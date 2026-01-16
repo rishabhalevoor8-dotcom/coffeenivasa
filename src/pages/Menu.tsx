@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Import all images
 import cappuccino from '@/assets/menu/cappuccino.jpg';
 import sandwich from '@/assets/menu/sandwich.jpg';
 import maggi from '@/assets/menu/maggi.jpg';
@@ -13,13 +14,23 @@ import starters from '@/assets/menu/starters.jpg';
 import rolls from '@/assets/menu/rolls.jpg';
 import iceCream from '@/assets/menu/ice-cream.jpg';
 import coldCoffee from '@/assets/menu/cold-coffee.jpg';
+import vegClubSandwich from '@/assets/menu/veg-club-sandwich.jpg';
+import paneerTikkaSandwich from '@/assets/menu/paneer-tikka-sandwich.jpg';
+import cheeseMaggi from '@/assets/menu/cheese-maggi.jpg';
+import schezwanRice from '@/assets/menu/schezwan-rice.jpg';
+import paneer65 from '@/assets/menu/paneer-65.jpg';
+import gobiManchurian from '@/assets/menu/gobi-manchurian.jpg';
+import paneerRoll from '@/assets/menu/paneer-roll.jpg';
+import hotChocolate from '@/assets/menu/hot-chocolate.jpg';
+import masalaChai from '@/assets/menu/masala-chai.jpg';
+import brownieIcecream from '@/assets/menu/brownie-icecream.jpg';
 
 interface MenuItem {
   name: string;
   price: string;
   isVeg: boolean;
   description?: string;
-  image?: string;
+  image: string;
 }
 
 interface MenuCategory {
@@ -34,11 +45,11 @@ const menuCategories: MenuCategory[] = [
     icon: '🥪',
     items: [
       { name: 'Grilled Cheese Sandwich', price: '₹120', isVeg: true, image: sandwich },
-      { name: 'Veg Club Sandwich', price: '₹140', isVeg: true },
-      { name: 'Paneer Tikka Sandwich', price: '₹150', isVeg: true },
-      { name: 'Corn & Cheese Sandwich', price: '₹130', isVeg: true },
-      { name: 'Chicken Grilled Sandwich', price: '₹160', isVeg: false },
-      { name: 'Egg Cheese Sandwich', price: '₹130', isVeg: false },
+      { name: 'Veg Club Sandwich', price: '₹140', isVeg: true, image: vegClubSandwich },
+      { name: 'Paneer Tikka Sandwich', price: '₹150', isVeg: true, image: paneerTikkaSandwich },
+      { name: 'Corn & Cheese Sandwich', price: '₹130', isVeg: true, image: sandwich },
+      { name: 'Chicken Grilled Sandwich', price: '₹160', isVeg: false, image: paneerTikkaSandwich },
+      { name: 'Egg Cheese Sandwich', price: '₹130', isVeg: false, image: vegClubSandwich },
     ],
   },
   {
@@ -46,11 +57,11 @@ const menuCategories: MenuCategory[] = [
     icon: '🍜',
     items: [
       { name: 'Classic Maggi', price: '₹60', isVeg: true, image: maggi },
-      { name: 'Masala Maggi', price: '₹80', isVeg: true },
-      { name: 'Cheese Maggi', price: '₹100', isVeg: true },
-      { name: 'Vegetable Maggi', price: '₹90', isVeg: true },
-      { name: 'Egg Maggi', price: '₹100', isVeg: false },
-      { name: 'Chicken Maggi', price: '₹120', isVeg: false },
+      { name: 'Masala Maggi', price: '₹80', isVeg: true, image: maggi },
+      { name: 'Cheese Maggi', price: '₹100', isVeg: true, image: cheeseMaggi },
+      { name: 'Vegetable Maggi', price: '₹90', isVeg: true, image: maggi },
+      { name: 'Egg Maggi', price: '₹100', isVeg: false, image: cheeseMaggi },
+      { name: 'Chicken Maggi', price: '₹120', isVeg: false, image: maggi },
     ],
   },
   {
@@ -58,11 +69,11 @@ const menuCategories: MenuCategory[] = [
     icon: '🍚',
     items: [
       { name: 'Veg Fried Rice', price: '₹150', isVeg: true, image: friedRice },
-      { name: 'Schezwan Fried Rice', price: '₹160', isVeg: true },
-      { name: 'Mushroom Fried Rice', price: '₹170', isVeg: true },
-      { name: 'Paneer Fried Rice', price: '₹180', isVeg: true },
-      { name: 'Egg Fried Rice', price: '₹160', isVeg: false },
-      { name: 'Chicken Fried Rice', price: '₹190', isVeg: false },
+      { name: 'Schezwan Fried Rice', price: '₹160', isVeg: true, image: schezwanRice },
+      { name: 'Mushroom Fried Rice', price: '₹170', isVeg: true, image: friedRice },
+      { name: 'Paneer Fried Rice', price: '₹180', isVeg: true, image: schezwanRice },
+      { name: 'Egg Fried Rice', price: '₹160', isVeg: false, image: friedRice },
+      { name: 'Chicken Fried Rice', price: '₹190', isVeg: false, image: schezwanRice },
     ],
   },
   {
@@ -70,46 +81,46 @@ const menuCategories: MenuCategory[] = [
     icon: '🍝',
     items: [
       { name: 'Veg Hakka Noodles', price: '₹140', isVeg: true, image: noodles },
-      { name: 'Schezwan Noodles', price: '₹150', isVeg: true },
-      { name: 'Chilli Garlic Noodles', price: '₹160', isVeg: true },
-      { name: 'Egg Noodles', price: '₹150', isVeg: false },
-      { name: 'Chicken Noodles', price: '₹180', isVeg: false },
+      { name: 'Schezwan Noodles', price: '₹150', isVeg: true, image: noodles },
+      { name: 'Chilli Garlic Noodles', price: '₹160', isVeg: true, image: noodles },
+      { name: 'Egg Noodles', price: '₹150', isVeg: false, image: noodles },
+      { name: 'Chicken Noodles', price: '₹180', isVeg: false, image: noodles },
     ],
   },
   {
     name: 'Starters',
     icon: '🍗',
     items: [
-      { name: 'Paneer 65', price: '₹200', isVeg: true },
-      { name: 'Gobi Manchurian', price: '₹180', isVeg: true },
-      { name: 'Veg Spring Rolls', price: '₹150', isVeg: true },
+      { name: 'Paneer 65', price: '₹200', isVeg: true, image: paneer65 },
+      { name: 'Gobi Manchurian', price: '₹180', isVeg: true, image: gobiManchurian },
+      { name: 'Veg Spring Rolls', price: '₹150', isVeg: true, image: paneerRoll },
       { name: 'Chicken 65', price: '₹220', isVeg: false, image: starters },
-      { name: 'Chicken Wings', price: '₹250', isVeg: false },
-      { name: 'Fish Fingers', price: '₹280', isVeg: false },
+      { name: 'Chicken Wings', price: '₹250', isVeg: false, image: starters },
+      { name: 'Fish Fingers', price: '₹280', isVeg: false, image: starters },
     ],
   },
   {
     name: 'Rolls',
     icon: '🌯',
     items: [
-      { name: 'Paneer Roll', price: '₹120', isVeg: true },
-      { name: 'Veg Kathi Roll', price: '₹100', isVeg: true },
-      { name: 'Cheese Roll', price: '₹110', isVeg: true },
-      { name: 'Egg Roll', price: '₹100', isVeg: false },
+      { name: 'Paneer Roll', price: '₹120', isVeg: true, image: paneerRoll },
+      { name: 'Veg Kathi Roll', price: '₹100', isVeg: true, image: paneerRoll },
+      { name: 'Cheese Roll', price: '₹110', isVeg: true, image: paneerRoll },
+      { name: 'Egg Roll', price: '₹100', isVeg: false, image: rolls },
       { name: 'Chicken Roll', price: '₹140', isVeg: false, image: rolls },
-      { name: 'Chicken Tikka Roll', price: '₹160', isVeg: false },
+      { name: 'Chicken Tikka Roll', price: '₹160', isVeg: false, image: rolls },
     ],
   },
   {
     name: 'Ice Cream',
     icon: '🍨',
     items: [
-      { name: 'Vanilla Scoop', price: '₹60', isVeg: true },
-      { name: 'Chocolate Scoop', price: '₹60', isVeg: true },
-      { name: 'Butterscotch Scoop', price: '₹70', isVeg: true },
+      { name: 'Vanilla Scoop', price: '₹60', isVeg: true, image: iceCream },
+      { name: 'Chocolate Scoop', price: '₹60', isVeg: true, image: brownieIcecream },
+      { name: 'Butterscotch Scoop', price: '₹70', isVeg: true, image: iceCream },
       { name: 'Ice Cream Sundae', price: '₹130', isVeg: true, image: iceCream },
-      { name: 'Brownie with Ice Cream', price: '₹180', isVeg: true },
-      { name: 'Falooda', price: '₹150', isVeg: true },
+      { name: 'Brownie with Ice Cream', price: '₹180', isVeg: true, image: brownieIcecream },
+      { name: 'Falooda', price: '₹150', isVeg: true, image: iceCream },
     ],
   },
   {
@@ -117,12 +128,12 @@ const menuCategories: MenuCategory[] = [
     icon: '☕',
     items: [
       { name: 'Classic Cappuccino', price: '₹120', isVeg: true, image: cappuccino },
-      { name: 'Café Latte', price: '₹130', isVeg: true },
+      { name: 'Café Latte', price: '₹130', isVeg: true, image: cappuccino },
       { name: 'Cold Coffee', price: '₹150', isVeg: true, image: coldCoffee },
-      { name: 'Hot Chocolate', price: '₹140', isVeg: true },
-      { name: 'Fresh Lime Soda', price: '₹70', isVeg: true },
-      { name: 'Masala Chai', price: '₹40', isVeg: true },
-      { name: 'Mango Shake', price: '₹120', isVeg: true },
+      { name: 'Hot Chocolate', price: '₹140', isVeg: true, image: hotChocolate },
+      { name: 'Fresh Lime Soda', price: '₹70', isVeg: true, image: coldCoffee },
+      { name: 'Masala Chai', price: '₹40', isVeg: true, image: masalaChai },
+      { name: 'Mango Shake', price: '₹120', isVeg: true, image: coldCoffee },
     ],
   },
 ];
@@ -197,18 +208,12 @@ const Menu = () => {
                   key={item.name}
                   className="flex gap-4 p-4 bg-card rounded-xl shadow-soft hover:shadow-card transition-all duration-300"
                 >
-                  {/* Image or Placeholder */}
-                  {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
-                    />
-                  ) : (
-                    <div className="w-20 h-20 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
-                      <span className="text-2xl">{currentCategory?.icon}</span>
-                    </div>
-                  )}
+                  {/* Image */}
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
+                  />
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
