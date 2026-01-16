@@ -29,7 +29,7 @@ export function HeroSection() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20">
             <span className="text-gold text-lg">☕</span>
-            <span className="text-sm font-medium text-primary-foreground/90">Premium Café Experience</span>
+            <span className="text-sm font-medium text-primary-foreground/90">Est. 2026 • Premium Café</span>
           </div>
 
           {/* Heading */}

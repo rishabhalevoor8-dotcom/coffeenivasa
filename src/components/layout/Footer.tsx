@@ -102,7 +102,7 @@ export function Footer() {
 
         <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center">
           <p className="text-sm text-primary-foreground/60">
-            © {new Date().getFullYear()} Coffee Nivasa. All rights reserved. Made with ❤️ in Bangalore
+            © 2026 Coffee Nivasa. All rights reserved. Made with ❤️ in Bangalore
           </p>
         </div>
       </div>
