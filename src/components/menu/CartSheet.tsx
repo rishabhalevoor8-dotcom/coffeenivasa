@@ -6,7 +6,6 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetFooter,
 } from '@/components/ui/sheet';
 import { CartItem } from '@/hooks/useCart';
 import { cn } from '@/lib/utils';
@@ -138,23 +137,17 @@ export function CartSheet({
                 </div>
               </div>
 
-              <SheetFooter>
-                <Button
-                  variant="whatsapp"
-                  size="xl"
-                  className="w-full gap-2"
-                  asChild
+              <div className="pt-2">
+                <a
+                  href={whatsappOrderUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full h-14 bg-[#25D366] hover:bg-[#22c55e] text-white rounded-xl font-semibold text-lg shadow-lg transition-colors"
                 >
-                  <a
-                    href={whatsappOrderUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <MessageCircle className="w-5 h-5" fill="currentColor" />
-                    Order via WhatsApp
-                  </a>
-                </Button>
-              </SheetFooter>
+                  <MessageCircle className="w-5 h-5" fill="currentColor" />
+                  Order via WhatsApp
+                </a>
+              </div>
             </div>
           </>
         )}
