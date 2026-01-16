@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Download, Plus, Check, Search, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useCart } from '@/hooks/useCart';
+import { CartSheet } from '@/components/menu/CartSheet';
 
 // Import all images
 import cappuccino from '@/assets/menu/cappuccino.jpg';
@@ -44,7 +46,6 @@ const menuCategories: MenuCategory[] = [
     name: 'Sandwiches',
     icon: '🥪',
     items: [
-      // Veg Sandwiches
       { name: 'Veg Sandwich', price: '₹50', isVeg: true, image: sandwich, subcategory: 'Veg Sandwiches' },
       { name: 'Sweet Corn', price: '₹50', isVeg: true, image: vegClubSandwich, subcategory: 'Veg Sandwiches' },
       { name: 'Baby Corn', price: '₹50', isVeg: true, image: sandwich, subcategory: 'Veg Sandwiches' },
@@ -60,7 +61,6 @@ const menuCategories: MenuCategory[] = [
       { name: 'Aloo Cheese Sandwich', price: '₹70', isVeg: true, image: sandwich, subcategory: 'Veg Sandwiches' },
       { name: 'Mushroom Masala', price: '₹75', isVeg: true, image: vegClubSandwich, subcategory: 'Veg Sandwiches' },
       { name: 'Fruit Sandwich', price: '₹85', isVeg: true, image: sandwich, subcategory: 'Veg Sandwiches' },
-      // Non-Veg Sandwiches
       { name: 'Egg Sandwich', price: '₹50', isVeg: false, image: vegClubSandwich, subcategory: 'Non-Veg Sandwiches' },
       { name: 'Bread Omelette', price: '₹60', isVeg: false, image: sandwich, subcategory: 'Non-Veg Sandwiches' },
       { name: 'Egg Cheese Sandwich', price: '₹65', isVeg: false, image: paneerTikkaSandwich, subcategory: 'Non-Veg Sandwiches' },
@@ -85,7 +85,6 @@ const menuCategories: MenuCategory[] = [
     name: 'Fried Rice',
     icon: '🍚',
     items: [
-      // Veg Fried Rice
       { name: 'Veg Fried Rice', price: '₹79', isVeg: true, image: friedRice, subcategory: 'Veg Fried Rice' },
       { name: 'Schezwan Veg Fried Rice', price: '₹99', isVeg: true, image: schezwanRice, subcategory: 'Veg Fried Rice' },
       { name: 'Shanghai Veg Fried Rice', price: '₹99', isVeg: true, image: friedRice, subcategory: 'Veg Fried Rice' },
@@ -96,7 +95,6 @@ const menuCategories: MenuCategory[] = [
       { name: 'Paneer Fried Rice', price: '₹109', isVeg: true, image: schezwanRice, subcategory: 'Veg Fried Rice' },
       { name: 'Butter Garlic Chilli Fried Rice', price: '₹119', isVeg: true, image: friedRice, subcategory: 'Veg Fried Rice' },
       { name: 'Singapore Fried Rice', price: '₹119', isVeg: true, image: schezwanRice, subcategory: 'Veg Fried Rice' },
-      // Non-Veg Fried Rice
       { name: 'Egg Fried Rice', price: '₹99', isVeg: false, image: friedRice, subcategory: 'Non-Veg Fried Rice' },
       { name: 'Egg Schezwan Fried Rice', price: '₹119', isVeg: false, image: schezwanRice, subcategory: 'Non-Veg Fried Rice' },
       { name: 'Garlic Chilli Egg Fried Rice', price: '₹119', isVeg: false, image: friedRice, subcategory: 'Non-Veg Fried Rice' },
@@ -111,7 +109,6 @@ const menuCategories: MenuCategory[] = [
     name: 'Noodles',
     icon: '🍝',
     items: [
-      // Veg Noodles
       { name: 'Veg Noodles', price: '₹79', isVeg: true, image: noodles, subcategory: 'Veg Noodles' },
       { name: 'Schezwan Veg Noodles', price: '₹89', isVeg: true, image: noodles, subcategory: 'Veg Noodles' },
       { name: 'Shanghai Veg Noodles', price: '₹99', isVeg: true, image: noodles, subcategory: 'Veg Noodles' },
@@ -122,7 +119,6 @@ const menuCategories: MenuCategory[] = [
       { name: 'Paneer Noodles', price: '₹109', isVeg: true, image: noodles, subcategory: 'Veg Noodles' },
       { name: 'Butter Garlic Chilli Noodles', price: '₹119', isVeg: true, image: noodles, subcategory: 'Veg Noodles' },
       { name: 'Singapore Noodles', price: '₹119', isVeg: true, image: noodles, subcategory: 'Veg Noodles' },
-      // Non-Veg Noodles
       { name: 'Egg Noodles', price: '₹99', isVeg: false, image: noodles, subcategory: 'Non-Veg Noodles' },
       { name: 'Egg Schezwan Noodles', price: '₹119', isVeg: false, image: noodles, subcategory: 'Non-Veg Noodles' },
       { name: 'Garlic Chilli Egg Noodles', price: '₹119', isVeg: false, image: noodles, subcategory: 'Non-Veg Noodles' },
@@ -137,7 +133,6 @@ const menuCategories: MenuCategory[] = [
     name: 'Starters',
     icon: '🍽️',
     items: [
-      // Veg Starters
       { name: 'Gobi Manchurian', price: '₹80', isVeg: true, image: gobiManchurian, subcategory: 'Veg Starters' },
       { name: 'Gobi Chilli', price: '₹90', isVeg: true, image: gobiManchurian, subcategory: 'Veg Starters' },
       { name: 'Gobi Pepper Dry', price: '₹90', isVeg: true, image: gobiManchurian, subcategory: 'Veg Starters' },
@@ -156,7 +151,6 @@ const menuCategories: MenuCategory[] = [
       { name: 'Paneer Pepper Dry', price: '₹129', isVeg: true, image: paneer65, subcategory: 'Veg Starters' },
       { name: 'Paneer 65', price: '₹139', isVeg: true, image: paneer65, subcategory: 'Veg Starters' },
       { name: 'Hot Garlic Paneer', price: '₹139', isVeg: true, image: paneer65, subcategory: 'Veg Starters' },
-      // Non-Veg Starters
       { name: 'Egg Manchurian', price: '₹99', isVeg: false, image: starters, subcategory: 'Non-Veg Starters' },
       { name: 'Egg Chilli', price: '₹109', isVeg: false, image: starters, subcategory: 'Non-Veg Starters' },
       { name: 'Egg Pepper Dry', price: '₹109', isVeg: false, image: starters, subcategory: 'Non-Veg Starters' },
@@ -198,14 +192,12 @@ const menuCategories: MenuCategory[] = [
     name: 'Rolls',
     icon: '🌯',
     items: [
-      // Chapati Rolls
       { name: 'Chapati Veg Roll', price: '₹60', isVeg: true, image: paneerRoll, subcategory: 'Chapati Rolls' },
       { name: 'Chapati Paneer Roll', price: '₹80', isVeg: true, image: paneerRoll, subcategory: 'Chapati Rolls' },
       { name: 'Chapati Mushroom Roll', price: '₹80', isVeg: true, image: paneerRoll, subcategory: 'Chapati Rolls' },
       { name: 'Chapati Egg Roll', price: '₹80', isVeg: false, image: rolls, subcategory: 'Chapati Rolls' },
       { name: 'Chapati Chicken Roll', price: '₹100', isVeg: false, image: rolls, subcategory: 'Chapati Rolls' },
       { name: 'Chapati Chicken Egg Roll', price: '₹110', isVeg: false, image: rolls, subcategory: 'Chapati Rolls' },
-      // Parotta Rolls
       { name: 'Parotta Veg Roll', price: '₹65', isVeg: true, image: paneerRoll, subcategory: 'Parotta Rolls' },
       { name: 'Parotta Paneer Roll', price: '₹85', isVeg: true, image: paneerRoll, subcategory: 'Parotta Rolls' },
       { name: 'Parotta Mushroom Roll', price: '₹85', isVeg: true, image: paneerRoll, subcategory: 'Parotta Rolls' },
@@ -218,14 +210,12 @@ const menuCategories: MenuCategory[] = [
     name: 'Ice Cream',
     icon: '🍨',
     items: [
-      // Single Scoop
       { name: 'Vanilla', price: '₹50', isVeg: true, image: iceCream, subcategory: 'Single Scoop' },
       { name: 'Strawberry', price: '₹50', isVeg: true, image: iceCream, subcategory: 'Single Scoop' },
       { name: 'Mango', price: '₹60', isVeg: true, image: iceCream, subcategory: 'Single Scoop' },
       { name: 'Butter Scotch', price: '₹60', isVeg: true, image: iceCream, subcategory: 'Single Scoop' },
       { name: 'Black Current', price: '₹60', isVeg: true, image: iceCream, subcategory: 'Single Scoop' },
       { name: 'Chocolate', price: '₹65', isVeg: true, image: brownieIcecream, subcategory: 'Single Scoop' },
-      // Sundae
       { name: 'Chocolate Sundae', price: '₹85', isVeg: true, image: brownieIcecream, subcategory: 'Sundae' },
       { name: 'Hot Chocolate Fudge', price: '₹95', isVeg: true, image: brownieIcecream, subcategory: 'Sundae' },
       { name: 'Butter Scotch Sundae', price: '₹99', isVeg: true, image: iceCream, subcategory: 'Sundae' },
@@ -269,7 +259,6 @@ const menuCategories: MenuCategory[] = [
     name: 'Tea & Coffee',
     icon: '☕',
     items: [
-      // Tea
       { name: 'Regular Tea', price: '₹15', isVeg: true, image: masalaChai, subcategory: 'Tea' },
       { name: 'Ginger Tea', price: '₹15', isVeg: true, image: masalaChai, subcategory: 'Tea' },
       { name: 'Mumbai Masala Tea', price: '₹20', isVeg: true, image: masalaChai, subcategory: 'Tea' },
@@ -277,7 +266,6 @@ const menuCategories: MenuCategory[] = [
       { name: 'Rajasthani Masala Tea', price: '₹25', isVeg: true, image: masalaChai, subcategory: 'Tea' },
       { name: 'Masala Tea', price: '₹25', isVeg: true, image: masalaChai, subcategory: 'Tea' },
       { name: 'Jaggery Tea', price: '₹25', isVeg: true, image: masalaChai, subcategory: 'Tea' },
-      // Herbal Tea
       { name: 'Black Tea', price: '₹15', isVeg: true, image: masalaChai, subcategory: 'Herbal Tea' },
       { name: 'Lemon Tea', price: '₹15', isVeg: true, image: masalaChai, subcategory: 'Herbal Tea' },
       { name: 'Lemon Honey Tea', price: '₹18', isVeg: true, image: masalaChai, subcategory: 'Herbal Tea' },
@@ -285,12 +273,10 @@ const menuCategories: MenuCategory[] = [
       { name: 'Green Tea', price: '₹18', isVeg: true, image: masalaChai, subcategory: 'Herbal Tea' },
       { name: 'Tulsi Tea', price: '₹20', isVeg: true, image: masalaChai, subcategory: 'Herbal Tea' },
       { name: 'Manad Kashaya', price: '₹20', isVeg: true, image: masalaChai, subcategory: 'Herbal Tea' },
-      // Flavoured Tea
       { name: 'Rose Tea', price: '₹30', isVeg: true, image: masalaChai, subcategory: 'Flavoured Tea' },
       { name: 'Mango Tea', price: '₹30', isVeg: true, image: masalaChai, subcategory: 'Flavoured Tea' },
       { name: 'Chocolate Tea', price: '₹30', isVeg: true, image: hotChocolate, subcategory: 'Flavoured Tea' },
       { name: 'Banana Tea', price: '₹30', isVeg: true, image: masalaChai, subcategory: 'Flavoured Tea' },
-      // Coffee
       { name: 'Black Coffee', price: '₹15', isVeg: true, image: cappuccino, subcategory: 'Coffee' },
       { name: 'Filter Coffee', price: '₹20', isVeg: true, image: cappuccino, subcategory: 'Coffee' },
       { name: 'Instant Coffee', price: '₹20', isVeg: true, image: cappuccino, subcategory: 'Coffee' },
@@ -305,11 +291,22 @@ const menuCategories: MenuCategory[] = [
 
 const Menu = () => {
   const [activeCategory, setActiveCategory] = useState(menuCategories[0].name);
+  const [searchQuery, setSearchQuery] = useState('');
+  const cart = useCart();
 
   const currentCategory = menuCategories.find((cat) => cat.name === activeCategory);
 
+  // Filter items by search query
+  const filteredItems = searchQuery
+    ? menuCategories.flatMap((cat) =>
+        cat.items.filter((item) =>
+          item.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      )
+    : currentCategory?.items || [];
+
   // Group items by subcategory if present
-  const groupedItems = currentCategory?.items.reduce((acc, item) => {
+  const groupedItems = filteredItems.reduce((acc, item) => {
     const key = item.subcategory || 'all';
     if (!acc[key]) acc[key] = [];
     acc[key].push(item);
@@ -319,109 +316,195 @@ const Menu = () => {
   return (
     <Layout>
       {/* Hero */}
-      <section className="pt-32 pb-8 bg-gradient-warm">
+      <section className="pt-32 pb-12 bg-gradient-warm">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <span className="inline-block text-gold font-medium text-sm uppercase tracking-wider mb-3">
-              Explore
+              Since 2026
             </span>
             <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
               Our Menu
             </h1>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-muted-foreground mb-8 text-lg">
               From aromatic coffees to delicious meals, discover what makes Coffee Nivasa special
             </p>
-            <Button variant="gold" size="lg">
-              <Download className="w-5 h-5" />
-              Download Menu PDF
-            </Button>
+            
+            {/* Search Bar */}
+            <div className="relative max-w-md mx-auto mb-6">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search menu items..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 rounded-full bg-background border border-border shadow-soft focus:outline-none focus:ring-2 focus:ring-primary/20 text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+
+            <div className="flex flex-wrap justify-center gap-3">
+              <Button variant="gold" size="lg">
+                <Download className="w-5 h-5" />
+                Download Menu PDF
+              </Button>
+              <Button variant="whatsapp" size="lg" asChild>
+                <a
+                  href="https://wa.me/919663025408?text=Hi%2C%20I%20would%20like%20to%20place%20an%20order"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <MessageCircle className="w-5 h-5" fill="currentColor" />
+                  Order on WhatsApp
+                </a>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Category Tabs */}
-      <section className="sticky top-16 z-30 bg-background border-b border-border py-4">
-        <div className="container mx-auto px-4">
-          <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-hide">
-            {menuCategories.map((category) => (
-              <button
-                key={category.name}
-                onClick={() => setActiveCategory(category.name)}
-                className={cn(
-                  'flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all',
-                  activeCategory === category.name
-                    ? 'bg-primary text-primary-foreground shadow-soft'
-                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                )}
-              >
-                <span>{category.icon}</span>
-                {category.name}
-              </button>
-            ))}
+      {!searchQuery && (
+        <section className="sticky top-16 z-30 bg-background/95 backdrop-blur-md border-b border-border py-4">
+          <div className="container mx-auto px-4">
+            <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-hide">
+              {menuCategories.map((category) => (
+                <button
+                  key={category.name}
+                  onClick={() => setActiveCategory(category.name)}
+                  className={cn(
+                    'flex items-center gap-2 px-4 py-2.5 rounded-full whitespace-nowrap text-sm font-medium transition-all',
+                    activeCategory === category.name
+                      ? 'bg-primary text-primary-foreground shadow-card'
+                      : 'bg-secondary/80 text-secondary-foreground hover:bg-secondary'
+                  )}
+                >
+                  <span className="text-base">{category.icon}</span>
+                  {category.name}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Menu Items */}
       <section className="py-12 bg-background">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             {/* Category Header */}
-            <div className="flex items-center gap-3 mb-8">
-              <span className="text-4xl">{currentCategory?.icon}</span>
-              <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
-                {currentCategory?.name}
-              </h2>
-            </div>
+            {!searchQuery && (
+              <div className="flex items-center gap-3 mb-8">
+                <span className="text-4xl">{currentCategory?.icon}</span>
+                <div>
+                  <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
+                    {currentCategory?.name}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {currentCategory?.items.length} items available
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {searchQuery && (
+              <div className="mb-8">
+                <h2 className="font-display text-xl font-semibold text-foreground mb-1">
+                  Search Results
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Found {filteredItems.length} items matching "{searchQuery}"
+                </p>
+              </div>
+            )}
 
             {/* Items by subcategory or all */}
-            {groupedItems && Object.entries(groupedItems).map(([subcategory, items]) => (
-              <div key={subcategory} className="mb-8">
+            {Object.entries(groupedItems).map(([subcategory, items]) => (
+              <div key={subcategory} className="mb-10">
                 {subcategory !== 'all' && (
-                  <h3 className="font-display text-lg font-semibold text-foreground mb-4 pb-2 border-b border-border">
+                  <h3 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-gold" />
                     {subcategory}
                   </h3>
                 )}
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {items.map((item) => (
-                    <div
-                      key={item.name}
-                      className="flex gap-3 p-3 bg-card rounded-xl shadow-soft hover:shadow-card transition-all duration-300"
-                    >
-                      {/* Image */}
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
-                      />
-
-                      {/* Content */}
-                      <div className="flex-1 min-w-0 flex flex-col justify-center">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            {/* Veg/Non-Veg Indicator */}
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {items.map((item) => {
+                    const quantity = cart.getItemQuantity(item.name);
+                    return (
+                      <div
+                        key={item.name}
+                        className={cn(
+                          'group relative flex gap-4 p-4 bg-card rounded-2xl border border-transparent transition-all duration-300',
+                          'hover:shadow-card hover:border-border',
+                          quantity > 0 && 'ring-2 ring-gold/30 border-gold/20'
+                        )}
+                      >
+                        {/* Image */}
+                        <div className="relative w-20 h-20 flex-shrink-0">
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="w-full h-full rounded-xl object-cover"
+                          />
+                          {/* Veg/Non-Veg badge */}
+                          <div
+                            className={cn(
+                              'absolute -top-1 -left-1 w-5 h-5 rounded border-2 flex items-center justify-center bg-background shadow-sm',
+                              item.isVeg ? 'border-accent' : 'border-destructive'
+                            )}
+                          >
                             <div
                               className={cn(
-                                'w-3.5 h-3.5 rounded border-2 flex items-center justify-center flex-shrink-0',
-                                item.isVeg ? 'border-accent' : 'border-destructive'
+                                'w-2 h-2 rounded-full',
+                                item.isVeg ? 'bg-accent' : 'bg-destructive'
                               )}
-                            >
-                              <div
-                                className={cn(
-                                  'w-1.5 h-1.5 rounded-full',
-                                  item.isVeg ? 'bg-accent' : 'bg-destructive'
-                                )}
-                              />
-                            </div>
-                            <h4 className="font-medium text-foreground text-sm leading-tight">{item.name}</h4>
+                            />
                           </div>
-                          <span className="font-bold text-gold text-sm whitespace-nowrap">
-                            {item.price}
-                          </span>
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 min-w-0 flex flex-col justify-between">
+                          <div>
+                            <h4 className="font-semibold text-foreground text-sm leading-tight mb-1">
+                              {item.name}
+                            </h4>
+                            <span className="font-bold text-gold text-lg">
+                              {item.price}
+                            </span>
+                          </div>
+
+                          {/* Add Button */}
+                          <div className="flex items-center justify-end mt-2">
+                            {quantity > 0 ? (
+                              <div className="flex items-center gap-2 bg-secondary rounded-full px-2 py-1">
+                                <button
+                                  onClick={() => cart.removeItem(item.name)}
+                                  className="w-6 h-6 rounded-full bg-background hover:bg-destructive/10 flex items-center justify-center transition-colors text-sm font-bold"
+                                >
+                                  −
+                                </button>
+                                <span className="w-5 text-center font-semibold text-sm">
+                                  {quantity}
+                                </span>
+                                <button
+                                  onClick={() => cart.addItem(item)}
+                                  className="w-6 h-6 rounded-full bg-background hover:bg-accent/10 flex items-center justify-center transition-colors text-sm font-bold"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => cart.addItem(item)}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-primary text-primary-foreground rounded-full text-xs font-semibold hover:bg-primary/90 transition-colors shadow-soft"
+                              >
+                                <Plus className="w-3.5 h-3.5" />
+                                Add
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))}
@@ -430,24 +513,35 @@ const Menu = () => {
       </section>
 
       {/* Legend */}
-      <section className="py-8 bg-secondary/50">
+      <section className="py-8 bg-secondary/30">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-6 text-sm">
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded border-2 border-accent flex items-center justify-center">
+              <div className="w-5 h-5 rounded border-2 border-accent flex items-center justify-center bg-background">
                 <div className="w-2 h-2 rounded-full bg-accent" />
               </div>
-              <span className="text-muted-foreground">Vegetarian</span>
+              <span className="text-muted-foreground font-medium">Vegetarian</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded border-2 border-destructive flex items-center justify-center">
+              <div className="w-5 h-5 rounded border-2 border-destructive flex items-center justify-center bg-background">
                 <div className="w-2 h-2 rounded-full bg-destructive" />
               </div>
-              <span className="text-muted-foreground">Non-Vegetarian</span>
+              <span className="text-muted-foreground font-medium">Non-Vegetarian</span>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Cart Sheet */}
+      <CartSheet
+        items={cart.items}
+        totalItems={cart.totalItems}
+        totalPrice={cart.totalPrice}
+        onAddItem={cart.addItem}
+        onRemoveItem={cart.removeItem}
+        onClearCart={cart.clearCart}
+        whatsappOrderUrl={cart.whatsappOrderUrl}
+      />
     </Layout>
   );
 };
