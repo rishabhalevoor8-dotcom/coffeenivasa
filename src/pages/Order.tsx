@@ -3,9 +3,22 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Lock, Coffee, ShoppingCart, Plus, Minus, Trash2, UtensilsCrossed, ShoppingBag, CheckCircle } from 'lucide-react';
+import { 
+  Coffee, 
+  ShoppingCart, 
+  Plus, 
+  Minus, 
+  Trash2, 
+  UtensilsCrossed, 
+  ShoppingBag, 
+  CheckCircle,
+  Wallet,
+  Banknote,
+  FileText,
+  ArrowLeft,
+  Sparkles
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface MenuItem {
@@ -29,6 +42,7 @@ interface CartItem extends MenuItem {
 }
 
 type OrderType = 'dine_in' | 'takeaway';
+type PaymentMethod = 'upi' | 'cash' | 'cheque';
 
 export default function Order() {
   const [pin, setPin] = useState('');
@@ -40,11 +54,11 @@ export default function Order() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orderType, setOrderType] = useState<OrderType | null>(null);
   const [tableNumber, setTableNumber] = useState<number | null>(null);
-  const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderNumber, setOrderNumber] = useState<number | null>(null);
+  const [showCart, setShowCart] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState<PaymentMethod | null>(null);
 
   const verifyPin = async () => {
     setLoading(true);
@@ -52,7 +66,7 @@ export default function Order() {
       .from('system_settings')
       .select('value')
       .eq('key', 'customer_pin')
-      .single();
+      .maybeSingle();
 
     if (error || !data) {
       toast.error('Could not verify PIN');
@@ -92,7 +106,6 @@ export default function Order() {
       }
       return [...prev, { ...item, quantity: 1 }];
     });
-    toast.success(`Added ${item.name} to cart`);
   };
 
   const updateQuantity = (itemId: string, delta: number) => {
@@ -114,12 +127,25 @@ export default function Order() {
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const tax = Math.round(subtotal * 0.05); // 5% tax
+  const tax = Math.round(subtotal * 0.05);
   const total = subtotal + tax;
 
   const getItemQuantity = (itemId: string) => cart.find(i => i.id === itemId)?.quantity || 0;
 
-  const submitOrder = async (paymentType: 'cash' | 'online') => {
+  const getPaymentStatus = (method: PaymentMethod) => {
+    switch (method) {
+      case 'upi': return 'paid';
+      case 'cash': return 'cash_pending';
+      case 'cheque': return 'cheque_pending';
+    }
+  };
+
+  const submitOrder = async () => {
+    if (!selectedPayment) {
+      toast.error('Please select a payment method');
+      return;
+    }
+
     if (orderType === 'dine_in' && !tableNumber) {
       toast.error('Please select a table number');
       return;
@@ -128,18 +154,15 @@ export default function Order() {
     setIsSubmitting(true);
 
     try {
-      // Create the order
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
           order_type: orderType,
           table_number: orderType === 'dine_in' ? tableNumber : null,
-          customer_name: customerName || null,
-          customer_phone: customerPhone || null,
           subtotal,
           tax,
           total,
-          payment_status: paymentType === 'cash' ? 'cash_pending' : 'pending',
+          payment_status: getPaymentStatus(selectedPayment),
           status: 'pending',
         })
         .select()
@@ -147,7 +170,6 @@ export default function Order() {
 
       if (orderError) throw orderError;
 
-      // Create order items
       const orderItems = cart.map(item => ({
         order_id: orderData.id,
         menu_item_id: item.id,
@@ -166,7 +188,7 @@ export default function Order() {
       setOrderNumber(orderData.order_number);
       setOrderComplete(true);
       setCart([]);
-      toast.success('Order placed successfully!');
+      setShowCart(false);
     } catch (error) {
       console.error('Order error:', error);
       toast.error('Failed to place order. Please try again.');
@@ -180,29 +202,43 @@ export default function Order() {
     setOrderNumber(null);
     setOrderType(null);
     setTableNumber(null);
-    setCustomerName('');
-    setCustomerPhone('');
+    setSelectedPayment(null);
   };
 
   // Order Complete Screen
   if (orderComplete) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="text-center max-w-md">
-          <div className="w-24 h-24 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-12 h-12 text-accent" />
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 flex items-center justify-center p-6">
+        <div className="text-center max-w-sm w-full">
+          <div className="relative mb-8">
+            <div className="w-28 h-28 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center mx-auto shadow-xl shadow-green-200">
+              <CheckCircle className="w-14 h-14 text-white" />
+            </div>
+            <Sparkles className="w-6 h-6 text-amber-500 absolute top-0 right-1/4 animate-pulse" />
           </div>
-          <h1 className="font-display text-3xl font-bold text-foreground mb-2">
+          
+          <h1 className="font-display text-3xl font-bold text-foreground mb-3">
             Order Confirmed!
           </h1>
-          <p className="text-muted-foreground mb-6">
-            Your order #{orderNumber} has been sent to the kitchen
+          <p className="text-muted-foreground mb-8 text-lg">
+            Your order has been sent to the kitchen
           </p>
-          <div className="bg-card rounded-2xl p-6 border border-border mb-6">
-            <p className="text-sm text-muted-foreground mb-2">Order Number</p>
-            <p className="font-display text-5xl font-bold text-primary">#{orderNumber}</p>
+          
+          <div className="bg-white rounded-3xl p-8 shadow-xl shadow-amber-100 border border-amber-100 mb-8">
+            <p className="text-sm text-muted-foreground mb-2 uppercase tracking-wide">Order Number</p>
+            <p className="font-display text-6xl font-bold bg-gradient-to-r from-amber-600 to-orange-500 bg-clip-text text-transparent">
+              #{orderNumber}
+            </p>
+            <p className="text-sm text-muted-foreground mt-4">
+              Please wait while we prepare your order
+            </p>
           </div>
-          <Button onClick={startNewOrder} size="lg" className="w-full">
+          
+          <Button 
+            onClick={startNewOrder} 
+            size="lg" 
+            className="w-full h-14 text-lg rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg"
+          >
             Place Another Order
           </Button>
         </div>
@@ -213,36 +249,33 @@ export default function Order() {
   // PIN Entry Screen
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 flex items-center justify-center p-6">
         <div className="w-full max-w-sm">
-          <div className="text-center mb-8">
-            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <Coffee className="w-10 h-10 text-primary" />
+          <div className="text-center mb-10">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-amber-200">
+              <Coffee className="w-12 h-12 text-white" />
             </div>
-            <h1 className="font-display text-2xl font-bold text-foreground mb-2">
+            <h1 className="font-display text-3xl font-bold text-foreground mb-2">
               Coffee Nivasa
             </h1>
-            <p className="text-muted-foreground">Enter PIN to start ordering</p>
+            <p className="text-muted-foreground text-lg">Enter café code to order</p>
           </div>
           
-          <div className="bg-card rounded-2xl p-6 border border-border">
-            <div className="relative mb-4">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
-                type="password"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                placeholder="Enter PIN"
-                value={pin}
-                onChange={(e) => setPin(e.target.value)}
-                className="pl-10 text-center text-2xl tracking-widest h-14"
-                maxLength={6}
-                onKeyDown={(e) => e.key === 'Enter' && verifyPin()}
-              />
-            </div>
+          <div className="bg-white rounded-3xl p-8 shadow-xl shadow-amber-100 border border-amber-100">
+            <Input
+              type="password"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="Enter Code"
+              value={pin}
+              onChange={(e) => setPin(e.target.value)}
+              className="text-center text-3xl tracking-[0.5em] h-16 rounded-2xl border-2 border-amber-200 focus:border-amber-400 bg-amber-50/50 mb-6"
+              maxLength={6}
+              onKeyDown={(e) => e.key === 'Enter' && verifyPin()}
+            />
             <Button 
               onClick={verifyPin} 
-              className="w-full h-12" 
+              className="w-full h-14 text-lg rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg" 
               disabled={loading || pin.length < 4}
             >
               {loading ? 'Verifying...' : 'Start Ordering'}
@@ -256,36 +289,36 @@ export default function Order() {
   // Order Type Selection
   if (!orderType) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <h1 className="font-display text-2xl font-bold text-foreground mb-2">
-              Choose Order Type
+          <div className="text-center mb-10">
+            <h1 className="font-display text-3xl font-bold text-foreground mb-2">
+              How are you dining?
             </h1>
-            <p className="text-muted-foreground">How would you like to order?</p>
+            <p className="text-muted-foreground text-lg">Select your preference</p>
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-5">
             <button
               onClick={() => setOrderType('dine_in')}
-              className="bg-card rounded-2xl p-8 border-2 border-border hover:border-primary transition-colors group"
+              className="bg-white rounded-3xl p-8 border-2 border-amber-100 hover:border-amber-400 transition-all duration-300 group shadow-lg shadow-amber-100 hover:shadow-xl active:scale-95"
             >
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                <UtensilsCrossed className="w-8 h-8 text-primary" />
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center mx-auto mb-5 group-hover:from-amber-200 group-hover:to-orange-200 transition-colors">
+                <UtensilsCrossed className="w-10 h-10 text-amber-600" />
               </div>
-              <p className="font-display font-bold text-lg text-foreground">Dine In</p>
-              <p className="text-sm text-muted-foreground">Eat at the café</p>
+              <p className="font-display font-bold text-xl text-foreground">Dine In</p>
+              <p className="text-sm text-muted-foreground mt-1">Eat here</p>
             </button>
             
             <button
               onClick={() => setOrderType('takeaway')}
-              className="bg-card rounded-2xl p-8 border-2 border-border hover:border-primary transition-colors group"
+              className="bg-white rounded-3xl p-8 border-2 border-amber-100 hover:border-amber-400 transition-all duration-300 group shadow-lg shadow-amber-100 hover:shadow-xl active:scale-95"
             >
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                <ShoppingBag className="w-8 h-8 text-primary" />
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center mx-auto mb-5 group-hover:from-amber-200 group-hover:to-orange-200 transition-colors">
+                <ShoppingBag className="w-10 h-10 text-amber-600" />
               </div>
-              <p className="font-display font-bold text-lg text-foreground">Takeaway</p>
-              <p className="text-sm text-muted-foreground">Pack to go</p>
+              <p className="font-display font-bold text-xl text-foreground">Takeaway</p>
+              <p className="text-sm text-muted-foreground mt-1">Pack to go</p>
             </button>
           </div>
         </div>
@@ -296,33 +329,197 @@ export default function Order() {
   // Table Selection (for dine-in)
   if (orderType === 'dine_in' && !tableNumber) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <h1 className="font-display text-2xl font-bold text-foreground mb-2">
+          <button 
+            onClick={() => setOrderType(null)}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back</span>
+          </button>
+          
+          <div className="text-center mb-10">
+            <h1 className="font-display text-3xl font-bold text-foreground mb-2">
               Select Your Table
             </h1>
-            <p className="text-muted-foreground">Choose your table number</p>
+            <p className="text-muted-foreground text-lg">Tap your table number</p>
           </div>
           
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-4 gap-4">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
               <button
                 key={num}
                 onClick={() => setTableNumber(num)}
-                className="aspect-square bg-card rounded-xl border-2 border-border hover:border-primary hover:bg-primary/5 transition-colors flex items-center justify-center"
+                className="aspect-square bg-white rounded-2xl border-2 border-amber-100 hover:border-amber-400 hover:bg-amber-50 transition-all flex items-center justify-center shadow-lg shadow-amber-100 active:scale-95"
               >
-                <span className="font-display text-2xl font-bold text-foreground">{num}</span>
+                <span className="font-display text-3xl font-bold text-amber-700">{num}</span>
               </button>
             ))}
           </div>
-          
+        </div>
+      </div>
+    );
+  }
+
+  // Cart View
+  if (showCart) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 flex flex-col">
+        {/* Header */}
+        <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-lg border-b border-amber-100 px-4 py-4">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setShowCart(false)}
+              className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center"
+            >
+              <ArrowLeft className="w-5 h-5 text-amber-700" />
+            </button>
+            <div>
+              <h1 className="font-display text-xl font-bold text-foreground">Your Order</h1>
+              <p className="text-sm text-muted-foreground">{totalItems} items</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Cart Items */}
+        <ScrollArea className="flex-1 px-4 py-4">
+          <div className="space-y-3">
+            {cart.map((item) => (
+              <div key={item.id} className="bg-white rounded-2xl p-4 shadow-md shadow-amber-100 border border-amber-50">
+                <div className="flex items-start gap-3">
+                  <div className={cn(
+                    'w-5 h-5 rounded-sm border-2 flex items-center justify-center flex-shrink-0 mt-0.5',
+                    item.is_veg ? 'border-green-600' : 'border-red-600'
+                  )}>
+                    <div className={cn(
+                      'w-2.5 h-2.5 rounded-full',
+                      item.is_veg ? 'bg-green-600' : 'bg-red-600'
+                    )} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-foreground">{item.name}</h3>
+                    <p className="text-amber-600 font-bold">₹{item.price}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button 
+                      onClick={() => updateQuantity(item.id, -1)}
+                      className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center active:scale-95"
+                    >
+                      <Minus className="w-4 h-4 text-amber-700" />
+                    </button>
+                    <span className="w-6 text-center font-bold text-lg">{item.quantity}</span>
+                    <button 
+                      onClick={() => updateQuantity(item.id, 1)}
+                      className="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center active:scale-95"
+                    >
+                      <Plus className="w-4 h-4 text-white" />
+                    </button>
+                    <button 
+                      onClick={() => removeFromCart(item.id)}
+                      className="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center active:scale-95 ml-2"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-600" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Payment Method Selection */}
+          <div className="mt-6">
+            <h2 className="font-display text-lg font-bold text-foreground mb-4">Payment Method</h2>
+            <div className="grid grid-cols-3 gap-3">
+              <button
+                onClick={() => setSelectedPayment('upi')}
+                className={cn(
+                  'p-4 rounded-2xl border-2 transition-all active:scale-95',
+                  selectedPayment === 'upi' 
+                    ? 'border-amber-500 bg-amber-50 shadow-lg' 
+                    : 'border-amber-100 bg-white'
+                )}
+              >
+                <div className={cn(
+                  'w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2',
+                  selectedPayment === 'upi' ? 'bg-amber-500' : 'bg-amber-100'
+                )}>
+                  <Wallet className={cn('w-6 h-6', selectedPayment === 'upi' ? 'text-white' : 'text-amber-600')} />
+                </div>
+                <p className="font-semibold text-sm">UPI</p>
+                <p className="text-xs text-muted-foreground">Paid</p>
+              </button>
+
+              <button
+                onClick={() => setSelectedPayment('cash')}
+                className={cn(
+                  'p-4 rounded-2xl border-2 transition-all active:scale-95',
+                  selectedPayment === 'cash' 
+                    ? 'border-amber-500 bg-amber-50 shadow-lg' 
+                    : 'border-amber-100 bg-white'
+                )}
+              >
+                <div className={cn(
+                  'w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2',
+                  selectedPayment === 'cash' ? 'bg-amber-500' : 'bg-amber-100'
+                )}>
+                  <Banknote className={cn('w-6 h-6', selectedPayment === 'cash' ? 'text-white' : 'text-amber-600')} />
+                </div>
+                <p className="font-semibold text-sm">Cash</p>
+                <p className="text-xs text-muted-foreground">Pay Later</p>
+              </button>
+
+              <button
+                onClick={() => setSelectedPayment('cheque')}
+                className={cn(
+                  'p-4 rounded-2xl border-2 transition-all active:scale-95',
+                  selectedPayment === 'cheque' 
+                    ? 'border-amber-500 bg-amber-50 shadow-lg' 
+                    : 'border-amber-100 bg-white'
+                )}
+              >
+                <div className={cn(
+                  'w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2',
+                  selectedPayment === 'cheque' ? 'bg-amber-500' : 'bg-amber-100'
+                )}>
+                  <FileText className={cn('w-6 h-6', selectedPayment === 'cheque' ? 'text-white' : 'text-amber-600')} />
+                </div>
+                <p className="font-semibold text-sm">Cheque</p>
+                <p className="text-xs text-muted-foreground">Pay Later</p>
+              </button>
+            </div>
+          </div>
+
+          {/* Order Summary */}
+          <div className="mt-6 bg-white rounded-2xl p-5 shadow-md shadow-amber-100 border border-amber-50">
+            <h2 className="font-display text-lg font-bold text-foreground mb-4">Bill Summary</h2>
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span className="font-medium">₹{subtotal}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Tax (5%)</span>
+                <span className="font-medium">₹{tax}</span>
+              </div>
+              <div className="border-t border-amber-100 pt-3 flex justify-between">
+                <span className="font-bold text-lg">Total</span>
+                <span className="font-bold text-xl text-amber-600">₹{total}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="h-32" />
+        </ScrollArea>
+
+        {/* Fixed Bottom - Place Order */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-amber-100 p-4 shadow-2xl">
           <Button 
-            variant="outline" 
-            onClick={() => setOrderType(null)} 
-            className="w-full mt-6"
+            onClick={submitOrder}
+            disabled={isSubmitting || !selectedPayment}
+            className="w-full h-14 text-lg rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg disabled:opacity-50"
           >
-            Back
+            {isSubmitting ? 'Placing Order...' : `Place Order • ₹${total}`}
           </Button>
         </div>
       </div>
@@ -335,215 +532,96 @@ export default function Order() {
     : items;
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 pb-28">
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="container mx-auto px-4 py-4">
+      <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-lg border-b border-amber-100">
+        <div className="px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="font-display text-xl font-bold text-foreground">
+              <h1 className="font-display text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-500 bg-clip-text text-transparent">
                 Coffee Nivasa
               </h1>
               <p className="text-sm text-muted-foreground">
-                {orderType === 'dine_in' ? `Table ${tableNumber}` : 'Takeaway'}
+                {orderType === 'dine_in' ? `Table ${tableNumber}` : '📦 Takeaway'}
               </p>
             </div>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="relative">
-                  <ShoppingCart className="w-5 h-5" />
-                  {totalItems > 0 && (
-                    <span className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
-                      {totalItems}
-                    </span>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="w-full sm:max-w-md flex flex-col">
-                <SheetHeader>
-                  <SheetTitle>Your Order</SheetTitle>
-                </SheetHeader>
-                
-                {cart.length === 0 ? (
-                  <div className="flex-1 flex items-center justify-center">
-                    <div className="text-center">
-                      <ShoppingCart className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                      <p className="text-muted-foreground">Your cart is empty</p>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <ScrollArea className="flex-1 -mx-6 px-6">
-                      <div className="space-y-3 py-4">
-                        {cart.map((item) => (
-                          <div key={item.id} className="flex items-center gap-3 p-3 bg-secondary/50 rounded-xl">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <div className={cn(
-                                  'w-3 h-3 rounded border flex-shrink-0',
-                                  item.is_veg ? 'border-accent bg-accent/20' : 'border-destructive bg-destructive/20'
-                                )} />
-                                <span className="font-medium text-sm">{item.name}</span>
-                              </div>
-                              <p className="text-sm text-muted-foreground">₹{item.price} × {item.quantity}</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button 
-                                size="icon" 
-                                variant="outline" 
-                                className="h-8 w-8"
-                                onClick={() => updateQuantity(item.id, -1)}
-                              >
-                                <Minus className="w-4 h-4" />
-                              </Button>
-                              <span className="w-6 text-center font-medium">{item.quantity}</span>
-                              <Button 
-                                size="icon" 
-                                variant="outline" 
-                                className="h-8 w-8"
-                                onClick={() => updateQuantity(item.id, 1)}
-                              >
-                                <Plus className="w-4 h-4" />
-                              </Button>
-                              <Button 
-                                size="icon" 
-                                variant="ghost" 
-                                className="h-8 w-8 text-destructive"
-                                onClick={() => removeFromCart(item.id)}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                    
-                    <div className="border-t border-border pt-4 space-y-4">
-                      <Input
-                        placeholder="Your Name (optional)"
-                        value={customerName}
-                        onChange={(e) => setCustomerName(e.target.value)}
-                      />
-                      <Input
-                        placeholder="Phone Number (optional)"
-                        value={customerPhone}
-                        onChange={(e) => setCustomerPhone(e.target.value)}
-                      />
-                      
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Subtotal</span>
-                          <span>₹{subtotal}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Tax (5%)</span>
-                          <span>₹{tax}</span>
-                        </div>
-                        <div className="flex justify-between font-bold text-lg pt-2 border-t">
-                          <span>Total</span>
-                          <span className="text-primary">₹{total}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-3">
-                        <Button 
-                          onClick={() => submitOrder('cash')}
-                          disabled={isSubmitting || cart.length === 0}
-                          variant="outline"
-                          className="w-full"
-                          size="lg"
-                        >
-                          {isSubmitting ? 'Placing...' : 'Pay with Cash'}
-                        </Button>
-                        <Button 
-                          onClick={() => submitOrder('online')}
-                          disabled={isSubmitting || cart.length === 0}
-                          className="w-full"
-                          size="lg"
-                        >
-                          {isSubmitting ? 'Placing...' : 'Pay Online'}
-                        </Button>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </SheetContent>
-            </Sheet>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">
+              <Coffee className="w-5 h-5 text-amber-600" />
+            </div>
           </div>
         </div>
 
         {/* Category Tabs */}
-        <div className="overflow-x-auto scrollbar-hide">
-          <div className="flex gap-2 px-4 pb-3 min-w-max">
+        <div className="overflow-x-auto scrollbar-hide pb-3">
+          <div className="flex gap-2 px-4 min-w-max">
             {categories.map((cat) => (
-              <Button
+              <button
                 key={cat.id}
-                variant={selectedCategory === cat.id ? 'default' : 'outline'}
-                size="sm"
                 onClick={() => setSelectedCategory(cat.id)}
-                className="flex-shrink-0"
+                className={cn(
+                  'px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap active:scale-95',
+                  selectedCategory === cat.id 
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg' 
+                    : 'bg-white text-muted-foreground border border-amber-200'
+                )}
               >
                 {cat.icon} {cat.name}
-              </Button>
+              </button>
             ))}
           </div>
         </div>
       </div>
 
       {/* Menu Items */}
-      <div className="container mx-auto px-4 py-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="px-4 py-4">
+        <div className="grid grid-cols-1 gap-3">
           {filteredItems.map((item) => {
             const quantity = getItemQuantity(item.id);
             return (
               <div 
                 key={item.id} 
-                className="bg-card rounded-xl p-4 border border-border flex items-center justify-between gap-3"
+                className="bg-white rounded-2xl p-4 shadow-md shadow-amber-100 border border-amber-50 flex items-center gap-4"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <div className={cn(
-                      'w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0',
-                      item.is_veg ? 'border-accent' : 'border-destructive'
+                      'w-5 h-5 rounded-sm border-2 flex items-center justify-center flex-shrink-0',
+                      item.is_veg ? 'border-green-600' : 'border-red-600'
                     )}>
                       <div className={cn(
-                        'w-2 h-2 rounded-full',
-                        item.is_veg ? 'bg-accent' : 'bg-destructive'
+                        'w-2.5 h-2.5 rounded-full',
+                        item.is_veg ? 'bg-green-600' : 'bg-red-600'
                       )} />
                     </div>
-                    <span className="font-medium text-foreground truncate">{item.name}</span>
+                    <span className="font-semibold text-foreground truncate">{item.name}</span>
                   </div>
-                  <p className="font-bold text-primary">₹{item.price}</p>
+                  <p className="font-bold text-amber-600 text-lg">₹{item.price}</p>
                 </div>
                 
                 {quantity > 0 ? (
-                  <div className="flex items-center gap-2">
-                    <Button 
-                      size="icon" 
-                      variant="outline" 
-                      className="h-9 w-9"
+                  <div className="flex items-center gap-3">
+                    <button 
                       onClick={() => updateQuantity(item.id, -1)}
+                      className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center active:scale-95"
                     >
-                      <Minus className="w-4 h-4" />
-                    </Button>
-                    <span className="w-6 text-center font-bold">{quantity}</span>
-                    <Button 
-                      size="icon" 
-                      className="h-9 w-9"
+                      <Minus className="w-5 h-5 text-amber-700" />
+                    </button>
+                    <span className="w-6 text-center font-bold text-lg">{quantity}</span>
+                    <button 
                       onClick={() => addToCart(item)}
+                      className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center active:scale-95"
                     >
-                      <Plus className="w-4 h-4" />
-                    </Button>
+                      <Plus className="w-5 h-5 text-white" />
+                    </button>
                   </div>
                 ) : (
-                  <Button 
-                    size="sm" 
+                  <button 
                     onClick={() => addToCart(item)}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold flex items-center gap-1 active:scale-95 shadow-md"
                   >
-                    <Plus className="w-4 h-4 mr-1" />
+                    <Plus className="w-4 h-4" />
                     Add
-                  </Button>
+                  </button>
                 )}
               </div>
             );
@@ -551,123 +629,33 @@ export default function Order() {
         </div>
 
         {filteredItems.length === 0 && (
-          <div className="text-center py-12">
-            <Coffee className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <p className="text-muted-foreground">No items in this category</p>
+          <div className="text-center py-16">
+            <div className="w-20 h-20 rounded-2xl bg-amber-100 flex items-center justify-center mx-auto mb-4">
+              <Coffee className="w-10 h-10 text-amber-400" />
+            </div>
+            <p className="text-muted-foreground text-lg">No items in this category</p>
           </div>
         )}
       </div>
 
       {/* Fixed Cart Bar */}
       {cart.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 z-50">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button className="w-full h-14 text-lg" size="lg">
-                <ShoppingCart className="w-5 h-5 mr-2" />
-                View Cart • {totalItems} items • ₹{total}
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="w-full sm:max-w-md flex flex-col">
-              <SheetHeader>
-                <SheetTitle>Your Order</SheetTitle>
-              </SheetHeader>
-              
-              <ScrollArea className="flex-1 -mx-6 px-6">
-                <div className="space-y-3 py-4">
-                  {cart.map((item) => (
-                    <div key={item.id} className="flex items-center gap-3 p-3 bg-secondary/50 rounded-xl">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <div className={cn(
-                            'w-3 h-3 rounded border flex-shrink-0',
-                            item.is_veg ? 'border-accent bg-accent/20' : 'border-destructive bg-destructive/20'
-                          )} />
-                          <span className="font-medium text-sm">{item.name}</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground">₹{item.price} × {item.quantity}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          size="icon" 
-                          variant="outline" 
-                          className="h-8 w-8"
-                          onClick={() => updateQuantity(item.id, -1)}
-                        >
-                          <Minus className="w-4 h-4" />
-                        </Button>
-                        <span className="w-6 text-center font-medium">{item.quantity}</span>
-                        <Button 
-                          size="icon" 
-                          variant="outline" 
-                          className="h-8 w-8"
-                          onClick={() => updateQuantity(item.id, 1)}
-                        >
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                        <Button 
-                          size="icon" 
-                          variant="ghost" 
-                          className="h-8 w-8 text-destructive"
-                          onClick={() => removeFromCart(item.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-              
-              <div className="border-t border-border pt-4 space-y-4">
-                <Input
-                  placeholder="Your Name (optional)"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                />
-                <Input
-                  placeholder="Phone Number (optional)"
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
-                />
-                
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span>₹{subtotal}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tax (5%)</span>
-                    <span>₹{tax}</span>
-                  </div>
-                  <div className="flex justify-between font-bold text-lg pt-2 border-t">
-                    <span>Total</span>
-                    <span className="text-primary">₹{total}</span>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-3">
-                  <Button 
-                    onClick={() => submitOrder('cash')}
-                    disabled={isSubmitting || cart.length === 0}
-                    variant="outline"
-                    className="w-full"
-                    size="lg"
-                  >
-                    {isSubmitting ? 'Placing...' : 'Pay with Cash'}
-                  </Button>
-                  <Button 
-                    onClick={() => submitOrder('online')}
-                    disabled={isSubmitting || cart.length === 0}
-                    className="w-full"
-                    size="lg"
-                  >
-                    {isSubmitting ? 'Placing...' : 'Pay Online'}
-                  </Button>
-                </div>
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-amber-50 via-amber-50 to-transparent pt-8">
+          <button
+            onClick={() => setShowCart(true)}
+            className="w-full h-16 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white flex items-center justify-between px-6 shadow-xl shadow-amber-300 active:scale-[0.98] transition-transform"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                <ShoppingCart className="w-5 h-5" />
               </div>
-            </SheetContent>
-          </Sheet>
+              <span className="font-bold text-lg">{totalItems} items</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-xl">₹{total}</span>
+              <span className="text-white/80">→</span>
+            </div>
+          </button>
         </div>
       )}
     </div>
