@@ -95,7 +95,8 @@ export default function Auth() {
       return false;
     }
 
-    return storedValue.trim() === code.trim();
+    const normalize = (v: string) => v.trim().replace(/\s+/g, '').toLowerCase();
+    return normalize(storedValue) === normalize(code);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
