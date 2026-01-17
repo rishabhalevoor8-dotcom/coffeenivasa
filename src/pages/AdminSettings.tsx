@@ -438,9 +438,79 @@ export default function AdminSettings() {
                     </div>
                   </div>
 
-                  {/* Current PIN Display */}
+                  {/* Admin Signup Code */}
+                  <div className="space-y-2 pt-4 border-t border-border">
+                    <Label htmlFor="adminSignupCode">Admin Signup Code</Label>
+                    <p className="text-sm text-muted-foreground">
+                      New admins need this code to create an account
+                    </p>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Input
+                          id="adminSignupCode"
+                          type={showPins['admin_signup_code'] ? 'text' : 'password'}
+                          value={editingSettings['admin_signup_code'] || ''}
+                          onChange={(e) => setEditingSettings(prev => ({ ...prev, admin_signup_code: e.target.value.toUpperCase() }))}
+                          placeholder="ADMIN2024"
+                          className="uppercase"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                          onClick={() => toggleShowPin('admin_signup_code')}
+                        >
+                          {showPins['admin_signup_code'] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </Button>
+                      </div>
+                      <Button 
+                        onClick={() => saveSetting('admin_signup_code', editingSettings['admin_signup_code'] || '')}
+                        disabled={saving}
+                      >
+                        <Save className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Kitchen Signup Code */}
+                  <div className="space-y-2">
+                    <Label htmlFor="kitchenSignupCode">Kitchen Signup Code</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Kitchen staff need this code to create an account
+                    </p>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Input
+                          id="kitchenSignupCode"
+                          type={showPins['kitchen_signup_code'] ? 'text' : 'password'}
+                          value={editingSettings['kitchen_signup_code'] || ''}
+                          onChange={(e) => setEditingSettings(prev => ({ ...prev, kitchen_signup_code: e.target.value.toUpperCase() }))}
+                          placeholder="KITCHEN2024"
+                          className="uppercase"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                          onClick={() => toggleShowPin('kitchen_signup_code')}
+                        >
+                          {showPins['kitchen_signup_code'] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </Button>
+                      </div>
+                      <Button 
+                        onClick={() => saveSetting('kitchen_signup_code', editingSettings['kitchen_signup_code'] || '')}
+                        disabled={saving}
+                      >
+                        <Save className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Current PIN & Code Display */}
                   <div className="mt-6 p-4 bg-secondary/50 rounded-lg">
-                    <h4 className="font-medium text-sm mb-3">Current PINs</h4>
+                    <h4 className="font-medium text-sm mb-3">Current PINs & Codes</h4>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="text-muted-foreground">Customer PIN:</span>
@@ -472,6 +542,38 @@ export default function AdminSettings() {
                           onClick={() => toggleShowPin('kitchen_pin_display')}
                         >
                           {showPins['kitchen_pin_display'] ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                        </Button>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Admin Code:</span>
+                        <span className="ml-2 font-mono font-bold">
+                          {showPins['admin_code_display'] 
+                            ? settings.find(s => s.key === 'admin_signup_code')?.value || 'ADMIN2024'
+                            : '••••••••'}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="ml-1 h-6 w-6 p-0"
+                          onClick={() => toggleShowPin('admin_code_display')}
+                        >
+                          {showPins['admin_code_display'] ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                        </Button>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Kitchen Code:</span>
+                        <span className="ml-2 font-mono font-bold">
+                          {showPins['kitchen_code_display'] 
+                            ? settings.find(s => s.key === 'kitchen_signup_code')?.value || 'KITCHEN2024'
+                            : '••••••••'}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="ml-1 h-6 w-6 p-0"
+                          onClick={() => toggleShowPin('kitchen_code_display')}
+                        >
+                          {showPins['kitchen_code_display'] ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                         </Button>
                       </div>
                     </div>

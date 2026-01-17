@@ -13,6 +13,7 @@ import Admin from "./pages/Admin";
 import AdminOrders from "./pages/AdminOrders";
 import AdminSettings from "./pages/AdminSettings";
 import Order from "./pages/Order";
+import OrderHistory from "./pages/OrderHistory";
 import Kitchen from "./pages/Kitchen";
 import NotFound from "./pages/NotFound";
 
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/order" element={<Order />} />
+          <Route path="/order-history" element={<OrderHistory />} />
           <Route path="/kitchen" element={<Kitchen />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
