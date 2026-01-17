@@ -280,8 +280,8 @@ export default function Auth() {
                       type="text"
                       placeholder="Enter signup code"
                       value={signupCode}
-                      onChange={(e) => setSignupCode(e.target.value.toUpperCase())}
-                      className="pl-10 uppercase"
+                      onChange={(e) => setSignupCode(e.target.value)}
+                      className="pl-10"
                       required
                     />
                   </div>
