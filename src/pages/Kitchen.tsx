@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Lock, ChefHat, Clock, CheckCircle2, Coffee, CreditCard, Banknote, PlayCircle, AlertCircle } from 'lucide-react';
+import { Lock, ChefHat, Clock, CheckCircle2, Coffee, CreditCard, Banknote, PlayCircle, AlertCircle, Volume2, VolumeX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface OrderItem {
@@ -44,6 +44,38 @@ const paymentConfig = {
   refunded: { label: 'REFUNDED', color: 'bg-gray-700', icon: CreditCard },
 };
 
+// Audio notification helper using Web Audio API
+const playNotificationSound = (type: 'newOrder' | 'statusChange' = 'newOrder') => {
+  try {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    if (type === 'newOrder') {
+      // Alert sound: ascending tones for new order
+      oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // A4
+      oscillator.frequency.setValueAtTime(554, audioContext.currentTime + 0.15); // C#5
+      oscillator.frequency.setValueAtTime(659, audioContext.currentTime + 0.3); // E5
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.5);
+    } else {
+      // Simple beep for status change
+      oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+      gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.2);
+    }
+  } catch (e) {
+    console.log('Audio not supported:', e);
+  }
+};
+
 export default function Kitchen() {
   const [pin, setPin] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -51,6 +83,8 @@ export default function Kitchen() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [updatingOrder, setUpdatingOrder] = useState<string | null>(null);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const previousOrderIds = useRef<Set<string>>(new Set());
 
   // Update clock every second
   useEffect(() => {
@@ -82,7 +116,7 @@ export default function Kitchen() {
     setLoading(false);
   };
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async (checkForNewOrders = false) => {
     // Only fetch PENDING and PREPARING orders for kitchen display
     // pending = new orders that need to start preparing
     // preparing = orders currently being made
@@ -107,24 +141,46 @@ export default function Kitchen() {
       })
     );
 
-    setOrders(ordersWithItems);
-  };
+    // Check for new orders and play sound
+    if (checkForNewOrders && soundEnabled) {
+      const currentIds = new Set(ordersWithItems.map(o => o.id));
+      const newOrdersFound = ordersWithItems.filter(
+        o => o.status === 'pending' && !previousOrderIds.current.has(o.id)
+      );
+      
+      if (newOrdersFound.length > 0 && previousOrderIds.current.size > 0) {
+        console.log('🔔 New order detected:', newOrdersFound.map(o => o.order_number));
+        playNotificationSound('newOrder');
+        toast.success(`New Order #${newOrdersFound[0].order_number}!`, {
+          duration: 5000,
+        });
+      }
+      
+      previousOrderIds.current = currentIds;
+    } else if (!checkForNewOrders) {
+      // Initial load - just set the IDs without playing sound
+      previousOrderIds.current = new Set(ordersWithItems.map(o => o.id));
+    }
 
-  const setupRealtimeSubscription = () => {
+    setOrders(ordersWithItems);
+  }, [soundEnabled]);
+
+  const setupRealtimeSubscription = useCallback(() => {
     const channel = supabase
       .channel('kitchen-orders')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'orders' },
-        () => {
-          fetchOrders();
+        (payload) => {
+          console.log('📦 Order change detected:', payload.eventType);
+          fetchOrders(true); // Check for new orders on realtime update
         }
       )
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'order_items' },
         () => {
-          fetchOrders();
+          fetchOrders(true);
         }
       )
       .subscribe();
@@ -132,7 +188,7 @@ export default function Kitchen() {
     return () => {
       supabase.removeChannel(channel);
     };
-  };
+  }, [fetchOrders]);
 
   // Kitchen staff can only update status: PENDING → PREPARING → READY
   const updateOrderStatus = async (orderId: string, newStatus: 'preparing' | 'ready') => {
@@ -148,13 +204,8 @@ export default function Kitchen() {
       console.error('Error updating order:', error);
     } else {
       toast.success(`Order marked as ${newStatus.toUpperCase()}`);
-      // Play sound for status change
-      try {
-        const audio = new Audio('/notification.mp3');
-        audio.volume = 0.5;
-        audio.play().catch(() => {});
-      } catch (e) {
-        // Ignore audio errors
+      if (soundEnabled) {
+        playNotificationSound('statusChange');
       }
     }
     
@@ -264,14 +315,32 @@ export default function Kitchen() {
               </div>
             </div>
             
-            {/* Clock - Large */}
-            <div className="text-right">
-              <p className="text-5xl font-mono font-bold text-white">
-                {currentTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
-              </p>
-              <p className="text-xl text-gray-400">
-                {currentTime.toLocaleDateString('en-IN', { weekday: 'short', day: '2-digit', month: 'short' })}
-              </p>
+            {/* Sound Toggle + Clock */}
+            <div className="flex items-center gap-6">
+              <Button
+                variant="ghost"
+                size="lg"
+                onClick={() => {
+                  setSoundEnabled(!soundEnabled);
+                  if (!soundEnabled) {
+                    playNotificationSound('statusChange');
+                  }
+                }}
+                className={cn(
+                  "h-16 w-16 rounded-full",
+                  soundEnabled ? "bg-green-600 hover:bg-green-700 text-white" : "bg-gray-700 hover:bg-gray-600 text-gray-400"
+                )}
+              >
+                {soundEnabled ? <Volume2 className="w-8 h-8" /> : <VolumeX className="w-8 h-8" />}
+              </Button>
+              <div className="text-right">
+                <p className="text-5xl font-mono font-bold text-white">
+                  {currentTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                </p>
+                <p className="text-xl text-gray-400">
+                  {currentTime.toLocaleDateString('en-IN', { weekday: 'short', day: '2-digit', month: 'short' })}
+                </p>
+              </div>
             </div>
           </div>
         </div>
