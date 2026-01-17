@@ -20,7 +20,7 @@ interface Order {
   table_number: number | null;
   order_type: 'dine_in' | 'takeaway';
   status: 'pending' | 'preparing' | 'ready' | 'served' | 'completed' | 'cancelled';
-  payment_status: 'pending' | 'paid' | 'cash_pending' | 'cheque_pending' | 'refunded';
+  payment_status: 'pending' | 'paid' | 'cash_pending' | 'card_pending' | 'cheque_pending' | 'refunded';
   created_at: string;
   items: OrderItem[];
 }
@@ -37,7 +37,8 @@ const statusConfig = {
 const paymentConfig = {
   paid: { label: 'PAID (UPI)', color: 'bg-green-600', icon: CreditCard },
   cash_pending: { label: 'CASH PENDING', color: 'bg-amber-600', icon: Banknote },
-  cheque_pending: { label: 'CHEQUE PENDING', color: 'bg-purple-600', icon: FileText },
+  card_pending: { label: 'CARD PENDING', color: 'bg-blue-600', icon: CreditCard },
+  cheque_pending: { label: 'CHEQUE PENDING', color: 'bg-purple-600', icon: CreditCard },
   pending: { label: 'PENDING', color: 'bg-gray-600', icon: Clock },
   refunded: { label: 'REFUNDED', color: 'bg-red-600', icon: CreditCard },
 };

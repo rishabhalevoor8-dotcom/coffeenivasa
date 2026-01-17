@@ -291,6 +291,7 @@ export type Database = {
         | "cash_pending"
         | "refunded"
         | "cheque_pending"
+        | "card_pending"
       staff_role: "admin" | "kitchen"
     }
     CompositeTypes: {
@@ -434,6 +435,7 @@ export const Constants = {
         "cash_pending",
         "refunded",
         "cheque_pending",
+        "card_pending",
       ],
       staff_role: ["admin", "kitchen"],
     },
