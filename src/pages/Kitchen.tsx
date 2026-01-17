@@ -3,9 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Lock, ChefHat, Clock, CheckCircle2, UtensilsCrossed, Coffee } from 'lucide-react';
+import { Lock, ChefHat, Clock, CheckCircle2, UtensilsCrossed, Coffee, CreditCard, Banknote, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
 
 interface OrderItem {
   id: string;
@@ -27,12 +26,20 @@ interface Order {
 }
 
 const statusConfig = {
-  pending: { label: 'New', color: 'bg-yellow-500', icon: Clock },
-  preparing: { label: 'Preparing', color: 'bg-blue-500', icon: ChefHat },
-  ready: { label: 'Ready', color: 'bg-green-500', icon: CheckCircle2 },
-  served: { label: 'Served', color: 'bg-purple-500', icon: UtensilsCrossed },
-  completed: { label: 'Done', color: 'bg-gray-500', icon: CheckCircle2 },
-  cancelled: { label: 'Cancelled', color: 'bg-red-500', icon: Clock },
+  pending: { label: 'NEW', color: 'bg-red-600', textColor: 'text-white', icon: Clock },
+  preparing: { label: 'PREPARING', color: 'bg-amber-500', textColor: 'text-white', icon: ChefHat },
+  ready: { label: 'READY', color: 'bg-green-600', textColor: 'text-white', icon: CheckCircle2 },
+  served: { label: 'SERVED', color: 'bg-blue-600', textColor: 'text-white', icon: UtensilsCrossed },
+  completed: { label: 'DONE', color: 'bg-gray-600', textColor: 'text-white', icon: CheckCircle2 },
+  cancelled: { label: 'CANCELLED', color: 'bg-gray-800', textColor: 'text-white', icon: Clock },
+};
+
+const paymentConfig = {
+  paid: { label: 'PAID (UPI)', color: 'bg-green-600', icon: CreditCard },
+  cash_pending: { label: 'CASH PENDING', color: 'bg-amber-600', icon: Banknote },
+  cheque_pending: { label: 'CHEQUE PENDING', color: 'bg-purple-600', icon: FileText },
+  pending: { label: 'PENDING', color: 'bg-gray-600', icon: Clock },
+  refunded: { label: 'REFUNDED', color: 'bg-red-600', icon: CreditCard },
 };
 
 export default function Kitchen() {
@@ -40,6 +47,13 @@ export default function Kitchen() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update clock every second
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const verifyPin = async () => {
     setLoading(true);
@@ -70,14 +84,13 @@ export default function Kitchen() {
       .from('orders')
       .select('*')
       .in('status', ['pending', 'preparing', 'ready', 'served'])
-      .order('created_at', { ascending: true });
+      .order('created_at', { ascending: false }); // New orders at top
 
     if (error) {
       console.error('Error fetching orders:', error);
       return;
     }
 
-    // Fetch items for each order
     const ordersWithItems = await Promise.all(
       (ordersData || []).map(async (order) => {
         const { data: items } = await supabase
@@ -130,63 +143,47 @@ export default function Kitchen() {
     fetchOrders();
   };
 
-  const getNextStatus = (currentStatus: Order['status']): Order['status'] | null => {
-    switch (currentStatus) {
-      case 'pending': return 'preparing';
-      case 'preparing': return 'ready';
-      case 'ready': return 'served';
-      default: return null;
-    }
-  };
-
-  const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('en-IN', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
   const getTimeSince = (dateString: string) => {
     const diff = Date.now() - new Date(dateString).getTime();
     const minutes = Math.floor(diff / 60000);
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    return `${Math.floor(minutes / 60)}h ${minutes % 60}m ago`;
+    if (minutes < 1) return 'NOW';
+    if (minutes < 60) return `${minutes}m`;
+    return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
   };
 
   // PIN Entry Screen
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="w-full max-w-sm">
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <ChefHat className="w-10 h-10 text-primary" />
+            <div className="w-24 h-24 rounded-full bg-amber-600 flex items-center justify-center mx-auto mb-6">
+              <ChefHat className="w-14 h-14 text-white" />
             </div>
-            <h1 className="font-display text-2xl font-bold text-foreground mb-2">
+            <h1 className="text-4xl font-bold text-white mb-2">
               Kitchen Dashboard
             </h1>
-            <p className="text-muted-foreground">Enter PIN to access orders</p>
+            <p className="text-xl text-gray-400">Coffee Nivasa</p>
           </div>
           
-          <div className="bg-card rounded-2xl p-6 border border-border">
-            <div className="relative mb-4">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <div className="bg-gray-900 rounded-3xl p-8 border border-gray-700">
+            <div className="relative mb-6">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-500" />
               <Input
                 type="password"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                placeholder="Enter PIN"
+                placeholder="Enter Kitchen PIN"
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
-                className="pl-10 text-center text-2xl tracking-widest h-14"
+                className="pl-14 text-center text-3xl tracking-widest h-16 bg-gray-800 border-gray-600 text-white"
                 maxLength={6}
                 onKeyDown={(e) => e.key === 'Enter' && verifyPin()}
               />
             </div>
             <Button 
               onClick={verifyPin} 
-              className="w-full h-12" 
+              className="w-full h-14 text-xl bg-amber-600 hover:bg-amber-700" 
               disabled={loading || pin.length < 4}
             >
               {loading ? 'Verifying...' : 'Access Kitchen'}
@@ -197,110 +194,138 @@ export default function Kitchen() {
     );
   }
 
-  // Kitchen Dashboard
+  // Kitchen TV Dashboard
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-card border-b border-border">
-        <div className="container mx-auto px-4 py-4">
+    <div className="min-h-screen bg-black text-white">
+      {/* Header - Very large for TV */}
+      <div className="sticky top-0 z-40 bg-gray-900 border-b-4 border-amber-600">
+        <div className="px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <ChefHat className="w-8 h-8 text-primary" />
+            <div className="flex items-center gap-4">
+              <ChefHat className="w-12 h-12 text-amber-500" />
               <div>
-                <h1 className="font-display text-xl font-bold text-foreground">
-                  Kitchen Display
+                <h1 className="text-3xl font-bold">
+                  KITCHEN DISPLAY
                 </h1>
-                <p className="text-sm text-muted-foreground">
-                  {orders.filter(o => o.status === 'pending').length} new orders
+                <p className="text-xl text-gray-400">
+                  Coffee Nivasa
                 </p>
               </div>
             </div>
-            <Badge variant="outline" className="text-lg px-4 py-2">
-              {new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
-            </Badge>
+            
+            {/* Stats */}
+            <div className="flex items-center gap-8">
+              <div className="text-center">
+                <p className="text-5xl font-bold text-red-500">
+                  {orders.filter(o => o.status === 'pending').length}
+                </p>
+                <p className="text-lg text-gray-400">NEW</p>
+              </div>
+              <div className="text-center">
+                <p className="text-5xl font-bold text-amber-500">
+                  {orders.filter(o => o.status === 'preparing').length}
+                </p>
+                <p className="text-lg text-gray-400">PREPARING</p>
+              </div>
+              <div className="text-center">
+                <p className="text-5xl font-bold text-green-500">
+                  {orders.filter(o => o.status === 'ready').length}
+                </p>
+                <p className="text-lg text-gray-400">READY</p>
+              </div>
+            </div>
+            
+            {/* Clock */}
+            <div className="text-right">
+              <p className="text-4xl font-mono font-bold text-white">
+                {currentTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+              </p>
+              <p className="text-lg text-gray-400">
+                {currentTime.toLocaleDateString('en-IN', { weekday: 'short', day: '2-digit', month: 'short' })}
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Orders Grid */}
-      <div className="container mx-auto p-4">
+      <div className="p-6">
         {orders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24">
-            <Coffee className="w-16 h-16 text-muted-foreground mb-4 opacity-50" />
-            <p className="text-xl text-muted-foreground">No active orders</p>
-            <p className="text-sm text-muted-foreground">New orders will appear here</p>
+          <div className="flex flex-col items-center justify-center py-32">
+            <Coffee className="w-32 h-32 text-gray-700 mb-6" />
+            <p className="text-4xl text-gray-600 font-bold">NO ACTIVE ORDERS</p>
+            <p className="text-2xl text-gray-700 mt-2">New orders will appear here</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {orders.map((order) => {
               const config = statusConfig[order.status];
+              const payment = paymentConfig[order.payment_status];
               const StatusIcon = config.icon;
-              const nextStatus = getNextStatus(order.status);
+              const PaymentIcon = payment.icon;
 
               return (
                 <div
                   key={order.id}
                   className={cn(
-                    'bg-card rounded-2xl border-2 overflow-hidden transition-all',
-                    order.status === 'pending' && 'border-yellow-500 animate-pulse',
-                    order.status === 'preparing' && 'border-blue-500',
+                    'bg-gray-900 rounded-3xl overflow-hidden border-4 transition-all',
+                    order.status === 'pending' && 'border-red-500 animate-pulse',
+                    order.status === 'preparing' && 'border-amber-500',
                     order.status === 'ready' && 'border-green-500',
-                    order.status === 'served' && 'border-purple-500'
+                    order.status === 'served' && 'border-blue-500'
                   )}
                 >
                   {/* Order Header */}
-                  <div className={cn('px-4 py-3 flex items-center justify-between', config.color)}>
-                    <div className="flex items-center gap-2 text-white">
-                      <span className="font-display text-2xl font-bold">
+                  <div className={cn('px-6 py-4 flex items-center justify-between', config.color)}>
+                    <div className="flex items-center gap-3">
+                      <span className="text-4xl font-bold">
                         #{order.order_number}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 text-white">
-                      <StatusIcon className="w-5 h-5" />
-                      <span className="font-medium">{config.label}</span>
+                    <div className="flex items-center gap-2">
+                      <StatusIcon className="w-8 h-8" />
+                      <span className="text-2xl font-bold">{config.label}</span>
                     </div>
                   </div>
 
-                  {/* Order Info */}
-                  <div className="px-4 py-3 border-b border-border flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-3">
+                  {/* Table Info */}
+                  <div className="px-6 py-4 bg-gray-800 flex items-center justify-between">
+                    <div className="text-3xl font-bold">
                       {order.order_type === 'dine_in' ? (
-                        <Badge variant="secondary" className="font-bold">
-                          Table {order.table_number}
-                        </Badge>
+                        <span className="text-white">TABLE {order.table_number}</span>
                       ) : (
-                        <Badge variant="outline">Takeaway</Badge>
+                        <span className="text-gray-400">TAKEAWAY</span>
                       )}
-                      <Badge 
-                        variant={order.payment_status === 'paid' ? 'default' : 'destructive'}
-                        className="font-medium"
-                      >
-                        {order.payment_status === 'cash_pending' ? '💵 Cash' : '✓ Paid'}
-                      </Badge>
                     </div>
-                    <span className="text-muted-foreground">
+                    <div className="text-2xl text-gray-400">
                       {getTimeSince(order.created_at)}
-                    </span>
+                    </div>
                   </div>
 
-                  {/* Order Items */}
-                  <div className="px-4 py-3 space-y-2">
+                  {/* Payment Status */}
+                  <div className={cn('px-6 py-3 flex items-center justify-center gap-3', payment.color)}>
+                    <PaymentIcon className="w-6 h-6" />
+                    <span className="text-xl font-bold">{payment.label}</span>
+                  </div>
+
+                  {/* Order Items - Large text */}
+                  <div className="px-6 py-4 space-y-3 max-h-64 overflow-y-auto">
                     {order.items.map((item) => (
-                      <div key={item.id} className="flex items-start gap-3">
-                        <span className="font-bold text-lg text-primary min-w-[2rem]">
+                      <div key={item.id} className="flex items-start gap-4">
+                        <span className="text-3xl font-bold text-amber-500 min-w-[3rem]">
                           {item.quantity}×
                         </span>
                         <div className="flex-1">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-3">
                             <div className={cn(
-                              'w-3 h-3 rounded border flex-shrink-0',
-                              item.is_veg ? 'border-accent bg-accent/30' : 'border-destructive bg-destructive/30'
+                              'w-5 h-5 rounded border-2 flex-shrink-0',
+                              item.is_veg ? 'border-green-500 bg-green-500/30' : 'border-red-500 bg-red-500/30'
                             )} />
-                            <span className="font-medium text-foreground">{item.item_name}</span>
+                            <span className="text-2xl font-semibold text-white">{item.item_name}</span>
                           </div>
                           {item.special_instructions && (
-                            <p className="text-sm text-muted-foreground mt-1">
-                              Note: {item.special_instructions}
+                            <p className="text-lg text-amber-400 mt-1 ml-8">
+                              ⚠ {item.special_instructions}
                             </p>
                           )}
                         </div>
@@ -308,18 +333,45 @@ export default function Kitchen() {
                     ))}
                   </div>
 
-                  {/* Action Buttons */}
-                  {nextStatus && (
-                    <div className="px-4 py-3 border-t border-border">
-                      <Button
-                        onClick={() => updateOrderStatus(order.id, nextStatus)}
-                        className="w-full"
-                        size="lg"
-                      >
-                        Mark as {statusConfig[nextStatus].label}
-                      </Button>
-                    </div>
-                  )}
+                  {/* Action Buttons - Large touch targets */}
+                  <div className="px-4 py-4 bg-gray-800 border-t border-gray-700 grid grid-cols-3 gap-3">
+                    <Button
+                      onClick={() => updateOrderStatus(order.id, 'preparing')}
+                      disabled={order.status === 'preparing'}
+                      className={cn(
+                        'h-16 text-lg font-bold rounded-xl',
+                        order.status === 'preparing' 
+                          ? 'bg-amber-600 text-white' 
+                          : 'bg-gray-700 hover:bg-amber-600 text-white'
+                      )}
+                    >
+                      PREPARING
+                    </Button>
+                    <Button
+                      onClick={() => updateOrderStatus(order.id, 'ready')}
+                      disabled={order.status === 'ready'}
+                      className={cn(
+                        'h-16 text-lg font-bold rounded-xl',
+                        order.status === 'ready' 
+                          ? 'bg-green-600 text-white' 
+                          : 'bg-gray-700 hover:bg-green-600 text-white'
+                      )}
+                    >
+                      READY
+                    </Button>
+                    <Button
+                      onClick={() => updateOrderStatus(order.id, 'served')}
+                      disabled={order.status === 'served'}
+                      className={cn(
+                        'h-16 text-lg font-bold rounded-xl',
+                        order.status === 'served' 
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-gray-700 hover:bg-blue-600 text-white'
+                      )}
+                    >
+                      SERVED
+                    </Button>
+                  </div>
                 </div>
               );
             })}
