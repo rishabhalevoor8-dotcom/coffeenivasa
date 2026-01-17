@@ -193,7 +193,7 @@ export default function Admin() {
           </div>
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <Link to="/admin/orders">
               <div className="bg-card rounded-2xl p-6 border border-border hover:border-primary transition-colors cursor-pointer group">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
@@ -215,10 +215,19 @@ export default function Admin() {
             <Link to="/order">
               <div className="bg-card rounded-2xl p-6 border border-border hover:border-primary transition-colors cursor-pointer group">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                  <Settings className="w-6 h-6 text-primary" />
+                  <Coffee className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="font-display font-bold text-lg text-foreground mb-1">Customer Order Page</h3>
                 <p className="text-sm text-muted-foreground">QR-based ordering interface</p>
+              </div>
+            </Link>
+            <Link to="/admin/settings">
+              <div className="bg-card rounded-2xl p-6 border border-border hover:border-primary transition-colors cursor-pointer group">
+                <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
+                  <Settings className="w-6 h-6 text-accent" />
+                </div>
+                <h3 className="font-display font-bold text-lg text-foreground mb-1">Management & Settings</h3>
+                <p className="text-sm text-muted-foreground">Café info, PINs & admin users</p>
               </div>
             </Link>
           </div>
