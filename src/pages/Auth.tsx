@@ -74,11 +74,17 @@ export default function Auth() {
                 <Coffee className="w-8 h-8 text-white" />
               </div>
               <h1 className="font-display text-2xl font-bold text-foreground">
-                Admin Login
+                {isLogin ? 'Admin Login' : 'Staff Sign Up'}
               </h1>
               <p className="text-muted-foreground text-sm mt-2">
-                Sign in to manage menu prices
+                {isLogin 
+                  ? 'Sign in to access admin & staff portal' 
+                  : 'Create an account for staff access'}
               </p>
+              <div className="mt-3 inline-flex items-center gap-2 bg-amber-50 text-amber-700 text-xs px-3 py-1.5 rounded-full">
+                <Lock className="w-3 h-3" />
+                Admin & Staff Only
+              </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -132,10 +138,15 @@ export default function Auth() {
                 className="text-sm text-gold hover:underline"
               >
                 {isLogin
-                  ? "Don't have an account? Sign up"
+                  ? "Staff member? Sign up here"
                   : 'Already have an account? Sign in'}
               </button>
             </div>
+            
+            <p className="text-xs text-center text-muted-foreground mt-4">
+              Note: Only authorized staff members can access this portal.
+              Contact admin if you need access.
+            </p>
           </div>
         </div>
       </section>

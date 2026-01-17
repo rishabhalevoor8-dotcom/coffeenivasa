@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { 
   Coffee, 
@@ -16,7 +17,12 @@ import {
   Banknote,
   FileText,
   ArrowLeft,
-  Sparkles
+  Sparkles,
+  User,
+  Phone,
+  Mail,
+  Clock,
+  Calendar
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -41,12 +47,20 @@ interface CartItem extends MenuItem {
   quantity: number;
 }
 
+interface CustomerDetails {
+  name: string;
+  phone: string;
+  email: string;
+}
+
 type OrderType = 'dine_in' | 'takeaway';
 type PaymentMethod = 'upi' | 'cash' | 'cheque';
 
 export default function Order() {
   const [pin, setPin] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [customerDetailsCollected, setCustomerDetailsCollected] = useState(false);
+  const [customerDetails, setCustomerDetails] = useState<CustomerDetails>({ name: '', phone: '', email: '' });
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
@@ -57,6 +71,7 @@ export default function Order() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderNumber, setOrderNumber] = useState<number | null>(null);
+  const [orderDateTime, setOrderDateTime] = useState<Date | null>(null);
   const [showCart, setShowCart] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<PaymentMethod | null>(null);
 
@@ -140,6 +155,24 @@ export default function Order() {
     }
   };
 
+  const validateCustomerDetails = () => {
+    if (!customerDetails.name.trim()) {
+      toast.error('Please enter your name');
+      return false;
+    }
+    if (!customerDetails.phone.trim() || customerDetails.phone.length < 10) {
+      toast.error('Please enter a valid phone number');
+      return false;
+    }
+    return true;
+  };
+
+  const handleCustomerDetailsSubmit = () => {
+    if (validateCustomerDetails()) {
+      setCustomerDetailsCollected(true);
+    }
+  };
+
   const submitOrder = async () => {
     if (!selectedPayment) {
       toast.error('Please select a payment method');
@@ -164,6 +197,8 @@ export default function Order() {
           total,
           payment_status: getPaymentStatus(selectedPayment),
           status: 'pending',
+          customer_name: customerDetails.name,
+          customer_phone: customerDetails.phone,
         })
         .select()
         .single();
@@ -186,6 +221,7 @@ export default function Order() {
       if (itemsError) throw itemsError;
 
       setOrderNumber(orderData.order_number);
+      setOrderDateTime(new Date(orderData.created_at));
       setOrderComplete(true);
       setCart([]);
       setShowCart(false);
@@ -200,13 +236,32 @@ export default function Order() {
   const startNewOrder = () => {
     setOrderComplete(false);
     setOrderNumber(null);
+    setOrderDateTime(null);
     setOrderType(null);
     setTableNumber(null);
     setSelectedPayment(null);
+    setCustomerDetailsCollected(false);
+    setCustomerDetails({ name: '', phone: '', email: '' });
   };
 
   // Order Complete Screen
   if (orderComplete) {
+    const formatDate = (date: Date) => {
+      return date.toLocaleDateString('en-IN', { 
+        weekday: 'short', 
+        day: 'numeric', 
+        month: 'short', 
+        year: 'numeric' 
+      });
+    };
+    const formatTime = (date: Date) => {
+      return date.toLocaleTimeString('en-IN', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true 
+      });
+    };
+
     return (
       <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 flex items-center justify-center p-6">
         <div className="text-center max-w-sm w-full">
@@ -220,15 +275,31 @@ export default function Order() {
           <h1 className="font-display text-3xl font-bold text-foreground mb-3">
             Order Confirmed!
           </h1>
-          <p className="text-muted-foreground mb-8 text-lg">
-            Your order has been sent to the kitchen
+          <p className="text-muted-foreground mb-6 text-lg">
+            Thank you, <span className="font-semibold text-foreground">{customerDetails.name}</span>!
           </p>
           
-          <div className="bg-white rounded-3xl p-8 shadow-xl shadow-amber-100 border border-amber-100 mb-8">
+          <div className="bg-white rounded-3xl p-8 shadow-xl shadow-amber-100 border border-amber-100 mb-6">
             <p className="text-sm text-muted-foreground mb-2 uppercase tracking-wide">Order Number</p>
             <p className="font-display text-6xl font-bold bg-gradient-to-r from-amber-600 to-orange-500 bg-clip-text text-transparent">
               #{orderNumber}
             </p>
+            
+            {orderDateTime && (
+              <div className="mt-6 pt-4 border-t border-amber-100">
+                <div className="flex justify-center gap-6 text-sm">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Calendar className="w-4 h-4" />
+                    <span>{formatDate(orderDateTime)}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Clock className="w-4 h-4" />
+                    <span>{formatTime(orderDateTime)}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <p className="text-sm text-muted-foreground mt-4">
               Please wait while we prepare your order
             </p>
@@ -279,6 +350,88 @@ export default function Order() {
               disabled={loading || pin.length < 4}
             >
               {loading ? 'Verifying...' : 'Start Ordering'}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Customer Details Collection Screen
+  if (!customerDetailsCollected) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 flex items-center justify-center p-6">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-4 shadow-xl shadow-amber-200">
+              <User className="w-10 h-10 text-white" />
+            </div>
+            <h1 className="font-display text-2xl font-bold text-foreground mb-2">
+              Your Details
+            </h1>
+            <p className="text-muted-foreground">Please tell us a bit about you</p>
+          </div>
+          
+          <div className="bg-white rounded-3xl p-8 shadow-xl shadow-amber-100 border border-amber-100">
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium">
+                  Name <span className="text-red-500">*</span>
+                </Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Your name"
+                    value={customerDetails.name}
+                    onChange={(e) => setCustomerDetails(prev => ({ ...prev, name: e.target.value }))}
+                    className="pl-10 h-12 rounded-xl border-2 border-amber-200 focus:border-amber-400"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="text-sm font-medium">
+                  Phone Number <span className="text-red-500">*</span>
+                </Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    inputMode="numeric"
+                    placeholder="9876543210"
+                    value={customerDetails.phone}
+                    onChange={(e) => setCustomerDetails(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
+                    className="pl-10 h-12 rounded-xl border-2 border-amber-200 focus:border-amber-400"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium">
+                  Email <span className="text-muted-foreground text-xs">(optional)</span>
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={customerDetails.email}
+                    onChange={(e) => setCustomerDetails(prev => ({ ...prev, email: e.target.value }))}
+                    className="pl-10 h-12 rounded-xl border-2 border-amber-200 focus:border-amber-400"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <Button 
+              onClick={handleCustomerDetailsSubmit}
+              className="w-full h-14 text-lg rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg mt-6"
+            >
+              Continue
             </Button>
           </div>
         </div>
