@@ -15,7 +15,7 @@ import {
   CheckCircle,
   Wallet,
   Banknote,
-  FileText,
+  CreditCard,
   ArrowLeft,
   Sparkles,
   User,
@@ -54,7 +54,7 @@ interface CustomerDetails {
 }
 
 type OrderType = 'dine_in' | 'takeaway';
-type PaymentMethod = 'upi' | 'cash' | 'cheque';
+type PaymentMethod = 'upi' | 'cash' | 'card';
 
 export default function Order() {
   const [pin, setPin] = useState('');
@@ -157,7 +157,7 @@ export default function Order() {
     switch (method) {
       case 'upi': return 'paid';
       case 'cash': return 'cash_pending';
-      case 'cheque': return 'cheque_pending';
+      case 'card': return 'card_pending';
     }
   };
 
@@ -629,21 +629,21 @@ export default function Order() {
               </button>
 
               <button
-                onClick={() => setSelectedPayment('cheque')}
+                onClick={() => setSelectedPayment('card')}
                 className={cn(
                   'p-4 rounded-2xl border-2 transition-all active:scale-95',
-                  selectedPayment === 'cheque' 
+                  selectedPayment === 'card' 
                     ? 'border-amber-500 bg-amber-50 shadow-lg' 
                     : 'border-amber-100 bg-white'
                 )}
               >
                 <div className={cn(
                   'w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2',
-                  selectedPayment === 'cheque' ? 'bg-amber-500' : 'bg-amber-100'
+                  selectedPayment === 'card' ? 'bg-amber-500' : 'bg-amber-100'
                 )}>
-                  <FileText className={cn('w-6 h-6', selectedPayment === 'cheque' ? 'text-white' : 'text-amber-600')} />
+                  <CreditCard className={cn('w-6 h-6', selectedPayment === 'card' ? 'text-white' : 'text-amber-600')} />
                 </div>
-                <p className="font-semibold text-sm">Cheque</p>
+                <p className="font-semibold text-sm">Card</p>
                 <p className="text-xs text-muted-foreground">Pay Later</p>
               </button>
             </div>

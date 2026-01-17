@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { 
   LogOut, Search, Clock, CheckCircle2, ChefHat, UtensilsCrossed, 
   XCircle, Receipt, RefreshCw, Eye, DollarSign, AlertCircle, ArrowLeft, 
-  Printer, Download, CreditCard, Banknote, FileText, Filter, LayoutGrid, Table
+  Printer, Download, CreditCard, Banknote, Filter, LayoutGrid, Table
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -32,7 +32,7 @@ interface Order {
   table_number: number | null;
   order_type: 'dine_in' | 'takeaway';
   status: 'pending' | 'preparing' | 'ready' | 'served' | 'completed' | 'cancelled';
-  payment_status: 'pending' | 'paid' | 'cash_pending' | 'cheque_pending' | 'refunded';
+  payment_status: 'pending' | 'paid' | 'cash_pending' | 'card_pending' | 'cheque_pending' | 'refunded';
   subtotal: number;
   tax: number;
   total: number;
@@ -56,7 +56,8 @@ const paymentStatusConfig = {
   pending: { label: 'Pending', color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400', icon: Clock },
   paid: { label: 'Paid (UPI)', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400', icon: CreditCard },
   cash_pending: { label: 'Cash Pending', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400', icon: Banknote },
-  cheque_pending: { label: 'Cheque Pending', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400', icon: FileText },
+  card_pending: { label: 'Card Pending', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400', icon: CreditCard },
+  cheque_pending: { label: 'Cheque Pending', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400', icon: CreditCard },
   refunded: { label: 'Refunded', color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400', icon: CreditCard },
 };
 
@@ -225,7 +226,7 @@ export default function AdminOrders() {
     pending: orders.filter(o => o.status === 'pending').length,
     preparing: orders.filter(o => o.status === 'preparing').length,
     cashPending: orders.filter(o => o.payment_status === 'cash_pending').length,
-    chequePending: orders.filter(o => o.payment_status === 'cheque_pending').length,
+    cardPending: orders.filter(o => o.payment_status === 'card_pending').length,
     todayTotal: orders
       .filter(o => new Date(o.created_at).toDateString() === new Date().toDateString())
       .filter(o => o.payment_status === 'paid')
@@ -329,9 +330,9 @@ export default function AdminOrders() {
               <p className="text-sm text-orange-700 dark:text-orange-400">Cash Pending</p>
               <p className="text-3xl font-bold text-orange-700 dark:text-orange-400">{stats.cashPending}</p>
             </div>
-            <div className="bg-purple-50 dark:bg-purple-950/30 rounded-xl p-4 border border-purple-200 dark:border-purple-800">
-              <p className="text-sm text-purple-700 dark:text-purple-400">Cheque Pending</p>
-              <p className="text-3xl font-bold text-purple-700 dark:text-purple-400">{stats.chequePending}</p>
+            <div className="bg-blue-50 dark:bg-blue-950/30 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+              <p className="text-sm text-blue-700 dark:text-blue-400">Card Pending</p>
+              <p className="text-3xl font-bold text-blue-700 dark:text-blue-400">{stats.cardPending}</p>
             </div>
             <div className="bg-green-50 dark:bg-green-950/30 rounded-xl p-4 border border-green-200 dark:border-green-800">
               <p className="text-sm text-green-700 dark:text-green-400">Today's Revenue</p>
@@ -373,7 +374,7 @@ export default function AdminOrders() {
                   <SelectItem value="all">All Payment</SelectItem>
                   <SelectItem value="paid">Paid (UPI)</SelectItem>
                   <SelectItem value="cash_pending">Cash Pending</SelectItem>
-                  <SelectItem value="cheque_pending">Cheque Pending</SelectItem>
+                  <SelectItem value="card_pending">Card Pending</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="refunded">Refunded</SelectItem>
                 </SelectContent>
@@ -483,7 +484,7 @@ export default function AdminOrders() {
                                 <Printer className="w-4 h-4" />
                               </Button>
                               
-                              {(order.payment_status === 'cash_pending' || order.payment_status === 'cheque_pending') && (
+                              {(order.payment_status === 'cash_pending' || order.payment_status === 'card_pending') && (
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -596,7 +597,7 @@ export default function AdminOrders() {
                           <Printer className="w-4 h-4" />
                         </Button>
                         
-                        {(order.payment_status === 'cash_pending' || order.payment_status === 'cheque_pending') && (
+                        {(order.payment_status === 'cash_pending' || order.payment_status === 'card_pending') && (
                           <Button size="sm" onClick={() => updatePaymentStatus(order.id, 'paid')}>
                             <DollarSign className="w-4 h-4 mr-1" />
                             Paid
