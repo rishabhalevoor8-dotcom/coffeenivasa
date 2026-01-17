@@ -109,6 +109,138 @@ export type Database = {
           },
         ]
       }
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          is_veg: boolean
+          item_name: string
+          item_price: number
+          menu_item_id: string
+          order_id: string
+          quantity: number
+          special_instructions: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_veg?: boolean
+          item_name: string
+          item_price: number
+          menu_item_id: string
+          order_id: string
+          quantity?: number
+          special_instructions?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_veg?: boolean
+          item_name?: string
+          item_price?: number
+          menu_item_id?: string
+          order_id?: string
+          quantity?: number
+          special_instructions?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_menu_item_id_fkey"
+            columns: ["menu_item_id"]
+            isOneToOne: false
+            referencedRelation: "menu_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          customer_name: string | null
+          customer_phone: string | null
+          id: string
+          notes: string | null
+          order_number: number
+          order_type: Database["public"]["Enums"]["order_type"]
+          payment_id: string | null
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          status: Database["public"]["Enums"]["order_status"]
+          subtotal: number
+          table_number: number | null
+          tax: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          notes?: string | null
+          order_number?: number
+          order_type?: Database["public"]["Enums"]["order_type"]
+          payment_id?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          status?: Database["public"]["Enums"]["order_status"]
+          subtotal?: number
+          table_number?: number | null
+          tax?: number
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          notes?: string | null
+          order_number?: number
+          order_type?: Database["public"]["Enums"]["order_type"]
+          payment_id?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          status?: Database["public"]["Enums"]["order_status"]
+          subtotal?: number
+          table_number?: number | null
+          tax?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      system_settings: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -117,7 +249,15 @@ export type Database = {
       is_admin: { Args: { _email: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      order_status:
+        | "pending"
+        | "preparing"
+        | "ready"
+        | "served"
+        | "completed"
+        | "cancelled"
+      order_type: "dine_in" | "takeaway"
+      payment_status: "pending" | "paid" | "cash_pending" | "refunded"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -244,6 +384,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      order_status: [
+        "pending",
+        "preparing",
+        "ready",
+        "served",
+        "completed",
+        "cancelled",
+      ],
+      order_type: ["dine_in", "takeaway"],
+      payment_status: ["pending", "paid", "cash_pending", "refunded"],
+    },
   },
 } as const
