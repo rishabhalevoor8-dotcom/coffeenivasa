@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Lock, ChefHat, Clock, CheckCircle2, Coffee, CreditCard, Banknote, PlayCircle, AlertCircle, Volume2, VolumeX } from 'lucide-react';
+import { Lock, ChefHat, Clock, CheckCircle2, Coffee, CreditCard, Banknote, PlayCircle, AlertCircle, Volume2, VolumeX, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import logo from '@/assets/logo.png';
 
 interface OrderItem {
   id: string;
@@ -234,9 +236,11 @@ export default function Kitchen() {
       <div className="min-h-screen bg-black flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <div className="w-24 h-24 rounded-full bg-amber-600 flex items-center justify-center mx-auto mb-6">
-              <ChefHat className="w-14 h-14 text-white" />
-            </div>
+            <img 
+              src={logo} 
+              alt="Coffee Nivasa" 
+              className="w-24 h-24 rounded-full object-cover mx-auto mb-6 shadow-lg"
+            />
             <h1 className="text-4xl font-bold text-white mb-2">
               Kitchen Display
             </h1>
@@ -264,6 +268,18 @@ export default function Kitchen() {
               disabled={loading || pin.length < 4}
             >
               {loading ? 'Verifying...' : 'Access Kitchen'}
+            </Button>
+            
+            {/* Home Button */}
+            <Button 
+              variant="ghost" 
+              className="w-full mt-4 text-gray-400 hover:text-white hover:bg-gray-800"
+              asChild
+            >
+              <Link to="/">
+                <Home className="w-5 h-5 mr-2" />
+                Back to Home
+              </Link>
             </Button>
           </div>
         </div>
