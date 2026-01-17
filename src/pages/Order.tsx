@@ -446,16 +446,24 @@ export default function Order() {
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-1 gap-3">
+                      <div className="grid grid-cols-2 gap-3">
                         <Button 
                           onClick={() => submitOrder('cash')}
+                          disabled={isSubmitting || cart.length === 0}
+                          variant="outline"
+                          className="w-full"
+                          size="lg"
+                        >
+                          {isSubmitting ? 'Placing...' : 'Pay with Cash'}
+                        </Button>
+                        <Button 
+                          onClick={() => submitOrder('online')}
                           disabled={isSubmitting || cart.length === 0}
                           className="w-full"
                           size="lg"
                         >
-                          {isSubmitting ? 'Placing Order...' : 'Pay with Cash'}
+                          {isSubmitting ? 'Placing...' : 'Pay Online'}
                         </Button>
-                        {/* Online payment will be added later */}
                       </div>
                     </div>
                   </>
@@ -638,14 +646,23 @@ export default function Order() {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   <Button 
                     onClick={() => submitOrder('cash')}
+                    disabled={isSubmitting || cart.length === 0}
+                    variant="outline"
+                    className="w-full"
+                    size="lg"
+                  >
+                    {isSubmitting ? 'Placing...' : 'Pay with Cash'}
+                  </Button>
+                  <Button 
+                    onClick={() => submitOrder('online')}
                     disabled={isSubmitting || cart.length === 0}
                     className="w-full"
                     size="lg"
                   >
-                    {isSubmitting ? 'Placing Order...' : 'Pay with Cash'}
+                    {isSubmitting ? 'Placing...' : 'Pay Online'}
                   </Button>
                 </div>
               </div>
