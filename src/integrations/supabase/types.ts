@@ -241,11 +241,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["staff_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["staff_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["staff_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      has_staff_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["staff_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_admin: { Args: { _email: string }; Returns: boolean }
     }
     Enums: {
@@ -263,6 +291,7 @@ export type Database = {
         | "cash_pending"
         | "refunded"
         | "cheque_pending"
+      staff_role: "admin" | "kitchen"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -406,6 +435,7 @@ export const Constants = {
         "refunded",
         "cheque_pending",
       ],
+      staff_role: ["admin", "kitchen"],
     },
   },
 } as const
