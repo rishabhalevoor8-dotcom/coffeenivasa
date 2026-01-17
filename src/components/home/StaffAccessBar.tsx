@@ -1,36 +1,48 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ChefHat, Settings, History } from 'lucide-react';
 
 export function StaffAccessBar() {
+  const navigate = useNavigate();
+
+  const handleAdminClick = () => {
+    navigate('/auth?role=admin');
+  };
+
+  const handleKitchenClick = () => {
+    navigate('/kitchen');
+  };
+
+  const handleOrderHistoryClick = () => {
+    navigate('/order-history');
+  };
+
   return (
-    <div className="bg-secondary/50 border-b border-border">
+    <div className="bg-card border-b border-border mt-16 md:mt-20">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between py-2 text-sm">
-          <div className="flex items-center gap-4">
-            <Link 
-              to="/order-history" 
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <History className="w-4 h-4" />
-              <span className="hidden sm:inline">Order History</span>
-            </Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-muted-foreground hidden sm:inline">Management & Staff:</span>
-            <Link 
-              to="/auth?role=admin" 
-              className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+        <div className="flex items-center justify-between py-2.5 text-sm">
+          <button 
+            onClick={handleOrderHistoryClick}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-secondary"
+          >
+            <History className="w-4 h-4" />
+            <span>Order History</span>
+          </button>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <span className="text-muted-foreground hidden sm:inline text-xs">Management & Staff:</span>
+            <button 
+              onClick={handleAdminClick}
+              className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors px-3 py-1.5 rounded-lg hover:bg-primary/10"
             >
               <Settings className="w-4 h-4" />
               <span>Admin</span>
-            </Link>
-            <Link 
-              to="/kitchen" 
-              className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+            </button>
+            <button 
+              onClick={handleKitchenClick}
+              className="flex items-center gap-1.5 text-muted-foreground hover:text-amber-600 transition-colors px-3 py-1.5 rounded-lg hover:bg-amber-50"
             >
               <ChefHat className="w-4 h-4" />
               <span>Kitchen</span>
-            </Link>
+            </button>
           </div>
         </div>
       </div>
