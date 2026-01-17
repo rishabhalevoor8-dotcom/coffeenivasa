@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Coffee, Phone } from 'lucide-react';
+import { Menu, X, Coffee, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -81,20 +81,11 @@ export function Navbar() {
 
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-3">
-            <Button variant="outline" size="sm" asChild>
-              <a href="tel:9663025408">
-                <Phone className="w-4 h-4" />
-                Call Now
-              </a>
-            </Button>
-            <Button variant="whatsapp" size="sm" asChild>
-              <a
-                href="https://wa.me/919663025408?text=Hi%2C%20I%20would%20like%20to%20know%20more%20about%20Coffee%20Nivasa"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                WhatsApp
-              </a>
+            <Button variant="gold" size="sm" asChild>
+              <Link to="/order">
+                <ShoppingBag className="w-4 h-4" />
+                Order Now
+              </Link>
             </Button>
           </div>
 
@@ -130,21 +121,12 @@ export function Navbar() {
                 {link.name}
               </Link>
             ))}
-            <div className="flex gap-2 pt-2 border-t border-border mt-2">
-              <Button variant="outline" size="sm" className="flex-1" asChild>
-                <a href="tel:9663025408">
-                  <Phone className="w-4 h-4" />
-                  Call
-                </a>
-              </Button>
-              <Button variant="whatsapp" size="sm" className="flex-1" asChild>
-                <a
-                  href="https://wa.me/919663025408"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  WhatsApp
-                </a>
+            <div className="pt-2 border-t border-border mt-2">
+              <Button variant="gold" size="sm" className="w-full" asChild>
+                <Link to="/order">
+                  <ShoppingBag className="w-4 h-4" />
+                  Order Now
+                </Link>
               </Button>
             </div>
           </div>

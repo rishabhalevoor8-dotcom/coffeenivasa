@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
-import { Download, Plus, Check, Search, MessageCircle } from 'lucide-react';
+import { Download, Plus, Check, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/hooks/useCart';
 import { CartSheet } from '@/components/menu/CartSheet';
@@ -346,16 +346,6 @@ const Menu = () => {
                 <Download className="w-5 h-5" />
                 Download Menu PDF
               </Button>
-              <Button variant="whatsapp" size="lg" asChild>
-                <a
-                  href="https://wa.me/919663025408?text=Hi%2C%20I%20would%20like%20to%20place%20an%20order"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <MessageCircle className="w-5 h-5" fill="currentColor" />
-                  Order on WhatsApp
-                </a>
-              </Button>
             </div>
           </div>
         </div>
@@ -540,7 +530,6 @@ const Menu = () => {
         onAddItem={cart.addItem}
         onRemoveItem={cart.removeItem}
         onClearCart={cart.clearCart}
-        whatsappOrderUrl={cart.whatsappOrderUrl}
       />
     </Layout>
   );
