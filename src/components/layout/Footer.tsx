@@ -55,14 +55,9 @@ export function Footer() {
                   1, 9th Cross Road, Chinnapanahalli Main Rd, Doddanekundi Extension, Bengaluru 560037
                 </span>
               </li>
-              <li>
-                <a
-                  href="tel:9663025408"
-                  className="flex items-center gap-3 text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                >
-                  <Phone className="w-5 h-5 flex-shrink-0 text-gold" />
-                  +91 96630 25408
-                </a>
+              <li className="flex items-center gap-3 text-sm text-primary-foreground/80">
+                <Phone className="w-5 h-5 flex-shrink-0 text-gold" />
+                +91 96630 25408
               </li>
               <li className="flex items-start gap-3">
                 <Clock className="w-5 h-5 mt-0.5 flex-shrink-0 text-gold" />
