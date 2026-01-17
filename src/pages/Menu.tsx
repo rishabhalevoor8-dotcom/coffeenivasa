@@ -26,6 +26,21 @@ import paneerRoll from '@/assets/menu/paneer-roll.jpg';
 import hotChocolate from '@/assets/menu/hot-chocolate.jpg';
 import masalaChai from '@/assets/menu/masala-chai.jpg';
 import brownieIcecream from '@/assets/menu/brownie-icecream.jpg';
+// New images for variety
+import orangeJuice from '@/assets/menu/orange-juice.jpg';
+import omelette from '@/assets/menu/omelette.jpg';
+import mojito from '@/assets/menu/mojito.jpg';
+import milkshake from '@/assets/menu/milkshake.jpg';
+import fries from '@/assets/menu/fries.jpg';
+import pasta from '@/assets/menu/pasta.jpg';
+import burger from '@/assets/menu/burger.jpg';
+import lassi from '@/assets/menu/lassi.jpg';
+import watermelonJuice from '@/assets/menu/watermelon-juice.jpg';
+import lemonade from '@/assets/menu/lemonade.jpg';
+import espresso from '@/assets/menu/espresso.jpg';
+import springRolls from '@/assets/menu/spring-rolls.jpg';
+import vanillaIceCream from '@/assets/menu/vanilla-ice-cream.jpg';
+import cookies from '@/assets/menu/cookies.jpg';
 
 interface MenuItem {
   name: string;
@@ -61,11 +76,11 @@ const menuCategories: MenuCategory[] = [
       { name: 'Aloo Cheese Sandwich', price: '₹70', isVeg: true, image: sandwich, subcategory: 'Veg Sandwiches' },
       { name: 'Mushroom Masala', price: '₹75', isVeg: true, image: vegClubSandwich, subcategory: 'Veg Sandwiches' },
       { name: 'Fruit Sandwich', price: '₹85', isVeg: true, image: sandwich, subcategory: 'Veg Sandwiches' },
-      { name: 'Egg Sandwich', price: '₹50', isVeg: false, image: vegClubSandwich, subcategory: 'Non-Veg Sandwiches' },
-      { name: 'Bread Omelette', price: '₹60', isVeg: false, image: sandwich, subcategory: 'Non-Veg Sandwiches' },
-      { name: 'Egg Cheese Sandwich', price: '₹65', isVeg: false, image: paneerTikkaSandwich, subcategory: 'Non-Veg Sandwiches' },
-      { name: 'Chicken Masala Sandwich', price: '₹80', isVeg: false, image: vegClubSandwich, subcategory: 'Non-Veg Sandwiches' },
-      { name: 'Chicken Cheese Sandwich', price: '₹90', isVeg: false, image: paneerTikkaSandwich, subcategory: 'Non-Veg Sandwiches' },
+      { name: 'Egg Sandwich', price: '₹50', isVeg: false, image: omelette, subcategory: 'Non-Veg Sandwiches' },
+      { name: 'Bread Omelette', price: '₹60', isVeg: false, image: omelette, subcategory: 'Non-Veg Sandwiches' },
+      { name: 'Egg Cheese Sandwich', price: '₹65', isVeg: false, image: omelette, subcategory: 'Non-Veg Sandwiches' },
+      { name: 'Chicken Masala Sandwich', price: '₹80', isVeg: false, image: starters, subcategory: 'Non-Veg Sandwiches' },
+      { name: 'Chicken Cheese Sandwich', price: '₹90', isVeg: false, image: starters, subcategory: 'Non-Veg Sandwiches' },
     ],
   },
   {
@@ -76,8 +91,8 @@ const menuCategories: MenuCategory[] = [
       { name: 'Veg Maggi', price: '₹50', isVeg: true, image: maggi },
       { name: 'Corn Maggi', price: '₹60', isVeg: true, image: cheeseMaggi },
       { name: 'Paneer Maggi', price: '₹60', isVeg: true, image: maggi },
-      { name: 'Egg Maggi', price: '₹60', isVeg: false, image: cheeseMaggi },
-      { name: 'Egg Bhurji Maggi', price: '₹65', isVeg: false, image: maggi },
+      { name: 'Egg Maggi', price: '₹60', isVeg: false, image: omelette },
+      { name: 'Egg Bhurji Maggi', price: '₹65', isVeg: false, image: omelette },
       { name: 'Chicken Masala Maggi', price: '₹70', isVeg: false, image: cheeseMaggi },
     ],
   },
@@ -210,49 +225,49 @@ const menuCategories: MenuCategory[] = [
     name: 'Ice Cream',
     icon: '🍨',
     items: [
-      { name: 'Vanilla', price: '₹50', isVeg: true, image: iceCream, subcategory: 'Single Scoop' },
+      { name: 'Vanilla', price: '₹50', isVeg: true, image: vanillaIceCream, subcategory: 'Single Scoop' },
       { name: 'Strawberry', price: '₹50', isVeg: true, image: iceCream, subcategory: 'Single Scoop' },
       { name: 'Mango', price: '₹60', isVeg: true, image: iceCream, subcategory: 'Single Scoop' },
-      { name: 'Butter Scotch', price: '₹60', isVeg: true, image: iceCream, subcategory: 'Single Scoop' },
+      { name: 'Butter Scotch', price: '₹60', isVeg: true, image: vanillaIceCream, subcategory: 'Single Scoop' },
       { name: 'Black Current', price: '₹60', isVeg: true, image: iceCream, subcategory: 'Single Scoop' },
       { name: 'Chocolate', price: '₹65', isVeg: true, image: brownieIcecream, subcategory: 'Single Scoop' },
       { name: 'Chocolate Sundae', price: '₹85', isVeg: true, image: brownieIcecream, subcategory: 'Sundae' },
       { name: 'Hot Chocolate Fudge', price: '₹95', isVeg: true, image: brownieIcecream, subcategory: 'Sundae' },
-      { name: 'Butter Scotch Sundae', price: '₹99', isVeg: true, image: iceCream, subcategory: 'Sundae' },
+      { name: 'Butter Scotch Sundae', price: '₹99', isVeg: true, image: vanillaIceCream, subcategory: 'Sundae' },
       { name: 'Black Current Sundae', price: '₹99', isVeg: true, image: iceCream, subcategory: 'Sundae' },
       { name: 'Mango Sundae', price: '₹120', isVeg: true, image: iceCream, subcategory: 'Sundae' },
-      { name: 'Triple Sundae', price: '₹199', isVeg: true, image: iceCream, subcategory: 'Sundae' },
+      { name: 'Triple Sundae', price: '₹199', isVeg: true, image: brownieIcecream, subcategory: 'Sundae' },
     ],
   },
   {
     name: 'Milkshakes',
     icon: '🧋',
     items: [
-      { name: 'Cold Badam Milkshake', price: '₹70', isVeg: true, image: coldCoffee },
-      { name: 'Rose Milk', price: '₹70', isVeg: true, image: coldCoffee },
-      { name: 'Banana Milkshake', price: '₹70', isVeg: true, image: coldCoffee },
-      { name: 'Strawberry Milkshake', price: '₹70', isVeg: true, image: coldCoffee },
-      { name: 'Chocolate Milkshake', price: '₹80', isVeg: true, image: coldCoffee },
-      { name: 'Kiwi Milkshake', price: '₹80', isVeg: true, image: coldCoffee },
-      { name: 'Mixed Fruit Milkshake', price: '₹80', isVeg: true, image: coldCoffee },
-      { name: 'Dry Fruit Milkshake', price: '₹90', isVeg: true, image: coldCoffee },
+      { name: 'Cold Badam Milkshake', price: '₹70', isVeg: true, image: lassi },
+      { name: 'Rose Milk', price: '₹70', isVeg: true, image: milkshake },
+      { name: 'Banana Milkshake', price: '₹70', isVeg: true, image: milkshake },
+      { name: 'Strawberry Milkshake', price: '₹70', isVeg: true, image: milkshake },
+      { name: 'Chocolate Milkshake', price: '₹80', isVeg: true, image: milkshake },
+      { name: 'Kiwi Milkshake', price: '₹80', isVeg: true, image: mojito },
+      { name: 'Mixed Fruit Milkshake', price: '₹80', isVeg: true, image: milkshake },
+      { name: 'Dry Fruit Milkshake', price: '₹90', isVeg: true, image: lassi },
     ],
   },
   {
     name: 'Fresh Juice',
     icon: '🧃',
     items: [
-      { name: 'Lemon Juice', price: '₹30', isVeg: true, image: coldCoffee },
-      { name: 'Mint Lemon Juice', price: '₹40', isVeg: true, image: coldCoffee },
-      { name: 'Papaya Juice', price: '₹50', isVeg: true, image: coldCoffee },
-      { name: 'Watermelon Juice', price: '₹50', isVeg: true, image: coldCoffee },
-      { name: 'Musk Melon Juice', price: '₹50', isVeg: true, image: coldCoffee },
-      { name: 'Apple Juice', price: '₹60', isVeg: true, image: coldCoffee },
-      { name: 'Orange Juice', price: '₹60', isVeg: true, image: coldCoffee },
-      { name: 'Mixed Fruit Juice', price: '₹60', isVeg: true, image: coldCoffee },
-      { name: 'Grape Juice', price: '₹60', isVeg: true, image: coldCoffee },
-      { name: 'Pineapple Juice', price: '₹60', isVeg: true, image: coldCoffee },
-      { name: 'Pomegranate Juice', price: '₹70', isVeg: true, image: coldCoffee },
+      { name: 'Lemon Juice', price: '₹30', isVeg: true, image: lemonade },
+      { name: 'Mint Lemon Juice', price: '₹40', isVeg: true, image: mojito },
+      { name: 'Papaya Juice', price: '₹50', isVeg: true, image: orangeJuice },
+      { name: 'Watermelon Juice', price: '₹50', isVeg: true, image: watermelonJuice },
+      { name: 'Musk Melon Juice', price: '₹50', isVeg: true, image: orangeJuice },
+      { name: 'Apple Juice', price: '₹60', isVeg: true, image: orangeJuice },
+      { name: 'Orange Juice', price: '₹60', isVeg: true, image: orangeJuice },
+      { name: 'Mixed Fruit Juice', price: '₹60', isVeg: true, image: watermelonJuice },
+      { name: 'Grape Juice', price: '₹60', isVeg: true, image: watermelonJuice },
+      { name: 'Pineapple Juice', price: '₹60', isVeg: true, image: orangeJuice },
+      { name: 'Pomegranate Juice', price: '₹70', isVeg: true, image: watermelonJuice },
     ],
   },
   {
@@ -277,8 +292,8 @@ const menuCategories: MenuCategory[] = [
       { name: 'Mango Tea', price: '₹30', isVeg: true, image: masalaChai, subcategory: 'Flavoured Tea' },
       { name: 'Chocolate Tea', price: '₹30', isVeg: true, image: hotChocolate, subcategory: 'Flavoured Tea' },
       { name: 'Banana Tea', price: '₹30', isVeg: true, image: masalaChai, subcategory: 'Flavoured Tea' },
-      { name: 'Black Coffee', price: '₹15', isVeg: true, image: cappuccino, subcategory: 'Coffee' },
-      { name: 'Filter Coffee', price: '₹20', isVeg: true, image: cappuccino, subcategory: 'Coffee' },
+      { name: 'Black Coffee', price: '₹15', isVeg: true, image: espresso, subcategory: 'Coffee' },
+      { name: 'Filter Coffee', price: '₹20', isVeg: true, image: espresso, subcategory: 'Coffee' },
       { name: 'Instant Coffee', price: '₹20', isVeg: true, image: cappuccino, subcategory: 'Coffee' },
       { name: 'Ginger Coffee', price: '₹20', isVeg: true, image: cappuccino, subcategory: 'Coffee' },
       { name: 'Jaggery Coffee', price: '₹25', isVeg: true, image: cappuccino, subcategory: 'Coffee' },
