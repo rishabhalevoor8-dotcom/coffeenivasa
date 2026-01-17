@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { 
   LogOut, Search, Clock, CheckCircle2, ChefHat, UtensilsCrossed, 
-  XCircle, Receipt, RefreshCw, Eye, DollarSign, AlertCircle, ArrowLeft, Printer, Download
+  XCircle, Receipt, RefreshCw, Eye, DollarSign, AlertCircle, ArrowLeft, 
+  Printer, Download, CreditCard, Banknote, FileText, Filter, LayoutGrid, Table
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -52,10 +53,11 @@ const statusConfig = {
 };
 
 const paymentStatusConfig = {
-  pending: { label: 'Pending', color: 'bg-orange-100 text-orange-700' },
-  paid: { label: 'Paid', color: 'bg-green-100 text-green-700' },
-  cash_pending: { label: 'Cash Pending', color: 'bg-yellow-100 text-yellow-700' },
-  refunded: { label: 'Refunded', color: 'bg-gray-100 text-gray-700' },
+  pending: { label: 'Pending', color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400', icon: Clock },
+  paid: { label: 'Paid (UPI)', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400', icon: CreditCard },
+  cash_pending: { label: 'Cash Pending', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400', icon: Banknote },
+  cheque_pending: { label: 'Cheque Pending', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400', icon: FileText },
+  refunded: { label: 'Refunded', color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400', icon: CreditCard },
 };
 
 export default function AdminOrders() {
@@ -66,6 +68,8 @@ export default function AdminOrders() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [paymentFilter, setPaymentFilter] = useState<string>('all');
+  const [tableFilter, setTableFilter] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const navigate = useNavigate();
 
@@ -211,13 +215,17 @@ export default function AdminOrders() {
       order.customer_phone?.includes(searchQuery);
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     const matchesPayment = paymentFilter === 'all' || order.payment_status === paymentFilter;
-    return matchesSearch && matchesStatus && matchesPayment;
+    const matchesTable = tableFilter === 'all' || 
+      (tableFilter === 'takeaway' && order.order_type === 'takeaway') ||
+      order.table_number?.toString() === tableFilter;
+    return matchesSearch && matchesStatus && matchesPayment && matchesTable;
   });
 
   const stats = {
     pending: orders.filter(o => o.status === 'pending').length,
     preparing: orders.filter(o => o.status === 'preparing').length,
     cashPending: orders.filter(o => o.payment_status === 'cash_pending').length,
+    chequePending: orders.filter(o => o.payment_status === 'cheque_pending').length,
     todayTotal: orders
       .filter(o => new Date(o.created_at).toDateString() === new Date().toDateString())
       .filter(o => o.payment_status === 'paid')
@@ -273,11 +281,29 @@ export default function AdminOrders() {
                   Order Management
                 </h1>
                 <p className="text-muted-foreground">
-                  Real-time order tracking
+                  Real-time order tracking & management
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <div className="flex border border-border rounded-lg overflow-hidden">
+                <Button
+                  variant={viewMode === 'table' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('table')}
+                  className="rounded-none"
+                >
+                  <Table className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'cards' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('cards')}
+                  className="rounded-none"
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </Button>
+              </div>
               <Button variant="outline" size="sm" onClick={fetchOrders}>
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Refresh
@@ -290,7 +316,7 @@ export default function AdminOrders() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
             <div className="bg-yellow-50 dark:bg-yellow-950/30 rounded-xl p-4 border border-yellow-200 dark:border-yellow-800">
               <p className="text-sm text-yellow-700 dark:text-yellow-400">New Orders</p>
               <p className="text-3xl font-bold text-yellow-700 dark:text-yellow-400">{stats.pending}</p>
@@ -302,6 +328,10 @@ export default function AdminOrders() {
             <div className="bg-orange-50 dark:bg-orange-950/30 rounded-xl p-4 border border-orange-200 dark:border-orange-800">
               <p className="text-sm text-orange-700 dark:text-orange-400">Cash Pending</p>
               <p className="text-3xl font-bold text-orange-700 dark:text-orange-400">{stats.cashPending}</p>
+            </div>
+            <div className="bg-purple-50 dark:bg-purple-950/30 rounded-xl p-4 border border-purple-200 dark:border-purple-800">
+              <p className="text-sm text-purple-700 dark:text-purple-400">Cheque Pending</p>
+              <p className="text-3xl font-bold text-purple-700 dark:text-purple-400">{stats.chequePending}</p>
             </div>
             <div className="bg-green-50 dark:bg-green-950/30 rounded-xl p-4 border border-green-200 dark:border-green-800">
               <p className="text-sm text-green-700 dark:text-green-400">Today's Revenue</p>
@@ -322,7 +352,7 @@ export default function AdminOrders() {
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full md:w-[180px]">
+                <SelectTrigger className="w-full md:w-[160px]">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -341,238 +371,384 @@ export default function AdminOrders() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Payment</SelectItem>
-                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="paid">Paid (UPI)</SelectItem>
                   <SelectItem value="cash_pending">Cash Pending</SelectItem>
+                  <SelectItem value="cheque_pending">Cheque Pending</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="refunded">Refunded</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={tableFilter} onValueChange={setTableFilter}>
+                <SelectTrigger className="w-full md:w-[140px]">
+                  <SelectValue placeholder="Table" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Tables</SelectItem>
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map(t => (
+                    <SelectItem key={t} value={t.toString()}>Table {t}</SelectItem>
+                  ))}
+                  <SelectItem value="takeaway">Takeaway</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          {/* Orders List */}
-          <div className="bg-card rounded-2xl border border-border overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border bg-secondary/50">
-                    <th className="text-left p-4 font-semibold text-muted-foreground">Order #</th>
-                    <th className="text-left p-4 font-semibold text-muted-foreground">Type</th>
-                    <th className="text-left p-4 font-semibold text-muted-foreground">Items</th>
-                    <th className="text-left p-4 font-semibold text-muted-foreground">Total</th>
-                    <th className="text-left p-4 font-semibold text-muted-foreground">Status</th>
-                    <th className="text-left p-4 font-semibold text-muted-foreground">Payment</th>
-                    <th className="text-left p-4 font-semibold text-muted-foreground">Time</th>
-                    <th className="text-left p-4 font-semibold text-muted-foreground">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredOrders.map((order) => {
-                    const config = statusConfig[order.status];
-                    const paymentConfig = paymentStatusConfig[order.payment_status];
-                    return (
-                      <tr key={order.id} className="border-b border-border hover:bg-secondary/30">
-                        <td className="p-4">
-                          <span className="font-bold text-primary">#{order.order_number}</span>
-                        </td>
-                        <td className="p-4">
-                          <Badge variant="outline">
-                            {order.order_type === 'dine_in' ? `Table ${order.table_number}` : 'Takeaway'}
-                          </Badge>
-                        </td>
-                        <td className="p-4">
-                          <span className="text-sm text-muted-foreground">
-                            {order.items.reduce((sum, i) => sum + i.quantity, 0)} items
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <span className="font-bold">₹{order.total}</span>
-                        </td>
-                        <td className="p-4">
-                          <Badge className={cn('font-medium', config.color)}>
-                            {config.label}
-                          </Badge>
-                        </td>
-                        <td className="p-4">
-                          <Badge className={cn('font-medium', paymentConfig.color)}>
-                            {paymentConfig.label}
-                          </Badge>
-                        </td>
-                        <td className="p-4">
-                          <span className="text-sm text-muted-foreground">
-                            {formatDateTime(order.created_at)}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <div className="flex items-center gap-2">
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon"
-                                  onClick={() => setSelectedOrder(order)}
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-lg">
-                                <DialogHeader>
-                                  <DialogTitle>Order #{order.order_number}</DialogTitle>
-                                </DialogHeader>
-                                <div className="space-y-4">
-                                  <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div>
-                                      <span className="text-muted-foreground">Type:</span>
-                                      <p className="font-medium">
-                                        {order.order_type === 'dine_in' ? `Dine In - Table ${order.table_number}` : 'Takeaway'}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <span className="text-muted-foreground">Time:</span>
-                                      <p className="font-medium">{formatDateTime(order.created_at)}</p>
-                                    </div>
-                                    {order.customer_name && (
-                                      <div>
-                                        <span className="text-muted-foreground">Customer:</span>
-                                        <p className="font-medium">{order.customer_name}</p>
-                                      </div>
-                                    )}
-                                    {order.customer_phone && (
-                                      <div>
-                                        <span className="text-muted-foreground">Phone:</span>
-                                        <p className="font-medium">{order.customer_phone}</p>
-                                      </div>
-                                    )}
-                                  </div>
+          {/* Orders - Table View */}
+          {viewMode === 'table' ? (
+            <div className="bg-card rounded-2xl border border-border overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border bg-secondary/50">
+                      <th className="text-left p-4 font-semibold text-muted-foreground">Order #</th>
+                      <th className="text-left p-4 font-semibold text-muted-foreground">Type</th>
+                      <th className="text-left p-4 font-semibold text-muted-foreground">Items</th>
+                      <th className="text-left p-4 font-semibold text-muted-foreground">Total</th>
+                      <th className="text-left p-4 font-semibold text-muted-foreground">Status</th>
+                      <th className="text-left p-4 font-semibold text-muted-foreground">Payment</th>
+                      <th className="text-left p-4 font-semibold text-muted-foreground">Time</th>
+                      <th className="text-left p-4 font-semibold text-muted-foreground">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredOrders.map((order) => {
+                      const config = statusConfig[order.status];
+                      const paymentConfig = paymentStatusConfig[order.payment_status];
+                      const PaymentIcon = paymentConfig.icon;
+                      return (
+                        <tr key={order.id} className="border-b border-border hover:bg-secondary/30">
+                          <td className="p-4">
+                            <span className="font-bold text-primary">#{order.order_number}</span>
+                          </td>
+                          <td className="p-4">
+                            <Badge variant="outline">
+                              {order.order_type === 'dine_in' ? `Table ${order.table_number}` : 'Takeaway'}
+                            </Badge>
+                          </td>
+                          <td className="p-4">
+                            <span className="text-sm text-muted-foreground">
+                              {order.items.reduce((sum, i) => sum + i.quantity, 0)} items
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <span className="font-bold">₹{order.total}</span>
+                          </td>
+                          <td className="p-4">
+                            <Badge className={cn('font-medium', config.color)}>
+                              {config.label}
+                            </Badge>
+                          </td>
+                          <td className="p-4">
+                            <Badge className={cn('font-medium flex items-center gap-1 w-fit', paymentConfig.color)}>
+                              <PaymentIcon className="w-3 h-3" />
+                              {paymentConfig.label}
+                            </Badge>
+                          </td>
+                          <td className="p-4">
+                            <span className="text-sm text-muted-foreground">
+                              {formatDateTime(order.created_at)}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex items-center gap-2">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    onClick={() => setSelectedOrder(order)}
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-lg">
+                                  <DialogHeader>
+                                    <DialogTitle>Order #{order.order_number}</DialogTitle>
+                                  </DialogHeader>
+                                  <OrderDetailsContent 
+                                    order={order}
+                                    updateOrderStatus={updateOrderStatus}
+                                    updatePaymentStatus={updatePaymentStatus}
+                                    formatDateTime={formatDateTime}
+                                  />
+                                </DialogContent>
+                              </Dialog>
 
-                                  <div className="border-t pt-4">
-                                    <h4 className="font-medium mb-2">Items</h4>
-                                    <div className="space-y-2">
-                                      {order.items.map((item) => (
-                                        <div key={item.id} className="flex justify-between text-sm">
-                                          <span>
-                                            {item.quantity}× {item.item_name}
-                                          </span>
-                                          <span>₹{item.item_price * item.quantity}</span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                    <div className="border-t mt-4 pt-4 space-y-1 text-sm">
-                                      <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Subtotal</span>
-                                        <span>₹{order.subtotal}</span>
-                                      </div>
-                                      <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Tax</span>
-                                        <span>₹{order.tax}</span>
-                                      </div>
-                                      <div className="flex justify-between font-bold text-lg">
-                                        <span>Total</span>
-                                        <span>₹{order.total}</span>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  <div className="border-t pt-4 grid grid-cols-2 gap-4">
-                                    <div>
-                                      <label className="text-sm text-muted-foreground">Update Status</label>
-                                      <Select 
-                                        value={order.status} 
-                                        onValueChange={(v) => updateOrderStatus(order.id, v as Order['status'])}
-                                      >
-                                        <SelectTrigger className="mt-1">
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="pending">Pending</SelectItem>
-                                          <SelectItem value="preparing">Preparing</SelectItem>
-                                          <SelectItem value="ready">Ready</SelectItem>
-                                          <SelectItem value="served">Served</SelectItem>
-                                          <SelectItem value="completed">Completed</SelectItem>
-                                          <SelectItem value="cancelled">Cancelled</SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-                                    <div>
-                                      <label className="text-sm text-muted-foreground">Payment Status</label>
-                                      <Select 
-                                        value={order.payment_status} 
-                                        onValueChange={(v) => updatePaymentStatus(order.id, v as Order['payment_status'])}
-                                      >
-                                        <SelectTrigger className="mt-1">
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="pending">Pending</SelectItem>
-                                          <SelectItem value="paid">Paid</SelectItem>
-                                          <SelectItem value="cash_pending">Cash Pending</SelectItem>
-                                          <SelectItem value="refunded">Refunded</SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-                                  </div>
-
-                                  <div className="border-t pt-4 flex gap-2">
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => printInvoice(order)}
-                                      className="flex-1"
-                                    >
-                                      <Printer className="w-4 h-4 mr-2" />
-                                      Print
-                                    </Button>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => downloadInvoice(order)}
-                                      className="flex-1"
-                                    >
-                                      <Download className="w-4 h-4 mr-2" />
-                                      Download
-                                    </Button>
-                                  </div>
-                                </div>
-                              </DialogContent>
-                            </Dialog>
-
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => printInvoice(order)}
-                              title="Print Invoice"
-                            >
-                              <Printer className="w-4 h-4" />
-                            </Button>
-                            
-                            {order.payment_status === 'cash_pending' && (
                               <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => updatePaymentStatus(order.id, 'paid')}
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => printInvoice(order)}
+                                title="Print Invoice"
                               >
-                                <DollarSign className="w-4 h-4 mr-1" />
-                                Mark Paid
+                                <Printer className="w-4 h-4" />
                               </Button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {filteredOrders.length === 0 && (
-              <div className="p-12 text-center text-muted-foreground">
-                <Receipt className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No orders found</p>
+                              
+                              {(order.payment_status === 'cash_pending' || order.payment_status === 'cheque_pending') && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => updatePaymentStatus(order.id, 'paid')}
+                                >
+                                  <DollarSign className="w-4 h-4 mr-1" />
+                                  Mark Paid
+                                </Button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
-            )}
-          </div>
+
+              {filteredOrders.length === 0 && (
+                <div className="p-12 text-center text-muted-foreground">
+                  <Receipt className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No orders found</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Cards View */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredOrders.map((order) => {
+                const config = statusConfig[order.status];
+                const paymentConfig = paymentStatusConfig[order.payment_status];
+                const PaymentIcon = paymentConfig.icon;
+                
+                return (
+                  <div 
+                    key={order.id} 
+                    className={cn(
+                      'bg-card rounded-2xl border-2 overflow-hidden',
+                      order.status === 'pending' && 'border-yellow-500',
+                      order.status === 'preparing' && 'border-blue-500',
+                      order.status === 'ready' && 'border-green-500',
+                      order.status === 'served' && 'border-purple-500',
+                      order.status === 'completed' && 'border-gray-500',
+                      order.status === 'cancelled' && 'border-red-500'
+                    )}
+                  >
+                    {/* Card Header */}
+                    <div className={cn('px-4 py-3 flex items-center justify-between text-white', config.color)}>
+                      <span className="text-xl font-bold">#{order.order_number}</span>
+                      <Badge className="bg-white/20 text-white border-0">{config.label}</Badge>
+                    </div>
+                    
+                    {/* Card Body */}
+                    <div className="p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Badge variant="outline">
+                          {order.order_type === 'dine_in' ? `Table ${order.table_number}` : 'Takeaway'}
+                        </Badge>
+                        <span className="text-sm text-muted-foreground">{formatDateTime(order.created_at)}</span>
+                      </div>
+                      
+                      {/* Payment Status */}
+                      <Badge className={cn('flex items-center gap-1 w-fit', paymentConfig.color)}>
+                        <PaymentIcon className="w-3 h-3" />
+                        {paymentConfig.label}
+                      </Badge>
+                      
+                      {/* Items */}
+                      <div className="border-t pt-3 space-y-1">
+                        {order.items.map((item) => (
+                          <div key={item.id} className="flex justify-between text-sm">
+                            <span className="flex items-center gap-2">
+                              <span className="font-medium text-primary">{item.quantity}×</span>
+                              {item.item_name}
+                            </span>
+                            <span className="text-muted-foreground">₹{item.item_price * item.quantity}</span>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {/* Total */}
+                      <div className="border-t pt-3 flex justify-between items-center">
+                        <span className="font-semibold">Total</span>
+                        <span className="text-xl font-bold text-primary">₹{order.total}</span>
+                      </div>
+                      
+                      {/* Actions */}
+                      <div className="flex gap-2 pt-2">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm" className="flex-1">
+                              <Eye className="w-4 h-4 mr-1" />
+                              Details
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-lg">
+                            <DialogHeader>
+                              <DialogTitle>Order #{order.order_number}</DialogTitle>
+                            </DialogHeader>
+                            <OrderDetailsContent 
+                              order={order}
+                              updateOrderStatus={updateOrderStatus}
+                              updatePaymentStatus={updatePaymentStatus}
+                              formatDateTime={formatDateTime}
+                            />
+                          </DialogContent>
+                        </Dialog>
+                        
+                        <Button variant="outline" size="sm" onClick={() => printInvoice(order)}>
+                          <Printer className="w-4 h-4" />
+                        </Button>
+                        
+                        {(order.payment_status === 'cash_pending' || order.payment_status === 'cheque_pending') && (
+                          <Button size="sm" onClick={() => updatePaymentStatus(order.id, 'paid')}>
+                            <DollarSign className="w-4 h-4 mr-1" />
+                            Paid
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              
+              {filteredOrders.length === 0 && (
+                <div className="col-span-full p-12 text-center text-muted-foreground bg-card rounded-2xl border border-border">
+                  <Receipt className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No orders found</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </section>
     </Layout>
+  );
+}
+
+// Extracted Order Details Dialog Content
+function OrderDetailsContent({ 
+  order, 
+  updateOrderStatus, 
+  updatePaymentStatus, 
+  formatDateTime 
+}: { 
+  order: Order; 
+  updateOrderStatus: (id: string, status: Order['status']) => void;
+  updatePaymentStatus: (id: string, status: Order['payment_status']) => void;
+  formatDateTime: (date: string) => string;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <span className="text-muted-foreground">Type:</span>
+          <p className="font-medium">
+            {order.order_type === 'dine_in' ? `Dine In - Table ${order.table_number}` : 'Takeaway'}
+          </p>
+        </div>
+        <div>
+          <span className="text-muted-foreground">Time:</span>
+          <p className="font-medium">{formatDateTime(order.created_at)}</p>
+        </div>
+        {order.customer_name && (
+          <div>
+            <span className="text-muted-foreground">Customer:</span>
+            <p className="font-medium">{order.customer_name}</p>
+          </div>
+        )}
+        {order.customer_phone && (
+          <div>
+            <span className="text-muted-foreground">Phone:</span>
+            <p className="font-medium">{order.customer_phone}</p>
+          </div>
+        )}
+      </div>
+
+      <div className="border-t pt-4">
+        <h4 className="font-medium mb-2">Items</h4>
+        <div className="space-y-2">
+          {order.items.map((item) => (
+            <div key={item.id} className="flex justify-between text-sm">
+              <span>
+                {item.quantity}× {item.item_name}
+              </span>
+              <span>₹{item.item_price * item.quantity}</span>
+            </div>
+          ))}
+        </div>
+        <div className="border-t mt-4 pt-4 space-y-1 text-sm">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Subtotal</span>
+            <span>₹{order.subtotal}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Tax</span>
+            <span>₹{order.tax}</span>
+          </div>
+          <div className="flex justify-between font-bold text-lg">
+            <span>Total</span>
+            <span>₹{order.total}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t pt-4 grid grid-cols-2 gap-4">
+        <div>
+          <label className="text-sm text-muted-foreground">Update Status</label>
+          <Select 
+            value={order.status} 
+            onValueChange={(v) => updateOrderStatus(order.id, v as Order['status'])}
+          >
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="preparing">Preparing</SelectItem>
+              <SelectItem value="ready">Ready</SelectItem>
+              <SelectItem value="served">Served</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <label className="text-sm text-muted-foreground">Payment Status</label>
+          <Select 
+            value={order.payment_status} 
+            onValueChange={(v) => updatePaymentStatus(order.id, v as Order['payment_status'])}
+          >
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="paid">Paid (UPI)</SelectItem>
+              <SelectItem value="cash_pending">Cash Pending</SelectItem>
+              <SelectItem value="cheque_pending">Cheque Pending</SelectItem>
+              <SelectItem value="refunded">Refunded</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="border-t pt-4 flex gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => printInvoice(order)}
+          className="flex-1"
+        >
+          <Printer className="w-4 h-4 mr-2" />
+          Print
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => downloadInvoice(order)}
+          className="flex-1"
+        >
+          <Download className="w-4 h-4 mr-2" />
+          Download
+        </Button>
+      </div>
+    </div>
   );
 }
