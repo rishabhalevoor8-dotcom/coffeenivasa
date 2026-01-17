@@ -1,4 +1,5 @@
-import { ShoppingCart, Minus, Plus, Trash2, MessageCircle } from 'lucide-react';
+import { ShoppingCart, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -17,7 +18,6 @@ interface CartSheetProps {
   onAddItem: (item: { name: string; price: string; isVeg: boolean }) => void;
   onRemoveItem: (name: string) => void;
   onClearCart: () => void;
-  whatsappOrderUrl: string;
 }
 
 export function CartSheet({
@@ -27,7 +27,6 @@ export function CartSheet({
   onAddItem,
   onRemoveItem,
   onClearCart,
-  whatsappOrderUrl,
 }: CartSheetProps) {
   return (
     <Sheet>
@@ -62,9 +61,15 @@ export function CartSheet({
             <h3 className="font-display text-lg font-semibold text-foreground mb-2">
               Your cart is empty
             </h3>
-            <p className="text-muted-foreground text-sm max-w-xs">
+            <p className="text-muted-foreground text-sm max-w-xs mb-6">
               Add items from the menu to start your order
             </p>
+            <Button variant="gold" asChild>
+              <Link to="/order">
+                <ShoppingBag className="w-4 h-4" />
+                Order at Café
+              </Link>
+            </Button>
           </div>
         ) : (
           <>
@@ -138,15 +143,15 @@ export function CartSheet({
               </div>
 
               <div className="pt-2">
-                <a
-                  href={whatsappOrderUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full h-14 bg-[#25D366] hover:bg-[#22c55e] text-white rounded-xl font-semibold text-lg shadow-lg transition-colors"
-                >
-                  <MessageCircle className="w-5 h-5" fill="currentColor" />
-                  Order via WhatsApp
-                </a>
+                <Button variant="gold" size="lg" className="w-full" asChild>
+                  <Link to="/order">
+                    <ShoppingBag className="w-5 h-5" />
+                    Place Order at Café
+                  </Link>
+                </Button>
+                <p className="text-xs text-muted-foreground text-center mt-2">
+                  Use the in-café ordering system to complete your order
+                </p>
               </div>
             </div>
           </>

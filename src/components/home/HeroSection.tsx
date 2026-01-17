@@ -1,4 +1,5 @@
-import { Phone, MessageCircle, MapPin, Check } from 'lucide-react';
+import { ShoppingBag, MapPin, Check } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import heroBg from '@/assets/hero-bg.jpg';
 
@@ -7,7 +8,6 @@ const trustIndicators = [
   { text: 'Open All Days', icon: '📅' },
   { text: 'Dine-in', icon: '🪑' },
   { text: 'Takeaway', icon: '📦' },
-  { text: 'Delivery', icon: '🛵' },
 ];
 
 export function HeroSection() {
@@ -46,20 +46,10 @@ export function HeroSection() {
           {/* CTA Buttons */}
           <div className="flex flex-wrap justify-center gap-3 pt-4">
             <Button variant="gold" size="lg" asChild>
-              <a href="tel:9663025408">
-                <Phone className="w-5 h-5" />
-                Call Now
-              </a>
-            </Button>
-            <Button variant="whatsapp" size="lg" asChild>
-              <a
-                href="https://wa.me/919663025408?text=Hi%2C%20I%20would%20like%20to%20know%20more%20about%20Coffee%20Nivasa"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <MessageCircle className="w-5 h-5" fill="currentColor" />
-                WhatsApp
-              </a>
+              <Link to="/order">
+                <ShoppingBag className="w-5 h-5" />
+                Order Now
+              </Link>
             </Button>
             <Button variant="heroOutline" size="lg" asChild>
               <a

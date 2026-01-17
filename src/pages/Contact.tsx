@@ -1,6 +1,7 @@
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
-import { MapPin, Phone, Clock, MessageCircle, Instagram } from 'lucide-react';
+import { MapPin, Phone, Clock, Instagram, ShoppingBag } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Contact = () => {
   return (
@@ -16,7 +17,7 @@ const Contact = () => {
               Contact Us
             </h1>
             <p className="text-muted-foreground">
-              We'd love to hear from you! Visit us, call us, or drop a message anytime.
+              We'd love to hear from you! Visit us or place an order directly through our app.
             </p>
           </div>
         </div>
@@ -78,16 +79,13 @@ const Contact = () => {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-display text-lg font-semibold text-foreground mb-2">
-                      Call Us
+                      Contact
                     </h3>
-                    <a
-                      href="tel:9663025408"
-                      className="text-2xl font-bold text-primary hover:text-primary/80 transition-colors"
-                    >
+                    <p className="text-lg font-bold text-primary">
                       +91 96630 25408
-                    </a>
+                    </p>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Tap to call on mobile
+                      For inquiries and reservations
                     </p>
                   </div>
                 </div>
@@ -116,15 +114,11 @@ const Contact = () => {
 
               {/* Action Buttons */}
               <div className="grid sm:grid-cols-2 gap-4">
-                <Button variant="whatsapp" size="lg" className="w-full" asChild>
-                  <a
-                    href="https://wa.me/919663025408?text=Hi%2C%20I%20would%20like%20to%20know%20more%20about%20Coffee%20Nivasa"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <MessageCircle className="w-5 h-5" fill="currentColor" />
-                    Chat on WhatsApp
-                  </a>
+                <Button variant="gold" size="lg" className="w-full" asChild>
+                  <Link to="/order">
+                    <ShoppingBag className="w-5 h-5" />
+                    Order Now
+                  </Link>
                 </Button>
                 <Button variant="outline" size="lg" className="w-full" asChild>
                   <a
@@ -146,17 +140,17 @@ const Contact = () => {
       <section className="py-16 bg-primary">
         <div className="container mx-auto px-4 text-center">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
-            Ready to Visit?
+            Ready to Order?
           </h2>
           <p className="text-primary-foreground/80 max-w-xl mx-auto mb-8">
-            Come experience the warmth of Coffee Nivasa. We're just a call or message away!
+            Visit our café and place your order directly through our self-ordering system.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Button variant="gold" size="lg" asChild>
-              <a href="tel:9663025408">
-                <Phone className="w-5 h-5" />
-                Call Now: 96630 25408
-              </a>
+              <Link to="/order">
+                <ShoppingBag className="w-5 h-5" />
+                Start Your Order
+              </Link>
             </Button>
           </div>
         </div>

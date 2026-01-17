@@ -11,26 +11,26 @@ export function useCart() {
   const [items, setItems] = useState<CartItem[]>([]);
 
   const addItem = useCallback((item: { name: string; price: string; isVeg: boolean }) => {
-    setItems((prev) => {
-      const existing = prev.find((i) => i.name === item.name);
-      if (existing) {
-        return prev.map((i) =>
+    setItems((current) => {
+      const existingItem = current.find((i) => i.name === item.name);
+      if (existingItem) {
+        return current.map((i) =>
           i.name === item.name ? { ...i, quantity: i.quantity + 1 } : i
         );
       }
-      return [...prev, { ...item, quantity: 1 }];
+      return [...current, { ...item, quantity: 1 }];
     });
   }, []);
 
   const removeItem = useCallback((name: string) => {
-    setItems((prev) => {
-      const existing = prev.find((i) => i.name === name);
-      if (existing && existing.quantity > 1) {
-        return prev.map((i) =>
+    setItems((current) => {
+      const existingItem = current.find((i) => i.name === name);
+      if (existingItem && existingItem.quantity > 1) {
+        return current.map((i) =>
           i.name === name ? { ...i, quantity: i.quantity - 1 } : i
         );
       }
-      return prev.filter((i) => i.name !== name);
+      return current.filter((i) => i.name !== name);
     });
   }, []);
 
@@ -39,7 +39,9 @@ export function useCart() {
   }, []);
 
   const getItemQuantity = useCallback(
-    (name: string) => items.find((i) => i.name === name)?.quantity || 0,
+    (name: string) => {
+      return items.find((i) => i.name === name)?.quantity || 0;
+    },
     [items]
   );
 
@@ -50,28 +52,6 @@ export function useCart() {
     return sum + price * item.quantity;
   }, 0);
 
-  const generateWhatsAppMessage = useCallback(() => {
-    if (items.length === 0) return '';
-    
-    let message = `🛒 *New Order from Coffee Nivasa Website*\n\n`;
-    message += `*Order Details:*\n`;
-    message += `─────────────────\n`;
-    
-    items.forEach((item, index) => {
-      const itemTotal = parseInt(item.price.replace(/[₹,]/g, '')) * item.quantity;
-      message += `${index + 1}. ${item.name}\n`;
-      message += `   Qty: ${item.quantity} × ${item.price} = ₹${itemTotal}\n`;
-    });
-    
-    message += `─────────────────\n`;
-    message += `*Total: ₹${totalPrice}*\n\n`;
-    message += `Please confirm my order. Thank you! 🙏`;
-    
-    return encodeURIComponent(message);
-  }, [items, totalPrice]);
-
-  const whatsappOrderUrl = `https://wa.me/919663025408?text=${generateWhatsAppMessage()}`;
-
   return {
     items,
     addItem,
@@ -80,6 +60,5 @@ export function useCart() {
     getItemQuantity,
     totalItems,
     totalPrice,
-    whatsappOrderUrl,
   };
 }
