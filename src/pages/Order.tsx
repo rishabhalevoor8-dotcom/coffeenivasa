@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,10 +23,12 @@ import {
   Phone,
   Mail,
   Clock,
-  Calendar
+  Calendar,
+  Home
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import logo from '@/assets/logo.png';
 
 interface MenuItem {
   id: string;
@@ -329,9 +332,11 @@ export default function Order() {
       <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 flex items-center justify-center p-6">
         <div className="w-full max-w-sm">
           <div className="text-center mb-10">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-amber-200">
-              <Coffee className="w-12 h-12 text-white" />
-            </div>
+            <img 
+              src={logo} 
+              alt="Coffee Nivasa" 
+              className="w-24 h-24 rounded-full object-cover mx-auto mb-6 shadow-xl shadow-amber-200"
+            />
             <h1 className="font-display text-3xl font-bold text-foreground mb-2">
               Coffee Nivasa
             </h1>
@@ -356,6 +361,18 @@ export default function Order() {
               disabled={loading || pin.length < 4}
             >
               {loading ? 'Verifying...' : 'Start Ordering'}
+            </Button>
+            
+            {/* Home Button */}
+            <Button 
+              variant="ghost" 
+              className="w-full mt-4 text-muted-foreground hover:text-foreground"
+              asChild
+            >
+              <Link to="/">
+                <Home className="w-5 h-5 mr-2" />
+                Back to Home
+              </Link>
             </Button>
           </div>
         </div>

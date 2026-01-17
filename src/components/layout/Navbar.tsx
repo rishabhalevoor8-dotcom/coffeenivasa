@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Coffee, ShoppingBag } from 'lucide-react';
+import { Menu, X, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import logo from '@/assets/logo.png';
 
 const navLinks = [
   { name: 'Home', path: '/' },
@@ -42,9 +43,11 @@ export function Navbar() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Coffee className="w-5 h-5 text-primary-foreground" />
-            </div>
+            <img 
+              src={logo} 
+              alt="Coffee Nivasa Logo" 
+              className="w-12 h-12 rounded-full object-cover group-hover:scale-110 transition-transform shadow-md"
+            />
             <div className="flex flex-col">
               <span className="font-display text-xl font-bold text-foreground leading-tight">
                 Coffee Nivasa
