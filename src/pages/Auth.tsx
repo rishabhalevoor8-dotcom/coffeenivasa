@@ -79,19 +79,23 @@ export default function Auth() {
 
   const verifySignupCode = async (code: string, role: RoleType): Promise<boolean> => {
     const settingKey = role === 'admin' ? 'admin_signup_code' : 'kitchen_signup_code';
-    
+
     const { data, error } = await supabase
       .from('system_settings')
       .select('value')
       .eq('key', settingKey)
+      .limit(1)
       .maybeSingle();
 
-    if (error || !data) {
+    // Defensive: depending on headers, some environments can still return an array
+    const storedValue = Array.isArray(data) ? data?.[0]?.value : data?.value;
+
+    if (error || !storedValue) {
       toast.error('Could not verify signup code');
       return false;
     }
 
-    return data.value === code;
+    return storedValue.trim() === code.trim();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
