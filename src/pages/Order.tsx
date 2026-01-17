@@ -104,13 +104,19 @@ export default function Order() {
       supabase.from('menu_items').select('*').eq('is_active', true).order('display_order'),
     ]);
 
+    const fetchedItems = itemsRes.data || [];
+    setItems(fetchedItems);
+
     if (categoriesRes.data) {
-      setCategories(categoriesRes.data);
-      if (categoriesRes.data.length > 0) {
-        setSelectedCategory(categoriesRes.data[0].id);
+      // Filter out categories that have no items
+      const categoriesWithItems = categoriesRes.data.filter(cat => 
+        fetchedItems.some(item => item.category_id === cat.id)
+      );
+      setCategories(categoriesWithItems);
+      if (categoriesWithItems.length > 0) {
+        setSelectedCategory(categoriesWithItems[0].id);
       }
     }
-    if (itemsRes.data) setItems(itemsRes.data);
   };
 
   const addToCart = (item: MenuItem) => {

@@ -76,13 +76,10 @@ export function LocationSection() {
                   <Phone className="w-6 h-6 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-foreground mb-2">Call Us</h4>
-                  <a
-                    href="tel:9663025408"
-                    className="text-lg font-bold text-primary hover:text-primary/80 transition-colors"
-                  >
+                  <h4 className="font-semibold text-foreground mb-2">Contact</h4>
+                  <span className="text-lg font-bold text-primary">
                     +91 96630 25408
-                  </a>
+                  </span>
                 </div>
               </div>
             </div>

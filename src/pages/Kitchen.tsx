@@ -128,20 +128,7 @@ export default function Kitchen() {
     };
   };
 
-  const updateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
-    const { error } = await supabase
-      .from('orders')
-      .update({ status: newStatus })
-      .eq('id', orderId);
-
-    if (error) {
-      toast.error('Failed to update order status');
-      return;
-    }
-
-    toast.success(`Order marked as ${statusConfig[newStatus].label}`);
-    fetchOrders();
-  };
+  // Status updates are now handled by admin only - Kitchen is READ-ONLY
 
   const getTimeSince = (dateString: string) => {
     const diff = Date.now() - new Date(dateString).getTime();
@@ -333,45 +320,6 @@ export default function Kitchen() {
                     ))}
                   </div>
 
-                  {/* Action Buttons - Large touch targets */}
-                  <div className="px-4 py-4 bg-gray-800 border-t border-gray-700 grid grid-cols-3 gap-3">
-                    <Button
-                      onClick={() => updateOrderStatus(order.id, 'preparing')}
-                      disabled={order.status === 'preparing'}
-                      className={cn(
-                        'h-16 text-lg font-bold rounded-xl',
-                        order.status === 'preparing' 
-                          ? 'bg-amber-600 text-white' 
-                          : 'bg-gray-700 hover:bg-amber-600 text-white'
-                      )}
-                    >
-                      PREPARING
-                    </Button>
-                    <Button
-                      onClick={() => updateOrderStatus(order.id, 'ready')}
-                      disabled={order.status === 'ready'}
-                      className={cn(
-                        'h-16 text-lg font-bold rounded-xl',
-                        order.status === 'ready' 
-                          ? 'bg-green-600 text-white' 
-                          : 'bg-gray-700 hover:bg-green-600 text-white'
-                      )}
-                    >
-                      READY
-                    </Button>
-                    <Button
-                      onClick={() => updateOrderStatus(order.id, 'served')}
-                      disabled={order.status === 'served'}
-                      className={cn(
-                        'h-16 text-lg font-bold rounded-xl',
-                        order.status === 'served' 
-                          ? 'bg-blue-600 text-white' 
-                          : 'bg-gray-700 hover:bg-blue-600 text-white'
-                      )}
-                    >
-                      SERVED
-                    </Button>
-                  </div>
                 </div>
               );
             })}

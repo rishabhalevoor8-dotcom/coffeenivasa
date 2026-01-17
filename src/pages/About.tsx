@@ -1,5 +1,6 @@
 import { Layout } from '@/components/layout/Layout';
-import { Heart, Leaf, Users, Shield, Coffee, ChefHat } from 'lucide-react';
+import { Heart, Leaf, Users, Shield, Coffee, ChefHat, ShoppingBag } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const values = [
   {
@@ -129,12 +130,13 @@ const About = () => {
             Experience the warmth of Coffee Nivasa. We're open all days from 10 AM to 11 PM.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <a
-              href="tel:9663025408"
+            <Link
+              to="/order"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gold text-gold-foreground font-semibold hover:opacity-90 transition-opacity"
             >
-              📞 Call Now
-            </a>
+              <ShoppingBag className="w-5 h-5" />
+              Order Now
+            </Link>
             <a
               href="https://maps.google.com/?q=Coffee+Nivasa,+Doddanekundi,+Bangalore"
               target="_blank"
