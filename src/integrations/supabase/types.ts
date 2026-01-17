@@ -257,7 +257,12 @@ export type Database = {
         | "completed"
         | "cancelled"
       order_type: "dine_in" | "takeaway"
-      payment_status: "pending" | "paid" | "cash_pending" | "refunded"
+      payment_status:
+        | "pending"
+        | "paid"
+        | "cash_pending"
+        | "refunded"
+        | "cheque_pending"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -394,7 +399,13 @@ export const Constants = {
         "cancelled",
       ],
       order_type: ["dine_in", "takeaway"],
-      payment_status: ["pending", "paid", "cash_pending", "refunded"],
+      payment_status: [
+        "pending",
+        "paid",
+        "cash_pending",
+        "refunded",
+        "cheque_pending",
+      ],
     },
   },
 } as const

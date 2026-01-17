@@ -31,7 +31,7 @@ interface Order {
   table_number: number | null;
   order_type: 'dine_in' | 'takeaway';
   status: 'pending' | 'preparing' | 'ready' | 'served' | 'completed' | 'cancelled';
-  payment_status: 'pending' | 'paid' | 'cash_pending' | 'refunded';
+  payment_status: 'pending' | 'paid' | 'cash_pending' | 'cheque_pending' | 'refunded';
   subtotal: number;
   tax: number;
   total: number;
