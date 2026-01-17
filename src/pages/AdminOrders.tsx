@@ -7,13 +7,14 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { 
   LogOut, Search, Clock, CheckCircle2, ChefHat, UtensilsCrossed, 
-  XCircle, Receipt, Filter, RefreshCw, Eye, DollarSign, AlertCircle, ArrowLeft
+  XCircle, Receipt, RefreshCw, Eye, DollarSign, AlertCircle, ArrowLeft, Printer, Download
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import type { User } from '@supabase/supabase-js';
+import { printInvoice, downloadInvoice } from '@/utils/invoiceGenerator';
 
 interface OrderItem {
   id: string;
@@ -510,9 +511,39 @@ export default function AdminOrders() {
                                       </Select>
                                     </div>
                                   </div>
+
+                                  <div className="border-t pt-4 flex gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => printInvoice(order)}
+                                      className="flex-1"
+                                    >
+                                      <Printer className="w-4 h-4 mr-2" />
+                                      Print
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => downloadInvoice(order)}
+                                      className="flex-1"
+                                    >
+                                      <Download className="w-4 h-4 mr-2" />
+                                      Download
+                                    </Button>
+                                  </div>
                                 </div>
                               </DialogContent>
                             </Dialog>
+
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => printInvoice(order)}
+                              title="Print Invoice"
+                            >
+                              <Printer className="w-4 h-4" />
+                            </Button>
                             
                             {order.payment_status === 'cash_pending' && (
                               <Button
