@@ -44,6 +44,7 @@ import cookies from '@/assets/menu/cookies.jpg';
 import cornFriedRice from '@/assets/menu/corn-fried-rice.jpg';
 import mushroomFriedRice from '@/assets/menu/mushroom-fried-rice.jpg';
 import butterGarlicFriedRice from '@/assets/menu/butter-garlic-fried-rice.jpg';
+import vegFriedRice from '@/assets/menu/veg-fried-rice.jpg';
 
 interface MenuItem {
   name: string;
@@ -103,9 +104,9 @@ const menuCategories: MenuCategory[] = [
     name: 'Fried Rice',
     icon: '🍚',
     items: [
-      { name: 'Veg Fried Rice', price: '₹79', isVeg: true, image: friedRice, subcategory: 'Veg Fried Rice' },
+      { name: 'Veg Fried Rice', price: '₹79', isVeg: true, image: vegFriedRice, subcategory: 'Veg Fried Rice' },
       { name: 'Schezwan Veg Fried Rice', price: '₹99', isVeg: true, image: schezwanRice, subcategory: 'Veg Fried Rice' },
-      { name: 'Shanghai Veg Fried Rice', price: '₹99', isVeg: true, image: friedRice, subcategory: 'Veg Fried Rice' },
+      { name: 'Shanghai Veg Fried Rice', price: '₹99', isVeg: true, image: vegFriedRice, subcategory: 'Veg Fried Rice' },
       { name: 'Schezwan Shanghai Veg Fried Rice', price: '₹109', isVeg: true, image: schezwanRice, subcategory: 'Veg Fried Rice' },
       { name: 'Corn Fried Rice', price: '₹109', isVeg: true, image: cornFriedRice, subcategory: 'Veg Fried Rice' },
       { name: 'Baby Corn Fried Rice', price: '₹109', isVeg: true, image: cornFriedRice, subcategory: 'Veg Fried Rice' },
