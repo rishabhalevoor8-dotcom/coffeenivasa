@@ -708,7 +708,7 @@ export default function Order() {
     : items;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 pb-28">
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 pb-40">
       {/* Header */}
       <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-lg border-b border-amber-100">
         <div className="px-4 py-4">
@@ -816,7 +816,7 @@ export default function Order() {
 
       {/* Fixed Cart Bar */}
       {cart.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-amber-50 via-amber-50 to-transparent pt-8">
+        <div className="fixed bottom-20 left-0 right-0 p-4 bg-gradient-to-t from-amber-50 via-amber-50 to-transparent pt-8 z-40">
           <button
             onClick={() => setShowCart(true)}
             className="w-full h-16 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white flex items-center justify-between px-6 shadow-xl shadow-amber-300 active:scale-[0.98] transition-transform"
