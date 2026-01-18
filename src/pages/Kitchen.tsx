@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Lock, ChefHat, Clock, CheckCircle2, Coffee, CreditCard, Banknote, PlayCircle, AlertCircle, Volume2, VolumeX, Home } from 'lucide-react';
+import { Lock, ChefHat, Clock, CheckCircle2, Coffee, CreditCard, Banknote, PlayCircle, AlertCircle, Volume2, VolumeX, Home, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import logo from '@/assets/logo.png';
 
@@ -206,6 +206,41 @@ export default function Kitchen() {
       console.error('Error updating order:', error);
     } else {
       toast.success(`Order marked as ${newStatus.toUpperCase()}`);
+      if (soundEnabled) {
+        playNotificationSound('statusChange');
+      }
+    }
+    
+    setUpdatingOrder(null);
+  };
+
+  // Kitchen staff can cancel orders ONLY if payment is pending (not paid)
+  const cancelOrder = async (orderId: string, orderNumber: number) => {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+    
+    // Only allow cancel if payment is NOT paid
+    if (order.payment_status === 'paid') {
+      toast.error('Cannot cancel - payment already received');
+      return;
+    }
+    
+    if (!confirm(`Cancel order #${orderNumber}? This action cannot be undone.`)) {
+      return;
+    }
+    
+    setUpdatingOrder(orderId);
+    
+    const { error } = await supabase
+      .from('orders')
+      .update({ status: 'cancelled' })
+      .eq('id', orderId);
+
+    if (error) {
+      toast.error('Failed to cancel order');
+      console.error('Error cancelling order:', error);
+    } else {
+      toast.success(`Order #${orderNumber} cancelled`);
       if (soundEnabled) {
         playNotificationSound('statusChange');
       }
@@ -447,7 +482,7 @@ export default function Kitchen() {
                   </div>
 
                   {/* Action Buttons - Kitchen staff can update status */}
-                  <div className="p-4 bg-gray-900 border-t border-gray-700">
+                  <div className="p-4 bg-gray-900 border-t border-gray-700 space-y-3">
                     {order.status === 'pending' && (
                       <Button
                         onClick={() => updateOrderStatus(order.id, 'preparing')}
@@ -466,6 +501,19 @@ export default function Kitchen() {
                       >
                         <CheckCircle2 className="w-8 h-8 mr-3" />
                         {updatingOrder === order.id ? 'UPDATING...' : 'MARK READY'}
+                      </Button>
+                    )}
+                    
+                    {/* Cancel button - only show if payment is NOT paid */}
+                    {order.payment_status !== 'paid' && (
+                      <Button
+                        onClick={() => cancelOrder(order.id, order.order_number)}
+                        disabled={updatingOrder === order.id}
+                        variant="outline"
+                        className="w-full h-12 text-lg font-bold border-red-600 text-red-500 hover:bg-red-600 hover:text-white transition-colors"
+                      >
+                        <XCircle className="w-6 h-6 mr-2" />
+                        CANCEL ORDER
                       </Button>
                     )}
                   </div>

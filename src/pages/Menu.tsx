@@ -41,6 +41,9 @@ import espresso from '@/assets/menu/espresso.jpg';
 import springRolls from '@/assets/menu/spring-rolls.jpg';
 import vanillaIceCream from '@/assets/menu/vanilla-ice-cream.jpg';
 import cookies from '@/assets/menu/cookies.jpg';
+import cornFriedRice from '@/assets/menu/corn-fried-rice.jpg';
+import mushroomFriedRice from '@/assets/menu/mushroom-fried-rice.jpg';
+import butterGarlicFriedRice from '@/assets/menu/butter-garlic-fried-rice.jpg';
 
 interface MenuItem {
   name: string;
@@ -104,11 +107,11 @@ const menuCategories: MenuCategory[] = [
       { name: 'Schezwan Veg Fried Rice', price: '₹99', isVeg: true, image: schezwanRice, subcategory: 'Veg Fried Rice' },
       { name: 'Shanghai Veg Fried Rice', price: '₹99', isVeg: true, image: friedRice, subcategory: 'Veg Fried Rice' },
       { name: 'Schezwan Shanghai Veg Fried Rice', price: '₹109', isVeg: true, image: schezwanRice, subcategory: 'Veg Fried Rice' },
-      { name: 'Corn Fried Rice', price: '₹109', isVeg: true, image: friedRice, subcategory: 'Veg Fried Rice' },
-      { name: 'Baby Corn Fried Rice', price: '₹109', isVeg: true, image: schezwanRice, subcategory: 'Veg Fried Rice' },
-      { name: 'Mushroom Fried Rice', price: '₹109', isVeg: true, image: friedRice, subcategory: 'Veg Fried Rice' },
+      { name: 'Corn Fried Rice', price: '₹109', isVeg: true, image: cornFriedRice, subcategory: 'Veg Fried Rice' },
+      { name: 'Baby Corn Fried Rice', price: '₹109', isVeg: true, image: cornFriedRice, subcategory: 'Veg Fried Rice' },
+      { name: 'Mushroom Fried Rice', price: '₹109', isVeg: true, image: mushroomFriedRice, subcategory: 'Veg Fried Rice' },
       { name: 'Paneer Fried Rice', price: '₹109', isVeg: true, image: schezwanRice, subcategory: 'Veg Fried Rice' },
-      { name: 'Butter Garlic Chilli Fried Rice', price: '₹119', isVeg: true, image: friedRice, subcategory: 'Veg Fried Rice' },
+      { name: 'Butter Garlic Chilli Fried Rice', price: '₹119', isVeg: true, image: butterGarlicFriedRice, subcategory: 'Veg Fried Rice' },
       { name: 'Singapore Fried Rice', price: '₹119', isVeg: true, image: schezwanRice, subcategory: 'Veg Fried Rice' },
       { name: 'Egg Fried Rice', price: '₹99', isVeg: false, image: friedRice, subcategory: 'Non-Veg Fried Rice' },
       { name: 'Egg Schezwan Fried Rice', price: '₹119', isVeg: false, image: schezwanRice, subcategory: 'Non-Veg Fried Rice' },

@@ -158,7 +158,7 @@ export default function Order() {
 
   const getPaymentStatus = (method: PaymentMethod) => {
     switch (method) {
-      case 'upi': return 'paid';
+      case 'upi': return 'pending'; // UPI payment needs to be confirmed by staff
       case 'cash': return 'cash_pending';
       case 'card': return 'card_pending';
     }
