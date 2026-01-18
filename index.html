@@ -66,6 +66,18 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script src="https://cdn.jotfor.ms/agent/embedjs/019bce0af73c742d85eb0f1b47f26081ebea/embed.js"></script>
+    <script src="https://cdn.jotfor.ms/agent/embedjs/019bce0af73c742d85eb0f1b47f26081ebea/embed.js" defer></script>
+    <style>
+      /* Move JotForm widget above mobile action bar */
+      [class*="jotform-agent"], iframe[src*="jotfor"] {
+        bottom: 70px !important;
+        z-index: 45 !important;
+      }
+      @media (min-width: 768px) {
+        [class*="jotform-agent"], iframe[src*="jotfor"] {
+          bottom: 20px !important;
+        }
+      }
+    </style>
   </body>
 </html>
