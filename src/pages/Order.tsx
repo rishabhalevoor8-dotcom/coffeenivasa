@@ -24,7 +24,10 @@ import {
   Mail,
   Clock,
   Calendar,
-  Home
+  Home,
+  QrCode,
+  Smartphone,
+  ShieldCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -77,6 +80,7 @@ export default function Order() {
   const [orderDateTime, setOrderDateTime] = useState<Date | null>(null);
   const [showCart, setShowCart] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<PaymentMethod | null>(null);
+  const [showUpiConfirmation, setShowUpiConfirmation] = useState(false);
 
   const verifyPin = async () => {
     setLoading(true);
@@ -182,7 +186,7 @@ export default function Order() {
     }
   };
 
-  const submitOrder = async () => {
+  const handleProceedToPayment = () => {
     if (!selectedPayment) {
       toast.error('Please select a payment method');
       return;
@@ -193,6 +197,15 @@ export default function Order() {
       return;
     }
 
+    if (selectedPayment === 'upi') {
+      setShowUpiConfirmation(true);
+      setShowCart(false);
+    } else {
+      submitOrder();
+    }
+  };
+
+  const submitOrder = async () => {
     setIsSubmitting(true);
 
     try {
@@ -251,7 +264,117 @@ export default function Order() {
     setSelectedPayment(null);
     setCustomerDetailsCollected(false);
     setCustomerDetails({ name: '', phone: '', email: '' });
+    setShowUpiConfirmation(false);
   };
+
+  // UPI QR Code Payment Confirmation Screen
+  if (showUpiConfirmation) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 flex flex-col">
+        {/* Header */}
+        <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-lg border-b border-amber-100 px-4 py-4">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => {
+                setShowUpiConfirmation(false);
+                setShowCart(true);
+              }}
+              className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center"
+            >
+              <ArrowLeft className="w-5 h-5 text-amber-700" />
+            </button>
+            <div>
+              <h1 className="font-display text-xl font-bold text-foreground">UPI Payment</h1>
+              <p className="text-sm text-muted-foreground">Scan & Pay</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 px-4 py-6 flex flex-col items-center justify-center">
+          {/* Amount Display */}
+          <div className="text-center mb-6">
+            <p className="text-sm text-muted-foreground mb-1">Amount to Pay</p>
+            <p className="font-display text-4xl font-bold bg-gradient-to-r from-amber-600 to-orange-500 bg-clip-text text-transparent">
+              ₹{total}
+            </p>
+          </div>
+
+          {/* QR Code Placeholder */}
+          <div className="bg-white rounded-3xl p-8 shadow-xl shadow-amber-100 border border-amber-100 mb-6 w-full max-w-xs">
+            <div className="aspect-square bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl flex flex-col items-center justify-center border-2 border-dashed border-amber-200">
+              <QrCode className="w-24 h-24 text-amber-300 mb-4" />
+              <p className="text-sm text-muted-foreground text-center px-4">
+                QR Code will be added soon
+              </p>
+            </div>
+            
+            <div className="mt-6 text-center">
+              <p className="text-sm font-medium text-foreground mb-1">Coffee Nivasa</p>
+              <p className="text-xs text-muted-foreground">UPI ID will appear here</p>
+            </div>
+          </div>
+
+          {/* Instructions */}
+          <div className="bg-white rounded-2xl p-5 shadow-md shadow-amber-100 border border-amber-50 w-full max-w-xs mb-6">
+            <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+              <Smartphone className="w-5 h-5 text-amber-600" />
+              How to Pay
+            </h3>
+            <ol className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-xs font-bold text-amber-700 flex-shrink-0 mt-0.5">1</span>
+                <span>Open any UPI app (GPay, PhonePe, Paytm)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-xs font-bold text-amber-700 flex-shrink-0 mt-0.5">2</span>
+                <span>Scan the QR code above</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-xs font-bold text-amber-700 flex-shrink-0 mt-0.5">3</span>
+                <span>Complete payment of ₹{total}</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-xs font-bold text-amber-700 flex-shrink-0 mt-0.5">4</span>
+                <span>Show payment confirmation to staff</span>
+              </li>
+            </ol>
+          </div>
+
+          {/* Staff Verification Notice */}
+          <div className="bg-amber-100 rounded-2xl p-4 w-full max-w-xs flex items-start gap-3">
+            <ShieldCheck className="w-6 h-6 text-amber-700 flex-shrink-0" />
+            <div>
+              <p className="font-medium text-amber-800 text-sm">Staff Verification Required</p>
+              <p className="text-xs text-amber-700 mt-1">
+                After payment, our staff will verify and confirm your order
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Fixed Bottom - Confirm Button */}
+        <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-amber-100 p-4 shadow-2xl">
+          <Button 
+            onClick={submitOrder}
+            disabled={isSubmitting}
+            className="w-full h-14 text-lg rounded-2xl bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg disabled:opacity-50"
+          >
+            {isSubmitting ? (
+              'Placing Order...'
+            ) : (
+              <span className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5" />
+                I've Paid - Confirm Order
+              </span>
+            )}
+          </Button>
+          <p className="text-xs text-center text-muted-foreground mt-2">
+            Staff will verify payment before preparing your order
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Order Complete Screen
   if (orderComplete) {
@@ -691,11 +814,11 @@ export default function Order() {
         {/* Fixed Bottom - Place Order */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-amber-100 p-4 shadow-2xl">
           <Button 
-            onClick={submitOrder}
+            onClick={handleProceedToPayment}
             disabled={isSubmitting || !selectedPayment}
             className="w-full h-14 text-lg rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg disabled:opacity-50"
           >
-            {isSubmitting ? 'Placing Order...' : `Place Order • ₹${total}`}
+            {isSubmitting ? 'Placing Order...' : selectedPayment === 'upi' ? `Pay with UPI • ₹${total}` : `Place Order • ₹${total}`}
           </Button>
         </div>
       </div>
