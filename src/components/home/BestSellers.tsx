@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import cappuccino from '@/assets/menu/cappuccino.jpg';
 import sandwich from '@/assets/menu/sandwich.jpg';
 import maggi from '@/assets/menu/maggi.jpg';
-import friedRice from '@/assets/menu/fried-rice.jpg';
+import vegFriedRice from '@/assets/menu/veg-fried-rice.jpg';
 import iceCream from '@/assets/menu/ice-cream.jpg';
 import coldCoffee from '@/assets/menu/cold-coffee.jpg';
 
@@ -33,7 +33,7 @@ const bestSellers = [
   {
     name: 'Veg Fried Rice',
     price: '₹79',
-    image: friedRice,
+    image: vegFriedRice,
     isVeg: true,
     tag: 'Chef Special',
   },
