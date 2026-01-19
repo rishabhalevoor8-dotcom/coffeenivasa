@@ -22,7 +22,9 @@ import {
   Coffee,
   Store,
   AlertCircle,
-  LogOut
+  LogOut,
+  RotateCcw,
+  AlertTriangle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { User } from '@supabase/supabase-js';
@@ -292,7 +294,7 @@ export default function AdminSettings() {
 
           {/* Tabs */}
           <Tabs defaultValue="cafe" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="cafe" className="flex items-center gap-2">
                 <Store className="w-4 h-4" />
                 <span className="hidden sm:inline">Café Info</span>
@@ -304,6 +306,10 @@ export default function AdminSettings() {
               <TabsTrigger value="admins" className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
                 <span className="hidden sm:inline">Admins</span>
+              </TabsTrigger>
+              <TabsTrigger value="danger" className="flex items-center gap-2 text-destructive data-[state=active]:text-destructive">
+                <AlertTriangle className="w-4 h-4" />
+                <span className="hidden sm:inline">Danger</span>
               </TabsTrigger>
             </TabsList>
 
@@ -651,6 +657,83 @@ export default function AdminSettings() {
                           No admin users found
                         </div>
                       )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Danger Zone Tab */}
+            <TabsContent value="danger">
+              <Card className="border-destructive/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-destructive">
+                    <AlertTriangle className="w-5 h-5" />
+                    Danger Zone
+                  </CardTitle>
+                  <CardDescription>
+                    Destructive actions that cannot be undone. Use with caution!
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Reset All Orders */}
+                  <div className="p-4 border border-destructive/30 rounded-lg bg-destructive/5">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0">
+                        <RotateCcw className="w-6 h-6 text-destructive" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-foreground mb-1">Reset All Orders</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          This will permanently delete ALL orders and order items from the database. 
+                          Use this to start fresh (e.g., after testing or at the start of a new day).
+                        </p>
+                        <Button 
+                          variant="destructive"
+                          onClick={async () => {
+                            if (!confirm('Are you sure you want to delete ALL orders? This cannot be undone!')) {
+                              return;
+                            }
+                            if (!confirm('This will permanently delete all order history. Type "yes" in the next prompt to confirm.')) {
+                              return;
+                            }
+                            const confirmText = prompt('Type "RESET" to confirm deletion of all orders:');
+                            if (confirmText !== 'RESET') {
+                              toast.error('Reset cancelled - confirmation text did not match');
+                              return;
+                            }
+                            
+                            setSaving(true);
+                            try {
+                              // Delete all order items first (foreign key constraint)
+                              const { error: itemsError } = await supabase
+                                .from('order_items')
+                                .delete()
+                                .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+                              
+                              if (itemsError) throw itemsError;
+                              
+                              // Delete all orders
+                              const { error: ordersError } = await supabase
+                                .from('orders')
+                                .delete()
+                                .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+                              
+                              if (ordersError) throw ordersError;
+                              
+                              toast.success('All orders have been deleted!');
+                            } catch (error) {
+                              console.error('Error resetting orders:', error);
+                              toast.error('Failed to reset orders');
+                            }
+                            setSaving(false);
+                          }}
+                          disabled={saving}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          {saving ? 'Resetting...' : 'Reset All Orders'}
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
