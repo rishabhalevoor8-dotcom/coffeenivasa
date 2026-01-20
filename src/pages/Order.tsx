@@ -27,7 +27,9 @@ import {
   Home,
   QrCode,
   Smartphone,
-  ShieldCheck
+  ShieldCheck,
+  ChefHat,
+  Bell
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -77,12 +79,52 @@ export default function Order() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderNumber, setOrderNumber] = useState<number | null>(null);
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [orderStatus, setOrderStatus] = useState<'pending' | 'preparing' | 'ready' | 'served' | 'cancelled'>('pending');
   const [orderDateTime, setOrderDateTime] = useState<Date | null>(null);
   const [showCart, setShowCart] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<PaymentMethod | null>(null);
   const [showUpiConfirmation, setShowUpiConfirmation] = useState(false);
   const [queueCount, setQueueCount] = useState<number>(0);
   const [estimatedWaitTime, setEstimatedWaitTime] = useState<number>(0);
+
+  // Real-time order status subscription
+  useEffect(() => {
+    if (!orderId || !orderComplete) return;
+
+    const channel = supabase
+      .channel(`order-status-${orderId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+          filter: `id=eq.${orderId}`,
+        },
+        (payload) => {
+          const newStatus = payload.new.status as typeof orderStatus;
+          setOrderStatus(newStatus);
+          
+          // Show toast notification for status changes
+          const statusMessages: Record<string, string> = {
+            preparing: '👨‍🍳 Your order is now being prepared!',
+            ready: '✅ Your order is ready for pickup!',
+            served: '🎉 Enjoy your meal!',
+            cancelled: '❌ Your order has been cancelled',
+          };
+          
+          if (statusMessages[newStatus]) {
+            toast.success(statusMessages[newStatus]);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [orderId, orderComplete]);
 
   const verifyPin = async () => {
     setLoading(true);
@@ -271,6 +313,8 @@ export default function Order() {
       if (itemsError) throw itemsError;
 
       setOrderNumber(orderData.order_number);
+      setOrderId(orderData.id);
+      setOrderStatus('pending');
       setOrderDateTime(new Date(orderData.created_at));
       setOrderComplete(true);
       setCart([]);
@@ -286,6 +330,8 @@ export default function Order() {
   const startNewOrder = () => {
     setOrderComplete(false);
     setOrderNumber(null);
+    setOrderId(null);
+    setOrderStatus('pending');
     setOrderDateTime(null);
     setOrderType(null);
     setTableNumber(null);
@@ -489,8 +535,103 @@ export default function Order() {
             </p>
           </div>
 
+          {/* Real-time Order Status Tracker */}
+          <div className="bg-white rounded-2xl p-5 shadow-lg border border-border mb-6">
+            <p className="text-sm font-medium text-foreground mb-4 uppercase tracking-wide">Order Status</p>
+            
+            <div className="flex items-center justify-between relative">
+              {/* Progress Line */}
+              <div className="absolute top-5 left-8 right-8 h-1 bg-muted rounded-full">
+                <div 
+                  className={cn(
+                    "h-full rounded-full transition-all duration-500",
+                    orderStatus === 'pending' && "w-0 bg-primary",
+                    orderStatus === 'preparing' && "w-1/2 bg-primary",
+                    orderStatus === 'ready' && "w-full bg-green-500",
+                    orderStatus === 'served' && "w-full bg-green-500",
+                    orderStatus === 'cancelled' && "w-full bg-destructive"
+                  )}
+                />
+              </div>
+
+              {/* Pending Step */}
+              <div className="flex flex-col items-center z-10">
+                <div className={cn(
+                  "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300",
+                  orderStatus === 'pending' 
+                    ? "bg-primary text-primary-foreground animate-pulse" 
+                    : orderStatus === 'cancelled'
+                    ? "bg-destructive text-destructive-foreground"
+                    : "bg-primary text-primary-foreground"
+                )}>
+                  <Clock className="w-5 h-5" />
+                </div>
+                <span className={cn(
+                  "text-xs mt-2 font-medium",
+                  orderStatus === 'pending' ? "text-primary" : "text-muted-foreground"
+                )}>Pending</span>
+              </div>
+
+              {/* Preparing Step */}
+              <div className="flex flex-col items-center z-10">
+                <div className={cn(
+                  "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300",
+                  orderStatus === 'preparing' 
+                    ? "bg-primary text-primary-foreground animate-pulse" 
+                    : orderStatus === 'ready' || orderStatus === 'served'
+                    ? "bg-primary text-primary-foreground"
+                    : orderStatus === 'cancelled'
+                    ? "bg-destructive text-destructive-foreground"
+                    : "bg-muted text-muted-foreground"
+                )}>
+                  <ChefHat className="w-5 h-5" />
+                </div>
+                <span className={cn(
+                  "text-xs mt-2 font-medium",
+                  orderStatus === 'preparing' ? "text-primary" : "text-muted-foreground"
+                )}>Preparing</span>
+              </div>
+
+              {/* Ready Step */}
+              <div className="flex flex-col items-center z-10">
+                <div className={cn(
+                  "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300",
+                  orderStatus === 'ready' 
+                    ? "bg-green-500 text-white animate-pulse" 
+                    : orderStatus === 'served'
+                    ? "bg-green-500 text-white"
+                    : orderStatus === 'cancelled'
+                    ? "bg-destructive text-destructive-foreground"
+                    : "bg-muted text-muted-foreground"
+                )}>
+                  <Bell className="w-5 h-5" />
+                </div>
+                <span className={cn(
+                  "text-xs mt-2 font-medium",
+                  orderStatus === 'ready' ? "text-green-600" : "text-muted-foreground"
+                )}>Ready</span>
+              </div>
+            </div>
+
+            {/* Status Message */}
+            <div className={cn(
+              "mt-5 p-3 rounded-xl text-sm font-medium text-center",
+              orderStatus === 'pending' && "bg-primary/10 text-primary",
+              orderStatus === 'preparing' && "bg-primary/10 text-primary",
+              orderStatus === 'ready' && "bg-green-100 text-green-700",
+              orderStatus === 'served' && "bg-green-100 text-green-700",
+              orderStatus === 'cancelled' && "bg-destructive/10 text-destructive"
+            )}>
+              {orderStatus === 'pending' && '⏳ Your order is in the queue'}
+              {orderStatus === 'preparing' && '👨‍🍳 Your order is being prepared'}
+              {orderStatus === 'ready' && '✅ Your order is ready for pickup!'}
+              {orderStatus === 'served' && '🎉 Enjoy your meal!'}
+              {orderStatus === 'cancelled' && '❌ Order cancelled'}
+            </div>
+          </div>
+
           <p className="text-sm text-muted-foreground mb-4">
-            Please wait while we prepare your order
+            This page updates automatically
           </p>
           
           <Button 
