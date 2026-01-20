@@ -15,6 +15,7 @@ import AdminSettings from "./pages/AdminSettings";
 import Order from "./pages/Order";
 import OrderHistory from "./pages/OrderHistory";
 import Kitchen from "./pages/Kitchen";
+import ReadyOrders from "./pages/ReadyOrders";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/order" element={<Order />} />
           <Route path="/order-history" element={<OrderHistory />} />
           <Route path="/kitchen" element={<Kitchen />} />
+          <Route path="/ready-orders" element={<ReadyOrders />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

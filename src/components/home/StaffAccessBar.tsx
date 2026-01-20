@@ -1,5 +1,5 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { ChefHat, Settings, History } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ChefHat, Settings, History, Bell } from 'lucide-react';
 
 export function StaffAccessBar() {
   const navigate = useNavigate();
@@ -14,6 +14,10 @@ export function StaffAccessBar() {
 
   const handleOrderHistoryClick = () => {
     navigate('/order-history');
+  };
+
+  const handleReadyOrdersClick = () => {
+    navigate('/ready-orders');
   };
 
   return (
@@ -42,6 +46,13 @@ export function StaffAccessBar() {
             >
               <ChefHat className="w-4 h-4" />
               <span>Kitchen</span>
+            </button>
+            <button 
+              onClick={handleReadyOrdersClick}
+              className="flex items-center gap-1.5 text-muted-foreground hover:text-green-600 transition-colors px-3 py-1.5 rounded-lg hover:bg-green-50"
+            >
+              <Bell className="w-4 h-4" />
+              <span>Ready</span>
             </button>
           </div>
         </div>
