@@ -81,6 +81,8 @@ export default function Order() {
   const [showCart, setShowCart] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<PaymentMethod | null>(null);
   const [showUpiConfirmation, setShowUpiConfirmation] = useState(false);
+  const [queueCount, setQueueCount] = useState<number>(0);
+  const [estimatedWaitTime, setEstimatedWaitTime] = useState<number>(0);
 
   const verifyPin = async () => {
     setLoading(true);
@@ -205,10 +207,36 @@ export default function Order() {
     }
   };
 
+  const fetchQueueInfo = async () => {
+    try {
+      // Count orders that are pending or preparing (excluding completed, served, cancelled)
+      const { count, error } = await supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true })
+        .in('status', ['pending', 'preparing']);
+
+      if (error) throw error;
+
+      const ordersAhead = count || 0;
+      setQueueCount(ordersAhead);
+      
+      // Estimate ~5 minutes per order in queue (adjust based on your café's speed)
+      const estimatedMinutes = ordersAhead * 5;
+      setEstimatedWaitTime(estimatedMinutes);
+    } catch (error) {
+      console.error('Error fetching queue info:', error);
+      setQueueCount(0);
+      setEstimatedWaitTime(0);
+    }
+  };
+
   const submitOrder = async () => {
     setIsSubmitting(true);
 
     try {
+      // Fetch queue info before placing order
+      await fetchQueueInfo();
+
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
@@ -265,6 +293,8 @@ export default function Order() {
     setCustomerDetailsCollected(false);
     setCustomerDetails({ name: '', phone: '', email: '' });
     setShowUpiConfirmation(false);
+    setQueueCount(0);
+    setEstimatedWaitTime(0);
   };
 
   // UPI QR Code Payment Confirmation Screen
@@ -431,11 +461,37 @@ export default function Order() {
                 </div>
               </div>
             )}
-            
-            <p className="text-sm text-muted-foreground mt-4">
-              Please wait while we prepare your order
+          </div>
+
+          {/* Estimated Wait Time Card */}
+          <div className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-2xl p-5 mb-6 border border-amber-200">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <Clock className="w-5 h-5 text-amber-600" />
+              <p className="text-sm font-medium text-amber-800 uppercase tracking-wide">Estimated Wait Time</p>
+            </div>
+            <p className="font-display text-3xl font-bold text-amber-700">
+              {estimatedWaitTime === 0 ? (
+                'Ready Soon!'
+              ) : estimatedWaitTime < 60 ? (
+                `~${estimatedWaitTime} min`
+              ) : (
+                `~${Math.floor(estimatedWaitTime / 60)}h ${estimatedWaitTime % 60}min`
+              )}
+            </p>
+            <p className="text-xs text-amber-600 mt-2">
+              {queueCount === 0 ? (
+                'No orders ahead of you'
+              ) : queueCount === 1 ? (
+                '1 order ahead of you'
+              ) : (
+                `${queueCount} orders ahead of you`
+              )}
             </p>
           </div>
+
+          <p className="text-sm text-muted-foreground mb-4">
+            Please wait while we prepare your order
+          </p>
           
           <Button 
             onClick={startNewOrder} 
