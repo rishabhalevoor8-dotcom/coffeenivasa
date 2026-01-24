@@ -70,6 +70,7 @@ export type Database = {
           is_veg: boolean
           name: string
           price: number
+          spice_type: string
           subcategory: string | null
           updated_at: string
         }
@@ -83,6 +84,7 @@ export type Database = {
           is_veg?: boolean
           name: string
           price: number
+          spice_type?: string
           subcategory?: string | null
           updated_at?: string
         }
@@ -96,6 +98,7 @@ export type Database = {
           is_veg?: boolean
           name?: string
           price?: number
+          spice_type?: string
           subcategory?: string | null
           updated_at?: string
         }

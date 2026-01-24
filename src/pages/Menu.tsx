@@ -46,12 +46,15 @@ import mushroomFriedRice from '@/assets/menu/mushroom-fried-rice.jpg';
 import butterGarlicFriedRice from '@/assets/menu/butter-garlic-fried-rice.jpg';
 import vegFriedRice from '@/assets/menu/veg-fried-rice.jpg';
 
+import { SpiceIndicator, type SpiceType } from '@/components/menu/SpiceIndicator';
+
 interface MenuItem {
   name: string;
   price: string;
   isVeg: boolean;
   image: string;
   subcategory?: string;
+  spiceType?: SpiceType;
 }
 
 interface MenuCategory {
@@ -472,9 +475,14 @@ const Menu = () => {
                         {/* Content */}
                         <div className="flex-1 min-w-0 flex flex-col justify-between">
                           <div>
-                            <h4 className="font-semibold text-foreground text-sm leading-tight mb-1">
-                              {item.name}
-                            </h4>
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <h4 className="font-semibold text-foreground text-sm leading-tight">
+                                {item.name}
+                              </h4>
+                              {item.spiceType && item.spiceType !== 'not_spicy' && (
+                                <SpiceIndicator spiceType={item.spiceType} showLabel={false} />
+                              )}
+                            </div>
                             <span className="font-bold text-gold text-lg">
                               {item.price}
                             </span>
@@ -537,6 +545,10 @@ const Menu = () => {
               </div>
               <span className="text-muted-foreground font-medium">Non-Vegetarian</span>
             </div>
+            <div className="h-5 w-px bg-border" />
+            <SpiceIndicator spiceType="not_spicy" />
+            <SpiceIndicator spiceType="mild" />
+            <SpiceIndicator spiceType="spicy" />
           </div>
         </div>
       </section>
