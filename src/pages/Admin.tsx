@@ -9,6 +9,14 @@ import { LogOut, Save, Pencil, Search, Coffee, AlertCircle, Receipt, ChefHat, Se
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import type { User } from '@supabase/supabase-js';
+import { SpiceIndicator, type SpiceType } from '@/components/menu/SpiceIndicator';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface MenuItem {
   id: string;
@@ -17,6 +25,7 @@ interface MenuItem {
   is_veg: boolean;
   subcategory: string | null;
   category_id: string;
+  spice_type: SpiceType;
 }
 
 interface MenuCategory {
@@ -33,6 +42,7 @@ export default function Admin() {
   const [items, setItems] = useState<MenuItem[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editPrice, setEditPrice] = useState('');
+  const [editSpiceType, setEditSpiceType] = useState<SpiceType>('not_spicy');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -89,7 +99,12 @@ export default function Admin() {
     ]);
 
     if (categoriesRes.data) setCategories(categoriesRes.data);
-    if (itemsRes.data) setItems(itemsRes.data);
+    if (itemsRes.data) {
+      setItems(itemsRes.data.map(item => ({
+        ...item,
+        spice_type: (item.spice_type as SpiceType) || 'not_spicy'
+      })));
+    }
   };
 
   const handleLogout = async () => {
@@ -100,9 +115,10 @@ export default function Admin() {
   const startEdit = (item: MenuItem) => {
     setEditingId(item.id);
     setEditPrice(item.price.toString());
+    setEditSpiceType(item.spice_type || 'not_spicy');
   };
 
-  const savePrice = async (itemId: string) => {
+  const saveItem = async (itemId: string) => {
     const newPrice = parseInt(editPrice);
     if (isNaN(newPrice) || newPrice < 0) {
       toast.error('Please enter a valid price');
@@ -111,19 +127,19 @@ export default function Admin() {
 
     const { error } = await supabase
       .from('menu_items')
-      .update({ price: newPrice })
+      .update({ price: newPrice, spice_type: editSpiceType })
       .eq('id', itemId);
 
     if (error) {
-      toast.error('Failed to update price');
+      toast.error('Failed to update item');
       return;
     }
 
     setItems(items.map(item => 
-      item.id === itemId ? { ...item, price: newPrice } : item
+      item.id === itemId ? { ...item, price: newPrice, spice_type: editSpiceType } : item
     ));
     setEditingId(null);
-    toast.success('Price updated successfully!');
+    toast.success('Item updated successfully!');
   };
 
   const filteredItems = items.filter(item => {
@@ -268,17 +284,18 @@ export default function Admin() {
 
           {/* Menu Items */}
           <div className="bg-card rounded-2xl border border-border overflow-hidden">
-            <div className="grid grid-cols-12 gap-4 p-4 bg-secondary/50 font-semibold text-sm text-muted-foreground border-b border-border">
-              <div className="col-span-5 md:col-span-6">Item Name</div>
-              <div className="col-span-2">Type</div>
+            <div className="grid grid-cols-12 gap-2 md:gap-4 p-4 bg-secondary/50 font-semibold text-sm text-muted-foreground border-b border-border">
+              <div className="col-span-4 md:col-span-4">Item Name</div>
+              <div className="col-span-2 hidden md:block">Type</div>
+              <div className="col-span-3 md:col-span-2">Spice</div>
               <div className="col-span-3 md:col-span-2">Price</div>
               <div className="col-span-2">Action</div>
             </div>
             
             <div className="divide-y divide-border">
               {filteredItems.map((item) => (
-                <div key={item.id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-secondary/30 transition-colors">
-                  <div className="col-span-5 md:col-span-6">
+                <div key={item.id} className="grid grid-cols-12 gap-2 md:gap-4 p-4 items-center hover:bg-secondary/30 transition-colors">
+                  <div className="col-span-4 md:col-span-4">
                     <div className="flex items-center gap-2">
                       <div
                         className={cn(
@@ -293,7 +310,7 @@ export default function Admin() {
                           )}
                         />
                       </div>
-                      <span className="font-medium text-foreground truncate">
+                      <span className="font-medium text-foreground truncate text-sm">
                         {item.name}
                       </span>
                     </div>
@@ -303,7 +320,7 @@ export default function Admin() {
                       </span>
                     )}
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-2 hidden md:block">
                     <span className={cn(
                       'text-xs font-medium px-2 py-1 rounded-full',
                       item.is_veg 
@@ -315,16 +332,34 @@ export default function Admin() {
                   </div>
                   <div className="col-span-3 md:col-span-2">
                     {editingId === item.id ? (
+                      <Select
+                        value={editSpiceType}
+                        onValueChange={(value: SpiceType) => setEditSpiceType(value)}
+                      >
+                        <SelectTrigger className="h-8 w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="not_spicy">Not Spicy</SelectItem>
+                          <SelectItem value="mild">Mild</SelectItem>
+                          <SelectItem value="spicy">Spicy</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <SpiceIndicator spiceType={item.spice_type || 'not_spicy'} showLabel={false} />
+                    )}
+                  </div>
+                  <div className="col-span-3 md:col-span-2">
+                    {editingId === item.id ? (
                       <div className="flex items-center gap-1">
                         <span className="text-gold font-bold">₹</span>
                         <Input
                           type="number"
                           value={editPrice}
                           onChange={(e) => setEditPrice(e.target.value)}
-                          className="h-8 w-20 text-center"
-                          autoFocus
+                          className="h-8 w-16 text-center"
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter') savePrice(item.id);
+                            if (e.key === 'Enter') saveItem(item.id);
                             if (e.key === 'Escape') setEditingId(null);
                           }}
                         />
@@ -337,7 +372,7 @@ export default function Admin() {
                     {editingId === item.id ? (
                       <Button
                         size="sm"
-                        onClick={() => savePrice(item.id)}
+                        onClick={() => saveItem(item.id)}
                         className="h-8"
                       >
                         <Save className="w-4 h-4" />
