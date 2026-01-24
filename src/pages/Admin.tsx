@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { LogOut, Save, Pencil, Search, Coffee, AlertCircle, Receipt, ChefHat, Settings } from 'lucide-react';
+import { LogOut, Save, Pencil, Search, Coffee, AlertCircle, Receipt, ChefHat, Settings, ToggleLeft, ToggleRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import type { User } from '@supabase/supabase-js';
@@ -23,6 +23,7 @@ interface MenuItem {
   name: string;
   price: number;
   is_veg: boolean;
+  is_active: boolean;
   subcategory: string | null;
   category_id: string;
   spice_type: SpiceType;
@@ -95,15 +96,30 @@ export default function Admin() {
   const fetchMenuData = async () => {
     const [categoriesRes, itemsRes] = await Promise.all([
       supabase.from('menu_categories').select('*').order('display_order'),
-      supabase.from('menu_items').select('*').order('display_order'),
+      supabase.rpc('get_all_menu_items_for_admin'),
     ]);
 
     if (categoriesRes.data) setCategories(categoriesRes.data);
     if (itemsRes.data) {
-      setItems(itemsRes.data.map(item => ({
+      setItems(itemsRes.data.map((item: MenuItem & { is_active: boolean }) => ({
         ...item,
-        spice_type: (item.spice_type as SpiceType) || 'not_spicy'
+        spice_type: (item.spice_type as SpiceType) || 'not_spicy',
+        is_active: item.is_active ?? true
       })));
+    } else {
+      // Fallback if RPC doesn't exist - use direct query (admin only sees all items)
+      const { data: fallbackItems } = await supabase
+        .from('menu_items')
+        .select('*')
+        .order('display_order');
+      
+      if (fallbackItems) {
+        setItems(fallbackItems.map((item) => ({
+          ...item,
+          spice_type: (item.spice_type as SpiceType) || 'not_spicy',
+          is_active: item.is_active ?? true
+        })));
+      }
     }
   };
 
@@ -140,6 +156,25 @@ export default function Admin() {
     ));
     setEditingId(null);
     toast.success('Item updated successfully!');
+  };
+
+  const toggleItemAvailability = async (item: MenuItem) => {
+    const newStatus = !item.is_active;
+    
+    const { error } = await supabase
+      .from('menu_items')
+      .update({ is_active: newStatus })
+      .eq('id', item.id);
+
+    if (error) {
+      toast.error('Failed to update availability');
+      return;
+    }
+
+    setItems(items.map(i => 
+      i.id === item.id ? { ...i, is_active: newStatus } : i
+    ));
+    toast.success(newStatus ? 'Item is now available' : 'Item is now unavailable');
   };
 
   const filteredItems = items.filter(item => {
@@ -285,17 +320,21 @@ export default function Admin() {
           {/* Menu Items */}
           <div className="bg-card rounded-2xl border border-border overflow-hidden">
             <div className="grid grid-cols-12 gap-2 md:gap-4 p-4 bg-secondary/50 font-semibold text-sm text-muted-foreground border-b border-border">
-              <div className="col-span-4 md:col-span-4">Item Name</div>
+              <div className="col-span-3 md:col-span-3">Item Name</div>
               <div className="col-span-2 hidden md:block">Type</div>
-              <div className="col-span-3 md:col-span-2">Spice</div>
-              <div className="col-span-3 md:col-span-2">Price</div>
-              <div className="col-span-2">Action</div>
+              <div className="col-span-2 md:col-span-2">Spice</div>
+              <div className="col-span-2 md:col-span-2">Price</div>
+              <div className="col-span-3 md:col-span-2">Status</div>
+              <div className="col-span-2 md:col-span-1">Edit</div>
             </div>
             
             <div className="divide-y divide-border">
               {filteredItems.map((item) => (
-                <div key={item.id} className="grid grid-cols-12 gap-2 md:gap-4 p-4 items-center hover:bg-secondary/30 transition-colors">
-                  <div className="col-span-4 md:col-span-4">
+                <div key={item.id} className={cn(
+                  "grid grid-cols-12 gap-2 md:gap-4 p-4 items-center hover:bg-secondary/30 transition-colors",
+                  !item.is_active && "opacity-60"
+                )}>
+                  <div className="col-span-3 md:col-span-3">
                     <div className="flex items-center gap-2">
                       <div
                         className={cn(
@@ -330,7 +369,7 @@ export default function Admin() {
                       {item.is_veg ? 'Veg' : 'Non-Veg'}
                     </span>
                   </div>
-                  <div className="col-span-3 md:col-span-2">
+                  <div className="col-span-2 md:col-span-2">
                     {editingId === item.id ? (
                       <Select
                         value={editSpiceType}
@@ -349,7 +388,7 @@ export default function Admin() {
                       <SpiceIndicator spiceType={item.spice_type || 'not_spicy'} showLabel={false} />
                     )}
                   </div>
-                  <div className="col-span-3 md:col-span-2">
+                  <div className="col-span-2 md:col-span-2">
                     {editingId === item.id ? (
                       <div className="flex items-center gap-1">
                         <span className="text-gold font-bold">₹</span>
@@ -368,7 +407,25 @@ export default function Admin() {
                       <span className="font-bold text-gold">₹{item.price}</span>
                     )}
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-3 md:col-span-2">
+                    <button
+                      onClick={() => toggleItemAvailability(item)}
+                      className="flex items-center gap-1.5"
+                    >
+                      {item.is_active ? (
+                        <>
+                          <ToggleRight className="w-6 h-6 text-accent" />
+                          <span className="text-xs font-medium text-accent hidden sm:inline">Available</span>
+                        </>
+                      ) : (
+                        <>
+                          <ToggleLeft className="w-6 h-6 text-muted-foreground" />
+                          <span className="text-xs font-medium text-muted-foreground hidden sm:inline">Unavailable</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <div className="col-span-2 md:col-span-1">
                     {editingId === item.id ? (
                       <Button
                         size="sm"
