@@ -832,7 +832,16 @@ export default function AdminSettings() {
                               
                               if (ordersError) throw ordersError;
                               
-                              toast.success('All orders have been deleted!');
+                              // Reset the order number sequence to start from 1
+                              const { error: sequenceError } = await supabase.rpc('reset_order_number_sequence');
+                              
+                              if (sequenceError) {
+                                console.error('Error resetting sequence:', sequenceError);
+                                // Don't throw - orders are already deleted, just warn
+                                toast.success('All orders deleted! (Note: Order number reset may require admin privileges)');
+                              } else {
+                                toast.success('All orders have been deleted and order numbers reset!');
+                              }
                             } catch (error) {
                               console.error('Error resetting orders:', error);
                               toast.error('Failed to reset orders');
