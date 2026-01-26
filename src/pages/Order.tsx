@@ -34,6 +34,8 @@ import {
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import logo from '@/assets/logo.png';
+import { useShopStatus } from '@/hooks/useShopStatus';
+import { ShopClosedBanner } from '@/components/order/ShopClosedBanner';
 
 interface MenuItem {
   id: string;
@@ -87,6 +89,9 @@ export default function Order() {
   const [showUpiConfirmation, setShowUpiConfirmation] = useState(false);
   const [queueCount, setQueueCount] = useState<number>(0);
   const [estimatedWaitTime, setEstimatedWaitTime] = useState<number>(0);
+
+  // Shop status check
+  const shopStatus = useShopStatus();
 
   // Real-time order status subscription
   useEffect(() => {
@@ -776,6 +781,44 @@ export default function Order() {
             >
               Continue
             </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Shop Closed Screen
+  if (!shopStatus.loading && !shopStatus.isOpen) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 flex items-center justify-center p-6">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <img 
+              src={logo} 
+              alt="Coffee Nivasa" 
+              className="w-20 h-20 mx-auto mb-4 rounded-2xl shadow-lg"
+            />
+            <h1 className="font-display text-2xl font-bold text-foreground">
+              Coffee Nivasa
+            </h1>
+          </div>
+          <ShopClosedBanner 
+            openTime={shopStatus.openTime} 
+            closeTime={shopStatus.closeTime} 
+          />
+          <div className="mt-6">
+            <Button 
+              onClick={() => shopStatus.refetch()}
+              variant="outline"
+              className="w-full h-12 rounded-xl"
+            >
+              Check Again
+            </Button>
+          </div>
+          <div className="text-center mt-4">
+            <Link to="/" className="text-sm text-muted-foreground hover:text-primary">
+              Back to Home
+            </Link>
           </div>
         </div>
       </div>

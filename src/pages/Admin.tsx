@@ -96,30 +96,16 @@ export default function Admin() {
   const fetchMenuData = async () => {
     const [categoriesRes, itemsRes] = await Promise.all([
       supabase.from('menu_categories').select('*').order('display_order'),
-      supabase.rpc('get_all_menu_items_for_admin'),
+      supabase.from('menu_items').select('*').order('display_order'),
     ]);
 
     if (categoriesRes.data) setCategories(categoriesRes.data);
     if (itemsRes.data) {
-      setItems(itemsRes.data.map((item: MenuItem & { is_active: boolean }) => ({
+      setItems(itemsRes.data.map((item) => ({
         ...item,
         spice_type: (item.spice_type as SpiceType) || 'not_spicy',
         is_active: item.is_active ?? true
       })));
-    } else {
-      // Fallback if RPC doesn't exist - use direct query (admin only sees all items)
-      const { data: fallbackItems } = await supabase
-        .from('menu_items')
-        .select('*')
-        .order('display_order');
-      
-      if (fallbackItems) {
-        setItems(fallbackItems.map((item) => ({
-          ...item,
-          spice_type: (item.spice_type as SpiceType) || 'not_spicy',
-          is_active: item.is_active ?? true
-        })));
-      }
     }
   };
 
