@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -12,6 +13,37 @@ const navLinks = [
   { name: 'Gallery', path: '/gallery' },
   { name: 'Contact', path: '/contact' },
 ];
+
+const menuVariants = {
+  closed: {
+    opacity: 0,
+    height: 0,
+    transition: {
+      duration: 0.3,
+      ease: 'easeInOut' as const,
+    },
+  },
+  open: {
+    opacity: 1,
+    height: 'auto',
+    transition: {
+      duration: 0.3,
+      ease: 'easeInOut' as const,
+    },
+  },
+};
+
+const menuItemVariants = {
+  closed: { opacity: 0, x: -10 },
+  open: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: {
+      delay: i * 0.05,
+      duration: 0.3,
+    },
+  }),
+};
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,7 +63,10 @@ export function Navbar() {
   }, [location]);
 
   return (
-    <nav
+    <motion.nav
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
         isScrolled
@@ -43,10 +78,12 @@ export function Navbar() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            <img 
-              src={logo} 
-              alt="Coffee Nivasa Logo" 
-              className="w-12 h-12 rounded-full object-cover group-hover:scale-110 transition-transform shadow-md"
+            <motion.img
+              src={logo}
+              alt="Coffee Nivasa Logo"
+              className="w-12 h-12 rounded-full object-cover shadow-md"
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              transition={{ type: 'spring', stiffness: 300 }}
             />
             <div className="flex flex-col">
               <span className="font-display text-xl font-bold text-foreground leading-tight">
@@ -60,81 +97,137 @@ export function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <Link
+            {navLinks.map((link, index) => (
+              <motion.div
                 key={link.path}
-                to={link.path}
-                className={cn(
-                  'text-sm font-medium transition-colors relative group',
-                  location.pathname === link.path
-                    ? 'text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
               >
-                {link.name}
-                <span
+                <Link
+                  to={link.path}
                   className={cn(
-                    'absolute -bottom-1 left-0 h-0.5 bg-gold transition-all duration-300',
-                    location.pathname === link.path ? 'w-full' : 'w-0 group-hover:w-full'
+                    'text-sm font-medium transition-colors relative group',
+                    location.pathname === link.path
+                      ? 'text-primary'
+                      : 'text-muted-foreground hover:text-foreground'
                   )}
-                />
-              </Link>
+                >
+                  {link.name}
+                  <motion.span
+                    className="absolute -bottom-1 left-0 h-0.5 bg-gold"
+                    initial={{ width: location.pathname === link.path ? '100%' : '0%' }}
+                    whileHover={{ width: '100%' }}
+                    transition={{ duration: 0.2 }}
+                  />
+                </Link>
+              </motion.div>
             ))}
           </div>
 
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-3">
-            <Button variant="gold" size="sm" asChild>
-              <Link to="/order">
-                <ShoppingBag className="w-4 h-4" />
-                Order Now
-              </Link>
-            </Button>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="lg:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
-            aria-label="Toggle menu"
-          >
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-        </div>
-
-        {/* Mobile Menu */}
-        <div
-          className={cn(
-            'lg:hidden overflow-hidden transition-all duration-300',
-            isOpen ? 'max-h-96 mt-4' : 'max-h-0'
-          )}
-        >
-          <div className="bg-card rounded-xl p-4 shadow-card space-y-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={cn(
-                  'block px-4 py-3 rounded-lg text-sm font-medium transition-colors',
-                  location.pathname === link.path
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-foreground hover:bg-secondary'
-                )}
-              >
-                {link.name}
-              </Link>
-            ))}
-            <div className="pt-2 border-t border-border mt-2">
-              <Button variant="gold" size="sm" className="w-full" asChild>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button variant="gold" size="sm" asChild>
                 <Link to="/order">
                   <ShoppingBag className="w-4 h-4" />
                   Order Now
                 </Link>
               </Button>
-            </div>
+            </motion.div>
           </div>
+
+          {/* Mobile Menu Button */}
+          <motion.button
+            onClick={() => setIsOpen(!isOpen)}
+            className="lg:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
+            aria-label="Toggle menu"
+            whileTap={{ scale: 0.9 }}
+          >
+            <AnimatePresence mode="wait">
+              {isOpen ? (
+                <motion.div
+                  key="close"
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <X className="w-6 h-6" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="menu"
+                  initial={{ rotate: 90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: -90, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Menu className="w-6 h-6" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.button>
         </div>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              className="lg:hidden mt-4"
+              variants={menuVariants}
+              initial="closed"
+              animate="open"
+              exit="closed"
+            >
+              <motion.div
+                className="bg-card rounded-xl p-4 shadow-card space-y-2"
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                {navLinks.map((link, i) => (
+                  <motion.div
+                    key={link.path}
+                    variants={menuItemVariants}
+                    custom={i}
+                    initial="closed"
+                    animate="open"
+                  >
+                    <Link
+                      to={link.path}
+                      className={cn(
+                        'block px-4 py-3 rounded-lg text-sm font-medium transition-colors',
+                        location.pathname === link.path
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-foreground hover:bg-secondary'
+                      )}
+                    >
+                      {link.name}
+                    </Link>
+                  </motion.div>
+                ))}
+                <motion.div
+                  className="pt-2 border-t border-border mt-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <Button variant="gold" size="sm" className="w-full" asChild>
+                    <Link to="/order">
+                      <ShoppingBag className="w-4 h-4" />
+                      Order Now
+                    </Link>
+                  </Button>
+                </motion.div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </nav>
+    </motion.nav>
   );
 }
