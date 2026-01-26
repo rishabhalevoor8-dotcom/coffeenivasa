@@ -5,6 +5,7 @@ import { Menu, X, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import logo from '@/assets/logo.png';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const navLinks = [
   { name: 'Home', path: '/' },
@@ -127,6 +128,7 @@ export function Navbar() {
 
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-3">
+            <ThemeToggle />
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -211,11 +213,15 @@ export function Navbar() {
                   </motion.div>
                 ))}
                 <motion.div
-                  className="pt-2 border-t border-border mt-2"
+                  className="pt-2 border-t border-border mt-2 space-y-2"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.3 }}
                 >
+                  <div className="flex items-center justify-between px-4 py-2">
+                    <span className="text-sm text-muted-foreground">Theme</span>
+                    <ThemeToggle />
+                  </div>
                   <Button variant="gold" size="sm" className="w-full" asChild>
                     <Link to="/order">
                       <ShoppingBag className="w-4 h-4" />
