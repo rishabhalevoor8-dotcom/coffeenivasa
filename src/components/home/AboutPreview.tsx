@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Heart, Leaf, Users } from 'lucide-react';
+import { ScrollReveal, StaggerContainer, StaggerItem, FloatingElement } from '@/components/animations';
 
 const features = [
   {
@@ -22,78 +24,130 @@ const features = [
 
 export function AboutPreview() {
   return (
-    <section className="py-16 md:py-24 bg-background">
+    <section className="py-16 md:py-24 bg-background overflow-hidden">
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
-          <div className="space-y-6">
-            <span className="inline-block text-gold font-medium text-sm uppercase tracking-wider">
-              Our Story
-            </span>
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground">
-              Welcome to Coffee Nivasa
-            </h2>
-            <p className="text-muted-foreground leading-relaxed">
-              Nestled in the heart of Doddanekundi, Bangalore, Coffee Nivasa is more than just a café – it's a haven for coffee lovers and food enthusiasts alike. Our journey began with a simple dream: to create a space where the aroma of freshly brewed coffee meets the warmth of home-cooked meals.
-            </p>
-            <p className="text-muted-foreground leading-relaxed">
-              Every cup we serve carries the essence of carefully selected beans, and every dish reflects our commitment to authentic flavors and quality ingredients.
-            </p>
+          <ScrollReveal direction="left">
+            <div className="space-y-6">
+              <motion.span
+                className="inline-block text-gold font-medium text-sm uppercase tracking-wider"
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+              >
+                Our Story
+              </motion.span>
+              <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground">
+                Welcome to Coffee Nivasa
+              </h2>
+              <p className="text-muted-foreground leading-relaxed">
+                Nestled in the heart of Doddanekundi, Bangalore, Coffee Nivasa is more than just a café – it's a haven for coffee lovers and food enthusiasts alike. Our journey began with a simple dream: to create a space where the aroma of freshly brewed coffee meets the warmth of home-cooked meals.
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                Every cup we serve carries the essence of carefully selected beans, and every dish reflects our commitment to authentic flavors and quality ingredients.
+              </p>
 
-            <div className="grid sm:grid-cols-3 gap-4 pt-4">
-              {features.map((feature) => (
-                <div key={feature.title} className="flex flex-col items-center text-center p-4 rounded-xl bg-secondary/50">
-                  <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-3">
-                    <feature.icon className="w-6 h-6 text-accent" />
-                  </div>
-                  <h4 className="font-semibold text-foreground text-sm mb-1">{feature.title}</h4>
-                  <p className="text-xs text-muted-foreground">{feature.description}</p>
-                </div>
-              ))}
+              <StaggerContainer className="grid sm:grid-cols-3 gap-4 pt-4" staggerDelay={0.15}>
+                {features.map((feature) => (
+                  <StaggerItem key={feature.title}>
+                    <motion.div
+                      className="flex flex-col items-center text-center p-4 rounded-xl bg-secondary/50"
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      transition={{ type: 'spring', stiffness: 300 }}
+                    >
+                      <motion.div
+                        className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-3"
+                        whileHover={{ rotate: 360 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <feature.icon className="w-6 h-6 text-accent" />
+                      </motion.div>
+                      <h4 className="font-semibold text-foreground text-sm mb-1">{feature.title}</h4>
+                      <p className="text-xs text-muted-foreground">{feature.description}</p>
+                    </motion.div>
+                  </StaggerItem>
+                ))}
+              </StaggerContainer>
+
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button variant="outline" size="lg" asChild className="mt-4">
+                  <Link to="/about">
+                    Learn More About Us
+                    <ArrowRight className="w-5 h-5" />
+                  </Link>
+                </Button>
+              </motion.div>
             </div>
-
-            <Button variant="outline" size="lg" asChild className="mt-4">
-              <Link to="/about">
-                Learn More About Us
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-            </Button>
-          </div>
+          </ScrollReveal>
 
           {/* Image Grid */}
-          <div className="relative">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-4">
-                <div className="h-48 rounded-2xl bg-accent/20 overflow-hidden shadow-card">
-                  <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/30 flex items-center justify-center">
-                    <span className="text-6xl">☕</span>
-                  </div>
+          <ScrollReveal direction="right" delay={0.2}>
+            <div className="relative">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <motion.div
+                    className="h-48 rounded-2xl bg-accent/20 overflow-hidden shadow-card"
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                  >
+                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/30 flex items-center justify-center">
+                      <FloatingElement duration={3}>
+                        <span className="text-6xl">☕</span>
+                      </FloatingElement>
+                    </div>
+                  </motion.div>
+                  <motion.div
+                    className="h-32 rounded-2xl bg-gold/20 overflow-hidden shadow-card"
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                  >
+                    <div className="w-full h-full bg-gradient-to-br from-gold/30 to-gold/10 flex items-center justify-center">
+                      <FloatingElement duration={3.5} delay={0.5}>
+                        <span className="text-4xl">🍳</span>
+                      </FloatingElement>
+                    </div>
+                  </motion.div>
                 </div>
-                <div className="h-32 rounded-2xl bg-gold/20 overflow-hidden shadow-card">
-                  <div className="w-full h-full bg-gradient-to-br from-gold/30 to-gold/10 flex items-center justify-center">
-                    <span className="text-4xl">🍳</span>
-                  </div>
+                <div className="space-y-4 pt-8">
+                  <motion.div
+                    className="h-32 rounded-2xl bg-primary/10 overflow-hidden shadow-card"
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                  >
+                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                      <FloatingElement duration={4} delay={1}>
+                        <span className="text-4xl">🥐</span>
+                      </FloatingElement>
+                    </div>
+                  </motion.div>
+                  <motion.div
+                    className="h-48 rounded-2xl bg-secondary overflow-hidden shadow-card"
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                  >
+                    <div className="w-full h-full bg-gradient-to-br from-secondary to-muted flex items-center justify-center">
+                      <FloatingElement duration={3.2} delay={0.3}>
+                        <span className="text-6xl">🍕</span>
+                      </FloatingElement>
+                    </div>
+                  </motion.div>
                 </div>
               </div>
-              <div className="space-y-4 pt-8">
-                <div className="h-32 rounded-2xl bg-primary/10 overflow-hidden shadow-card">
-                  <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                    <span className="text-4xl">🥐</span>
-                  </div>
-                </div>
-                <div className="h-48 rounded-2xl bg-secondary overflow-hidden shadow-card">
-                  <div className="w-full h-full bg-gradient-to-br from-secondary to-muted flex items-center justify-center">
-                    <span className="text-6xl">🍕</span>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            {/* Floating Badge */}
-            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-gold text-gold-foreground px-6 py-3 rounded-full shadow-gold font-semibold text-sm">
-              Since 2026 • Bengaluru
+              {/* Floating Badge */}
+              <motion.div
+                className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-gold text-gold-foreground px-6 py-3 rounded-full shadow-gold font-semibold text-sm"
+                initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.5, type: 'spring' }}
+                whileHover={{ scale: 1.05 }}
+              >
+                Since 2026 • Bengaluru
+              </motion.div>
             </div>
-          </div>
+          </ScrollReveal>
         </div>
       </div>
     </section>

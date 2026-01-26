@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
-import { Download, Plus, Check, Search } from 'lucide-react';
+import { Download, Plus, Search, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/hooks/useCart';
 import { CartSheet } from '@/components/menu/CartSheet';
+import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/animations';
 
 // Import all images
 import cappuccino from '@/assets/menu/cappuccino.jpg';
@@ -314,18 +316,25 @@ const menuCategories: MenuCategory[] = [
 const Menu = () => {
   const [activeCategory, setActiveCategory] = useState(menuCategories[0].name);
   const [searchQuery, setSearchQuery] = useState('');
+  const [dietFilter, setDietFilter] = useState<'all' | 'veg' | 'nonveg'>('all');
   const cart = useCart();
 
   const currentCategory = menuCategories.find((cat) => cat.name === activeCategory);
 
-  // Filter items by search query
-  const filteredItems = searchQuery
+  // Filter items by search query and diet preference
+  const filteredItems = (searchQuery
     ? menuCategories.flatMap((cat) =>
         cat.items.filter((item) =>
           item.name.toLowerCase().includes(searchQuery.toLowerCase())
         )
       )
-    : currentCategory?.items || [];
+    : currentCategory?.items || []
+  ).filter((item) => {
+    if (dietFilter === 'all') return true;
+    if (dietFilter === 'veg') return item.isVeg;
+    if (dietFilter === 'nonveg') return !item.isVeg;
+    return true;
+  });
 
   // Group items by subcategory if present
   const groupedItems = filteredItems.reduce((acc, item) => {
@@ -338,193 +347,341 @@ const Menu = () => {
   return (
     <Layout>
       {/* Hero */}
-      <section className="pt-32 pb-12 bg-gradient-warm">
+      <section className="pt-32 pb-12 bg-gradient-warm overflow-hidden">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <span className="inline-block text-gold font-medium text-sm uppercase tracking-wider mb-3">
+          <ScrollReveal className="max-w-3xl mx-auto text-center">
+            <motion.span
+              className="inline-block text-gold font-medium text-sm uppercase tracking-wider mb-3"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
               Since 2026
-            </span>
-            <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
+            </motion.span>
+            <motion.h1
+              className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
               Our Menu
-            </h1>
-            <p className="text-muted-foreground mb-8 text-lg">
+            </motion.h1>
+            <motion.p
+              className="text-muted-foreground mb-8 text-lg"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
               From aromatic coffees to delicious meals, discover what makes Coffee Nivasa special
-            </p>
+            </motion.p>
             
             {/* Search Bar */}
-            <div className="relative max-w-md mx-auto mb-6">
+            <motion.div
+              className="relative max-w-md mx-auto mb-6"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3 }}
+            >
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search menu items..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-full bg-background border border-border shadow-soft focus:outline-none focus:ring-2 focus:ring-primary/20 text-foreground placeholder:text-muted-foreground"
+                className="w-full pl-12 pr-4 py-3 rounded-full bg-background border border-border shadow-soft focus:outline-none focus:ring-2 focus:ring-primary/20 text-foreground placeholder:text-muted-foreground transition-all"
               />
-            </div>
+            </motion.div>
 
-            <div className="flex flex-wrap justify-center gap-3">
-              <Button variant="gold" size="lg">
-                <Download className="w-5 h-5" />
-                Download Menu PDF
-              </Button>
-            </div>
-          </div>
+            {/* Diet Filter */}
+            <motion.div
+              className="flex flex-wrap justify-center gap-2 mb-6"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Filter className="w-4 h-4 text-muted-foreground self-center mr-1" />
+              {[
+                { key: 'all', label: 'All Items' },
+                { key: 'veg', label: '🌱 Veg Only' },
+                { key: 'nonveg', label: '🍗 Non-Veg' },
+              ].map((filter) => (
+                <motion.button
+                  key={filter.key}
+                  onClick={() => setDietFilter(filter.key as 'all' | 'veg' | 'nonveg')}
+                  className={cn(
+                    'px-4 py-2 rounded-full text-sm font-medium transition-all',
+                    dietFilter === filter.key
+                      ? 'bg-gold text-gold-foreground shadow-gold'
+                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                  )}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {filter.label}
+                </motion.button>
+              ))}
+            </motion.div>
+
+            <motion.div
+              className="flex flex-wrap justify-center gap-3"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button variant="gold" size="lg">
+                  <Download className="w-5 h-5" />
+                  Download Menu PDF
+                </Button>
+              </motion.div>
+            </motion.div>
+          </ScrollReveal>
         </div>
       </section>
 
       {/* Category Tabs */}
       {!searchQuery && (
-        <section className="sticky top-16 z-30 bg-background/95 backdrop-blur-md border-b border-border py-4">
+        <motion.section
+          className="sticky top-16 z-30 bg-background/95 backdrop-blur-md border-b border-border py-4"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
           <div className="container mx-auto px-4">
             <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-hide">
-              {menuCategories.map((category) => (
-                <button
+              {menuCategories.map((category, index) => (
+                <motion.button
                   key={category.name}
                   onClick={() => setActiveCategory(category.name)}
                   className={cn(
-                    'flex items-center gap-2 px-4 py-2.5 rounded-full whitespace-nowrap text-sm font-medium transition-all',
+                    'flex items-center gap-2 px-4 py-2.5 rounded-full whitespace-nowrap text-sm font-medium transition-all relative',
                     activeCategory === category.name
                       ? 'bg-primary text-primary-foreground shadow-card'
                       : 'bg-secondary/80 text-secondary-foreground hover:bg-secondary'
                   )}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.05 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <span className="text-base">{category.icon}</span>
+                  <motion.span
+                    className="text-base"
+                    animate={activeCategory === category.name ? { rotate: [0, -10, 10, 0] } : {}}
+                    transition={{ duration: 0.5 }}
+                  >
+                    {category.icon}
+                  </motion.span>
                   {category.name}
-                </button>
+                  {activeCategory === category.name && (
+                    <motion.div
+                      className="absolute -bottom-1 left-1/2 w-2 h-2 bg-gold rounded-full"
+                      layoutId="activeIndicator"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      style={{ x: '-50%' }}
+                    />
+                  )}
+                </motion.button>
               ))}
             </div>
           </div>
-        </section>
+        </motion.section>
       )}
 
       {/* Menu Items */}
-      <section className="py-12 bg-background">
+      <section className="py-12 bg-background overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             {/* Category Header */}
-            {!searchQuery && (
-              <div className="flex items-center gap-3 mb-8">
-                <span className="text-4xl">{currentCategory?.icon}</span>
-                <div>
-                  <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
-                    {currentCategory?.name}
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    {currentCategory?.items.length} items available
-                  </p>
-                </div>
-              </div>
-            )}
+            <AnimatePresence mode="wait">
+              {!searchQuery && (
+                <motion.div
+                  key={activeCategory}
+                  className="flex items-center gap-3 mb-8"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <motion.span
+                    className="text-4xl"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1, rotate: [0, -10, 10, 0] }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    {currentCategory?.icon}
+                  </motion.span>
+                  <div>
+                    <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
+                      {currentCategory?.name}
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                      {filteredItems.length} items available
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {searchQuery && (
-              <div className="mb-8">
+              <motion.div
+                className="mb-8"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
                 <h2 className="font-display text-xl font-semibold text-foreground mb-1">
                   Search Results
                 </h2>
                 <p className="text-sm text-muted-foreground">
                   Found {filteredItems.length} items matching "{searchQuery}"
                 </p>
-              </div>
+              </motion.div>
             )}
 
             {/* Items by subcategory or all */}
-            {Object.entries(groupedItems).map(([subcategory, items]) => (
-              <div key={subcategory} className="mb-10">
-                {subcategory !== 'all' && (
-                  <h3 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-gold" />
-                    {subcategory}
-                  </h3>
-                )}
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {items.map((item) => {
-                    const quantity = cart.getItemQuantity(item.name);
-                    return (
-                      <div
-                        key={item.name}
-                        className={cn(
-                          'group relative flex gap-4 p-4 bg-card rounded-2xl border border-transparent transition-all duration-300',
-                          'hover:shadow-card hover:border-border',
-                          quantity > 0 && 'ring-2 ring-gold/30 border-gold/20'
-                        )}
-                      >
-                        {/* Image */}
-                        <div className="relative w-20 h-20 flex-shrink-0">
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-full h-full rounded-xl object-cover"
-                          />
-                          {/* Veg/Non-Veg badge */}
-                          <div
+            <AnimatePresence mode="wait">
+              {Object.entries(groupedItems).map(([subcategory, items]) => (
+                <motion.div
+                  key={`${activeCategory}-${subcategory}`}
+                  className="mb-10"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {subcategory !== 'all' && (
+                    <motion.h3
+                      className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                    >
+                      <motion.span
+                        className="w-2 h-2 rounded-full bg-gold"
+                        animate={{ scale: [1, 1.5, 1] }}
+                        transition={{ duration: 1, repeat: Infinity, repeatDelay: 2 }}
+                      />
+                      {subcategory}
+                    </motion.h3>
+                  )}
+                  <StaggerContainer className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4" staggerDelay={0.05}>
+                    {items.map((item) => {
+                      const quantity = cart.getItemQuantity(item.name);
+                      return (
+                        <StaggerItem key={item.name}>
+                          <motion.div
                             className={cn(
-                              'absolute -top-1 -left-1 w-5 h-5 rounded border-2 flex items-center justify-center bg-background shadow-sm',
-                              item.isVeg ? 'border-accent' : 'border-destructive'
+                              'group relative flex gap-4 p-4 bg-card rounded-2xl border border-transparent transition-all duration-300',
+                              'hover:shadow-card hover:border-border',
+                              quantity > 0 && 'ring-2 ring-gold/30 border-gold/20'
                             )}
+                            whileHover={{ y: -3 }}
+                            transition={{ type: 'spring', stiffness: 300 }}
                           >
-                            <div
-                              className={cn(
-                                'w-2 h-2 rounded-full',
-                                item.isVeg ? 'bg-accent' : 'bg-destructive'
-                              )}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0 flex flex-col justify-between">
-                          <div>
-                            <div className="flex items-center gap-1.5 mb-1">
-                              <h4 className="font-semibold text-foreground text-sm leading-tight">
-                                {item.name}
-                              </h4>
-                              {item.spiceType && item.spiceType !== 'not_spicy' && (
-                                <SpiceIndicator spiceType={item.spiceType} showLabel={false} />
-                              )}
-                            </div>
-                            <span className="font-bold text-gold text-lg">
-                              {item.price}
-                            </span>
-                          </div>
-
-                          {/* Add Button */}
-                          <div className="flex items-center justify-end mt-2">
-                            {quantity > 0 ? (
-                              <div className="flex items-center gap-2 bg-secondary rounded-full px-2 py-1">
-                                <button
-                                  onClick={() => cart.removeItem(item.name)}
-                                  className="w-6 h-6 rounded-full bg-background hover:bg-destructive/10 flex items-center justify-center transition-colors text-sm font-bold"
-                                >
-                                  −
-                                </button>
-                                <span className="w-5 text-center font-semibold text-sm">
-                                  {quantity}
-                                </span>
-                                <button
-                                  onClick={() => cart.addItem(item)}
-                                  className="w-6 h-6 rounded-full bg-background hover:bg-accent/10 flex items-center justify-center transition-colors text-sm font-bold"
-                                >
-                                  +
-                                </button>
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => cart.addItem(item)}
-                                className="flex items-center gap-1 px-3 py-1.5 bg-primary text-primary-foreground rounded-full text-xs font-semibold hover:bg-primary/90 transition-colors shadow-soft"
+                            {/* Image */}
+                            <div className="relative w-20 h-20 flex-shrink-0">
+                              <motion.img
+                                src={item.image}
+                                alt={item.name}
+                                className="w-full h-full rounded-xl object-cover"
+                                whileHover={{ scale: 1.05 }}
+                              />
+                              {/* Veg/Non-Veg badge */}
+                              <div
+                                className={cn(
+                                  'absolute -top-1 -left-1 w-5 h-5 rounded border-2 flex items-center justify-center bg-background shadow-sm',
+                                  item.isVeg ? 'border-accent' : 'border-destructive'
+                                )}
                               >
-                                <Plus className="w-3.5 h-3.5" />
-                                Add
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+                                <div
+                                  className={cn(
+                                    'w-2 h-2 rounded-full',
+                                    item.isVeg ? 'bg-accent' : 'bg-destructive'
+                                  )}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Content */}
+                            <div className="flex-1 min-w-0 flex flex-col justify-between">
+                              <div>
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <h4 className="font-semibold text-foreground text-sm leading-tight">
+                                    {item.name}
+                                  </h4>
+                                  {item.spiceType && item.spiceType !== 'not_spicy' && (
+                                    <SpiceIndicator spiceType={item.spiceType} showLabel={false} />
+                                  )}
+                                </div>
+                                <motion.span
+                                  className="font-bold text-gold text-lg"
+                                  whileHover={{ scale: 1.05 }}
+                                >
+                                  {item.price}
+                                </motion.span>
+                              </div>
+
+                              {/* Add Button */}
+                              <div className="flex items-center justify-end mt-2">
+                                <AnimatePresence mode="wait">
+                                  {quantity > 0 ? (
+                                    <motion.div
+                                      key="quantity"
+                                      className="flex items-center gap-2 bg-secondary rounded-full px-2 py-1"
+                                      initial={{ scale: 0.8, opacity: 0 }}
+                                      animate={{ scale: 1, opacity: 1 }}
+                                      exit={{ scale: 0.8, opacity: 0 }}
+                                    >
+                                      <motion.button
+                                        onClick={() => cart.removeItem(item.name)}
+                                        className="w-6 h-6 rounded-full bg-background hover:bg-destructive/10 flex items-center justify-center transition-colors text-sm font-bold"
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                      >
+                                        −
+                                      </motion.button>
+                                      <motion.span
+                                        key={quantity}
+                                        className="w-5 text-center font-semibold text-sm"
+                                        initial={{ scale: 1.3 }}
+                                        animate={{ scale: 1 }}
+                                      >
+                                        {quantity}
+                                      </motion.span>
+                                      <motion.button
+                                        onClick={() => cart.addItem(item)}
+                                        className="w-6 h-6 rounded-full bg-background hover:bg-accent/10 flex items-center justify-center transition-colors text-sm font-bold"
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                      >
+                                        +
+                                      </motion.button>
+                                    </motion.div>
+                                  ) : (
+                                    <motion.button
+                                      key="add"
+                                      onClick={() => cart.addItem(item)}
+                                      className="flex items-center gap-1 px-3 py-1.5 bg-primary text-primary-foreground rounded-full text-xs font-semibold hover:bg-primary/90 transition-colors shadow-soft"
+                                      initial={{ scale: 0.8, opacity: 0 }}
+                                      animate={{ scale: 1, opacity: 1 }}
+                                      exit={{ scale: 0.8, opacity: 0 }}
+                                      whileHover={{ scale: 1.05 }}
+                                      whileTap={{ scale: 0.95 }}
+                                    >
+                                      <Plus className="w-3.5 h-3.5" />
+                                      Add
+                                    </motion.button>
+                                  )}
+                                </AnimatePresence>
+                              </div>
+                            </div>
+                          </motion.div>
+                        </StaggerItem>
+                      );
+                    })}
+                  </StaggerContainer>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         </div>
       </section>

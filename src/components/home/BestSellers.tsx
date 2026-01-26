@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import { ScrollReveal, StaggerContainer, StaggerItem, AnimatedCard } from '@/components/animations';
 import cappuccino from '@/assets/menu/cappuccino.jpg';
 import sandwich from '@/assets/menu/sandwich.jpg';
 import maggi from '@/assets/menu/maggi.jpg';
@@ -55,68 +57,86 @@ const bestSellers = [
 
 export function BestSellers() {
   return (
-    <section className="py-16 md:py-24 bg-gradient-warm">
+    <section className="py-16 md:py-24 bg-gradient-warm overflow-hidden">
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-12">
-          <span className="inline-block text-gold font-medium text-sm uppercase tracking-wider mb-3">
+        <ScrollReveal className="text-center mb-12">
+          <motion.span
+            className="inline-block text-gold font-medium text-sm uppercase tracking-wider mb-3"
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
             Our Favorites
-          </span>
+          </motion.span>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
             Best Sellers
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
             Discover our most loved dishes, crafted with passion and served with love
           </p>
-        </div>
+        </ScrollReveal>
 
         {/* Menu Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {bestSellers.map((item, index) => (
-            <div
-              key={item.name}
-              className="group bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-hover transition-all duration-300"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              {/* Image */}
-              <div className="relative h-48 overflow-hidden">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                {/* Tag */}
-                <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-gold text-gold-foreground text-xs font-semibold">
-                  {item.tag}
+        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {bestSellers.map((item) => (
+            <StaggerItem key={item.name}>
+              <AnimatedCard className="group bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-hover transition-shadow duration-300">
+                {/* Image */}
+                <div className="relative h-48 overflow-hidden">
+                  <motion.img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-full object-cover"
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ duration: 0.5 }}
+                  />
+                  {/* Tag */}
+                  <motion.div
+                    className="absolute top-3 left-3 px-3 py-1 rounded-full bg-gold text-gold-foreground text-xs font-semibold"
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    {item.tag}
+                  </motion.div>
+                  {/* Veg Indicator */}
+                  <div className="absolute top-3 right-3 w-5 h-5 rounded border-2 border-accent bg-background flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-accent" />
+                  </div>
                 </div>
-                {/* Veg Indicator */}
-                <div className="absolute top-3 right-3 w-5 h-5 rounded border-2 border-accent bg-background flex items-center justify-center">
-                  <div className="w-2 h-2 rounded-full bg-accent" />
-                </div>
-              </div>
 
-              {/* Content */}
-              <div className="p-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-display text-lg font-semibold text-foreground">
-                    {item.name}
-                  </h3>
-                  <span className="text-lg font-bold text-gold">{item.price}</span>
+                {/* Content */}
+                <div className="p-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-display text-lg font-semibold text-foreground">
+                      {item.name}
+                    </h3>
+                    <motion.span
+                      className="text-lg font-bold text-gold"
+                      whileHover={{ scale: 1.1 }}
+                    >
+                      {item.price}
+                    </motion.span>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </AnimatedCard>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
 
         {/* CTA */}
-        <div className="text-center mt-10">
-          <Button variant="default" size="lg" asChild>
-            <Link to="/menu">
-              View Full Menu
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-          </Button>
-        </div>
+        <ScrollReveal className="text-center mt-10" delay={0.3}>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button variant="default" size="lg" asChild>
+              <Link to="/menu">
+                View Full Menu
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            </Button>
+          </motion.div>
+        </ScrollReveal>
       </div>
     </section>
   );
