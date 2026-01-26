@@ -91,7 +91,7 @@ export function AboutPreview() {
 
             {/* Floating Badge */}
             <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-gold text-gold-foreground px-6 py-3 rounded-full shadow-gold font-semibold text-sm">
-              Since 2020 • Bengaluru
+              Since 2026 • Bengaluru
             </div>
           </div>
         </div>
