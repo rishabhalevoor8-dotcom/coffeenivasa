@@ -36,6 +36,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import logo from '@/assets/logo.png';
 import { useShopStatus } from '@/hooks/useShopStatus';
 import { ShopClosedBanner } from '@/components/order/ShopClosedBanner';
+import { useConfetti } from '@/hooks/useConfetti';
 
 interface MenuItem {
   id: string;
@@ -92,6 +93,20 @@ export default function Order() {
 
   // Shop status check
   const shopStatus = useShopStatus();
+  
+  // Confetti celebration
+  const { fireConfetti } = useConfetti();
+
+  // Trigger confetti when order is complete
+  useEffect(() => {
+    if (orderComplete) {
+      // Small delay to let the success screen render first
+      const timer = setTimeout(() => {
+        fireConfetti();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [orderComplete, fireConfetti]);
 
   // Real-time order status subscription
   useEffect(() => {
