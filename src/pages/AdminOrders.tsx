@@ -222,6 +222,9 @@ export default function AdminOrders() {
     return matchesSearch && matchesStatus && matchesPayment && matchesTable;
   });
 
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  
   const stats = {
     pending: orders.filter(o => o.status === 'pending').length,
     preparing: orders.filter(o => o.status === 'preparing').length,
@@ -229,6 +232,10 @@ export default function AdminOrders() {
     cardPending: orders.filter(o => o.payment_status === 'card_pending').length,
     todayTotal: orders
       .filter(o => new Date(o.created_at).toDateString() === new Date().toDateString())
+      .filter(o => o.payment_status === 'paid')
+      .reduce((sum, o) => sum + o.total, 0),
+    monthlyTotal: orders
+      .filter(o => new Date(o.created_at) >= startOfMonth)
       .filter(o => o.payment_status === 'paid')
       .reduce((sum, o) => sum + o.total, 0),
   };
@@ -317,7 +324,7 @@ export default function AdminOrders() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
             <div className="bg-yellow-50 dark:bg-yellow-950/30 rounded-xl p-4 border border-yellow-200 dark:border-yellow-800">
               <p className="text-sm text-yellow-700 dark:text-yellow-400">New Orders</p>
               <p className="text-3xl font-bold text-yellow-700 dark:text-yellow-400">{stats.pending}</p>
@@ -337,6 +344,10 @@ export default function AdminOrders() {
             <div className="bg-green-50 dark:bg-green-950/30 rounded-xl p-4 border border-green-200 dark:border-green-800">
               <p className="text-sm text-green-700 dark:text-green-400">Today's Revenue</p>
               <p className="text-3xl font-bold text-green-700 dark:text-green-400">₹{stats.todayTotal}</p>
+            </div>
+            <div className="bg-purple-50 dark:bg-purple-950/30 rounded-xl p-4 border border-purple-200 dark:border-purple-800">
+              <p className="text-sm text-purple-700 dark:text-purple-400">Monthly Revenue</p>
+              <p className="text-3xl font-bold text-purple-700 dark:text-purple-400">₹{stats.monthlyTotal}</p>
             </div>
           </div>
 
