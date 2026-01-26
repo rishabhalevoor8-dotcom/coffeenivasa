@@ -278,6 +278,7 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _email: string }; Returns: boolean }
+      reset_order_number_sequence: { Args: never; Returns: undefined }
     }
     Enums: {
       order_status:
