@@ -220,6 +220,36 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          avatar: string
+          created_at: string
+          id: string
+          is_approved: boolean
+          name: string
+          rating: number
+          text: string
+        }
+        Insert: {
+          avatar?: string
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          name: string
+          rating: number
+          text: string
+        }
+        Update: {
+          avatar?: string
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          name?: string
+          rating?: number
+          text?: string
+        }
+        Relationships: []
+      }
       system_settings: {
         Row: {
           created_at: string
