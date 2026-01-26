@@ -24,7 +24,10 @@ import {
   AlertCircle,
   LogOut,
   RotateCcw,
-  AlertTriangle
+  AlertTriangle,
+  Clock,
+  ToggleLeft,
+  ToggleRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { User } from '@supabase/supabase-js';
@@ -58,6 +61,10 @@ export default function AdminSettings() {
   const [cafeAddress, setCafeAddress] = useState('Bangalore, India');
   const [cafePhone, setCafePhone] = useState('');
 
+  // Shop timing state
+  const [shopOpenTime, setShopOpenTime] = useState('06:00');
+  const [shopCloseTime, setShopCloseTime] = useState('00:00');
+  const [shopIsOpen, setShopIsOpen] = useState(true);
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -124,6 +131,15 @@ export default function AdminSettings() {
       if (cafeNameSetting) setCafeName(cafeNameSetting.value);
       if (cafeAddressSetting) setCafeAddress(cafeAddressSetting.value);
       if (cafePhoneSetting) setCafePhone(cafePhoneSetting.value);
+      
+      // Load shop timing settings
+      const shopOpenTimeSetting = settingsRes.data.find(s => s.key === 'shop_open_time');
+      const shopCloseTimeSetting = settingsRes.data.find(s => s.key === 'shop_close_time');
+      const shopIsOpenSetting = settingsRes.data.find(s => s.key === 'shop_is_open');
+      if (shopOpenTimeSetting) setShopOpenTime(shopOpenTimeSetting.value);
+      if (shopCloseTimeSetting) setShopCloseTime(shopCloseTimeSetting.value);
+      if (shopIsOpenSetting) setShopIsOpen(shopIsOpenSetting.value === 'true');
+      
       setEditingSettings(editValues);
     }
     if (adminsRes.data) setAdminUsers(adminsRes.data);
@@ -177,6 +193,25 @@ export default function AdminSettings() {
       toast.error('Failed to save café info');
     }
     setSaving(false);
+  };
+
+  const saveShopTimings = async () => {
+    setSaving(true);
+    try {
+      await saveSetting('shop_open_time', shopOpenTime);
+      await saveSetting('shop_close_time', shopCloseTime);
+      toast.success('Shop timings updated!');
+    } catch {
+      toast.error('Failed to save shop timings');
+    }
+    setSaving(false);
+  };
+
+  const toggleShopOpen = async () => {
+    const newValue = !shopIsOpen;
+    setShopIsOpen(newValue);
+    await saveSetting('shop_is_open', newValue.toString());
+    toast.success(newValue ? 'Shop is now open!' : 'Shop is now closed');
   };
 
   const addAdminUser = async () => {
@@ -294,10 +329,14 @@ export default function AdminSettings() {
 
           {/* Tabs */}
           <Tabs defaultValue="cafe" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="cafe" className="flex items-center gap-2">
                 <Store className="w-4 h-4" />
-                <span className="hidden sm:inline">Café Info</span>
+                <span className="hidden sm:inline">Café</span>
+              </TabsTrigger>
+              <TabsTrigger value="timings" className="flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                <span className="hidden sm:inline">Timings</span>
               </TabsTrigger>
               <TabsTrigger value="security" className="flex items-center gap-2">
                 <Key className="w-4 h-4" />
@@ -356,6 +395,78 @@ export default function AdminSettings() {
                   <Button onClick={saveCafeInfo} disabled={saving}>
                     <Save className="w-4 h-4 mr-2" />
                     {saving ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Shop Timings Tab */}
+            <TabsContent value="timings">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-primary" />
+                    Shop Timings
+                  </CardTitle>
+                  <CardDescription>
+                    Control operating hours and manually open/close the shop
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Manual Open/Close Toggle */}
+                  <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-xl">
+                    <div>
+                      <h3 className="font-semibold text-foreground">Shop Status</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {shopIsOpen ? 'Customers can place orders' : 'Ordering is disabled'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={toggleShopOpen}
+                      className="flex items-center gap-2"
+                    >
+                      {shopIsOpen ? (
+                        <>
+                          <ToggleRight className="w-10 h-10 text-accent" />
+                          <span className="font-semibold text-accent">Open</span>
+                        </>
+                      ) : (
+                        <>
+                          <ToggleLeft className="w-10 h-10 text-destructive" />
+                          <span className="font-semibold text-destructive">Closed</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Opening Time */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="openTime">Opening Time</Label>
+                      <Input
+                        id="openTime"
+                        type="time"
+                        value={shopOpenTime}
+                        onChange={(e) => setShopOpenTime(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="closeTime">Closing Time</Label>
+                      <Input
+                        id="closeTime"
+                        type="time"
+                        value={shopCloseTime}
+                        onChange={(e) => setShopCloseTime(e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Use 00:00 for midnight
+                      </p>
+                    </div>
+                  </div>
+
+                  <Button onClick={saveShopTimings} disabled={saving}>
+                    <Save className="w-4 h-4 mr-2" />
+                    {saving ? 'Saving...' : 'Save Timings'}
                   </Button>
                 </CardContent>
               </Card>
