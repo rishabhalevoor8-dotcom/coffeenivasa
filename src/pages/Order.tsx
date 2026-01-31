@@ -230,7 +230,7 @@ export default function Order() {
 
   const getItemQuantity = (itemId: string) => cart.find(i => i.id === itemId)?.quantity || 0;
 
-  const getPaymentStatus = () => {
+  const getPaymentStatus = (): 'pending' | 'paid' | 'cash_pending' | 'refunded' | 'cheque_pending' | 'card_pending' => {
     return 'pending'; // Pay Later (UPI) - payment to be collected later
   };
 
@@ -294,7 +294,7 @@ export default function Order() {
 
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
-        .insert({
+        .insert([{
           order_type: orderType,
           table_number: orderType === 'dine_in' ? tableNumber : null,
           subtotal,
@@ -304,7 +304,7 @@ export default function Order() {
           status: 'pending',
           customer_name: customerDetails.name,
           customer_phone: customerDetails.phone,
-        })
+        }])
         .select()
         .single();
 
