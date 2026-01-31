@@ -340,14 +340,14 @@ export default function Admin() {
                         className={cn(
                           'w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0',
                           item.food_type === 'veg' ? 'border-accent' : 
-                          item.food_type === 'egg' ? 'border-yellow-500' : 'border-destructive'
+                          item.food_type === 'egg' ? 'border-amber-700' : 'border-destructive'
                         )}
                       >
                         <div
                           className={cn(
                             'w-2 h-2 rounded-full',
                             item.food_type === 'veg' ? 'bg-accent' : 
-                            item.food_type === 'egg' ? 'bg-yellow-500' : 'bg-destructive'
+                            item.food_type === 'egg' ? 'bg-amber-700' : 'bg-destructive'
                           )}
                         />
                       </div>

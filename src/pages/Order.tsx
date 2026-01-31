@@ -937,12 +937,12 @@ export default function Order() {
                   <div className={cn(
                     'w-5 h-5 rounded-sm border-2 flex items-center justify-center flex-shrink-0 mt-0.5',
                     item.food_type === 'veg' ? 'border-green-600' : 
-                    item.food_type === 'egg' ? 'border-yellow-500' : 'border-red-600'
+                    item.food_type === 'egg' ? 'border-amber-700' : 'border-red-600'
                   )}>
                     <div className={cn(
                       'w-2.5 h-2.5 rounded-full',
                       item.food_type === 'veg' ? 'bg-green-600' : 
-                      item.food_type === 'egg' ? 'bg-yellow-500' : 'bg-red-600'
+                      item.food_type === 'egg' ? 'bg-amber-700' : 'bg-red-600'
                     )} />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -1111,12 +1111,12 @@ export default function Order() {
                     <div className={cn(
                       'w-5 h-5 rounded-sm border-2 flex items-center justify-center flex-shrink-0',
                       item.food_type === 'veg' ? 'border-green-600' : 
-                      item.food_type === 'egg' ? 'border-yellow-500' : 'border-red-600'
+                      item.food_type === 'egg' ? 'border-amber-700' : 'border-red-600'
                     )}>
                       <div className={cn(
                         'w-2.5 h-2.5 rounded-full',
                         item.food_type === 'veg' ? 'bg-green-600' : 
-                        item.food_type === 'egg' ? 'bg-yellow-500' : 'bg-red-600'
+                        item.food_type === 'egg' ? 'bg-amber-700' : 'bg-red-600'
                       )} />
                     </div>
                     <span className="font-semibold text-foreground truncate">{item.name}</span>
