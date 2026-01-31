@@ -81,19 +81,19 @@ export function BestSellers() {
         <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {bestSellers.map((item) => (
             <StaggerItem key={item.name}>
-              <AnimatedCard className="group bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-hover transition-shadow duration-300">
+              <AnimatedCard className="group bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-hover transition-all duration-300 border border-border/50 hover:border-gold/30">
                 {/* Image */}
                 <div className="relative h-48 overflow-hidden">
                   <motion.img
                     src={item.image}
                     alt={item.name}
-                    className="w-full h-full object-cover"
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ duration: 0.5 }}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
+                  {/* Gradient overlay for depth */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   {/* Tag */}
                   <motion.div
-                    className="absolute top-3 left-3 px-3 py-1 rounded-full bg-gold text-gold-foreground text-xs font-semibold"
+                    className="absolute top-3 left-3 px-3 py-1.5 rounded-full bg-gold text-gold-foreground text-xs font-semibold shadow-gold"
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
@@ -102,20 +102,20 @@ export function BestSellers() {
                     {item.tag}
                   </motion.div>
                   {/* Veg Indicator */}
-                  <div className="absolute top-3 right-3 w-5 h-5 rounded border-2 border-accent bg-background flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-accent" />
+                  <div className="absolute top-3 right-3 w-6 h-6 rounded-md border-2 border-accent bg-background/90 backdrop-blur-sm flex items-center justify-center shadow-sm">
+                    <div className="w-2.5 h-2.5 rounded-full bg-accent" />
                   </div>
                 </div>
 
                 {/* Content */}
-                <div className="p-4">
+                <div className="p-5">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-display text-lg font-semibold text-foreground">
+                    <h3 className="font-display text-lg font-semibold text-foreground group-hover:text-gold transition-colors duration-200">
                       {item.name}
                     </h3>
                     <motion.span
-                      className="text-lg font-bold text-gold"
-                      whileHover={{ scale: 1.1 }}
+                      className="text-lg font-bold text-gold bg-gold/10 px-3 py-1 rounded-full"
+                      whileHover={{ scale: 1.05 }}
                     >
                       {item.price}
                     </motion.span>
