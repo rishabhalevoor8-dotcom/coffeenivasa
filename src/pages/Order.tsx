@@ -15,8 +15,6 @@ import {
   ShoppingBag, 
   CheckCircle,
   Wallet,
-  Banknote,
-  CreditCard,
   ArrowLeft,
   Sparkles,
   User,
@@ -25,11 +23,11 @@ import {
   Clock,
   Calendar,
   Home,
+  ChefHat,
+  Bell,
   QrCode,
   Smartphone,
-  ShieldCheck,
-  ChefHat,
-  Bell
+  ShieldCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -38,11 +36,14 @@ import { useShopStatus } from '@/hooks/useShopStatus';
 import { ShopClosedBanner } from '@/components/order/ShopClosedBanner';
 import { useConfetti } from '@/hooks/useConfetti';
 
+type FoodType = 'veg' | 'non_veg' | 'egg';
+
 interface MenuItem {
   id: string;
   name: string;
   price: number;
   is_veg: boolean;
+  food_type: FoodType;
   subcategory: string | null;
   category_id: string;
   image_key: string;
@@ -65,7 +66,7 @@ interface CustomerDetails {
 }
 
 type OrderType = 'dine_in' | 'takeaway';
-type PaymentMethod = 'upi' | 'cash' | 'card';
+type PaymentMethod = 'upi_later';
 
 export default function Order() {
   const [pin, setPin] = useState('');
@@ -86,7 +87,7 @@ export default function Order() {
   const [orderStatus, setOrderStatus] = useState<'pending' | 'preparing' | 'ready' | 'served' | 'cancelled'>('pending');
   const [orderDateTime, setOrderDateTime] = useState<Date | null>(null);
   const [showCart, setShowCart] = useState(false);
-  const [selectedPayment, setSelectedPayment] = useState<PaymentMethod | null>(null);
+  const [selectedPayment] = useState<PaymentMethod>('upi_later'); // Single payment option: Pay Later (UPI)
   const [showUpiConfirmation, setShowUpiConfirmation] = useState(false);
   const [queueCount, setQueueCount] = useState<number>(0);
   const [estimatedWaitTime, setEstimatedWaitTime] = useState<number>(0);
@@ -175,7 +176,10 @@ export default function Order() {
       supabase.from('menu_items').select('*').eq('is_active', true).order('display_order'),
     ]);
 
-    const fetchedItems = itemsRes.data || [];
+    const fetchedItems = (itemsRes.data || []).map(item => ({
+      ...item,
+      food_type: (item.food_type as FoodType) || 'veg'
+    }));
     setItems(fetchedItems);
 
     if (categoriesRes.data) {
@@ -220,16 +224,14 @@ export default function Order() {
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const tax = Math.round(subtotal * 0.05);
-  const total = subtotal + tax;
+  // Packing charge only for takeaway
+  const packingCharge = orderType === 'takeaway' ? 15 : 0;
+  const total = subtotal + tax + packingCharge;
 
   const getItemQuantity = (itemId: string) => cart.find(i => i.id === itemId)?.quantity || 0;
 
-  const getPaymentStatus = (method: PaymentMethod) => {
-    switch (method) {
-      case 'upi': return 'pending'; // UPI payment needs to be confirmed by staff
-      case 'cash': return 'cash_pending';
-      case 'card': return 'card_pending';
-    }
+  const getPaymentStatus = () => {
+    return 'pending'; // Pay Later (UPI) - payment to be collected later
   };
 
   const validateCustomerDetails = () => {
@@ -251,22 +253,13 @@ export default function Order() {
   };
 
   const handleProceedToPayment = () => {
-    if (!selectedPayment) {
-      toast.error('Please select a payment method');
-      return;
-    }
-
     if (orderType === 'dine_in' && !tableNumber) {
       toast.error('Please select a table number');
       return;
     }
 
-    if (selectedPayment === 'upi') {
-      setShowUpiConfirmation(true);
-      setShowCart(false);
-    } else {
-      submitOrder();
-    }
+    // Directly submit order - Pay Later (UPI)
+    submitOrder();
   };
 
   const fetchQueueInfo = async () => {
@@ -307,7 +300,7 @@ export default function Order() {
           subtotal,
           tax,
           total,
-          payment_status: getPaymentStatus(selectedPayment),
+          payment_status: getPaymentStatus(),
           status: 'pending',
           customer_name: customerDetails.name,
           customer_phone: customerDetails.phone,
@@ -355,7 +348,6 @@ export default function Order() {
     setOrderDateTime(null);
     setOrderType(null);
     setTableNumber(null);
-    setSelectedPayment(null);
     setCustomerDetailsCollected(false);
     setCustomerDetails({ name: '', phone: '', email: '' });
     setShowUpiConfirmation(false);
@@ -944,11 +936,13 @@ export default function Order() {
                 <div className="flex items-start gap-3">
                   <div className={cn(
                     'w-5 h-5 rounded-sm border-2 flex items-center justify-center flex-shrink-0 mt-0.5',
-                    item.is_veg ? 'border-green-600' : 'border-red-600'
+                    item.food_type === 'veg' ? 'border-green-600' : 
+                    item.food_type === 'egg' ? 'border-yellow-500' : 'border-red-600'
                   )}>
                     <div className={cn(
                       'w-2.5 h-2.5 rounded-full',
-                      item.is_veg ? 'bg-green-600' : 'bg-red-600'
+                      item.food_type === 'veg' ? 'bg-green-600' : 
+                      item.food_type === 'egg' ? 'bg-yellow-500' : 'bg-red-600'
                     )} />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -981,66 +975,20 @@ export default function Order() {
             ))}
           </div>
 
-          {/* Payment Method Selection */}
+          {/* Payment Method - Pay Later (UPI) Only */}
           <div className="mt-6">
             <h2 className="font-display text-lg font-bold text-foreground mb-4">Payment Method</h2>
-            <div className="grid grid-cols-3 gap-3">
-              <button
-                onClick={() => setSelectedPayment('upi')}
-                className={cn(
-                  'p-4 rounded-2xl border-2 transition-all active:scale-95',
-                  selectedPayment === 'upi' 
-                    ? 'border-amber-500 bg-amber-50 shadow-lg' 
-                    : 'border-amber-100 bg-white'
-                )}
-              >
-                <div className={cn(
-                  'w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2',
-                  selectedPayment === 'upi' ? 'bg-amber-500' : 'bg-amber-100'
-                )}>
-                  <Wallet className={cn('w-6 h-6', selectedPayment === 'upi' ? 'text-white' : 'text-amber-600')} />
+            <div className="bg-white rounded-2xl p-4 border-2 border-amber-500 shadow-lg">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-xl bg-amber-500 flex items-center justify-center">
+                  <Wallet className="w-7 h-7 text-white" />
                 </div>
-                <p className="font-semibold text-sm">UPI</p>
-                <p className="text-xs text-muted-foreground">Paid</p>
-              </button>
-
-              <button
-                onClick={() => setSelectedPayment('cash')}
-                className={cn(
-                  'p-4 rounded-2xl border-2 transition-all active:scale-95',
-                  selectedPayment === 'cash' 
-                    ? 'border-amber-500 bg-amber-50 shadow-lg' 
-                    : 'border-amber-100 bg-white'
-                )}
-              >
-                <div className={cn(
-                  'w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2',
-                  selectedPayment === 'cash' ? 'bg-amber-500' : 'bg-amber-100'
-                )}>
-                  <Banknote className={cn('w-6 h-6', selectedPayment === 'cash' ? 'text-white' : 'text-amber-600')} />
+                <div className="flex-1">
+                  <p className="font-bold text-lg text-foreground">Pay Later (UPI)</p>
+                  <p className="text-sm text-muted-foreground">Payment will be collected at counter/table via UPI</p>
                 </div>
-                <p className="font-semibold text-sm">Cash</p>
-                <p className="text-xs text-muted-foreground">Pay Later</p>
-              </button>
-
-              <button
-                onClick={() => setSelectedPayment('card')}
-                className={cn(
-                  'p-4 rounded-2xl border-2 transition-all active:scale-95',
-                  selectedPayment === 'card' 
-                    ? 'border-amber-500 bg-amber-50 shadow-lg' 
-                    : 'border-amber-100 bg-white'
-                )}
-              >
-                <div className={cn(
-                  'w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2',
-                  selectedPayment === 'card' ? 'bg-amber-500' : 'bg-amber-100'
-                )}>
-                  <CreditCard className={cn('w-6 h-6', selectedPayment === 'card' ? 'text-white' : 'text-amber-600')} />
-                </div>
-                <p className="font-semibold text-sm">Card</p>
-                <p className="text-xs text-muted-foreground">Pay Later</p>
-              </button>
+                <CheckCircle className="w-6 h-6 text-amber-500" />
+              </div>
             </div>
           </div>
 
@@ -1049,16 +997,35 @@ export default function Order() {
             <h2 className="font-display text-lg font-bold text-foreground mb-4">Bill Summary</h2>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Subtotal</span>
+                <span className="text-muted-foreground">Items Total</span>
                 <span className="font-medium">₹{subtotal}</span>
               </div>
+              {packingCharge > 0 && (
+                <div className="flex justify-between text-amber-700">
+                  <span className="flex items-center gap-1">
+                    <ShoppingBag className="w-4 h-4" />
+                    Packing Charge (Takeaway)
+                  </span>
+                  <span className="font-medium">₹{packingCharge}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Tax (5%)</span>
                 <span className="font-medium">₹{tax}</span>
               </div>
-              <div className="border-t border-amber-100 pt-3 flex justify-between">
-                <span className="font-bold text-lg">Total</span>
-                <span className="font-bold text-xl text-amber-600">₹{total}</span>
+              <div className="border-t border-amber-100 pt-3 space-y-2">
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>Order Type</span>
+                  <span className="font-medium text-foreground">{orderType === 'dine_in' ? 'Dine-In' : 'Takeaway'}</span>
+                </div>
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>Payment</span>
+                  <span className="font-medium text-foreground">Pay Later (UPI)</span>
+                </div>
+                <div className="flex justify-between pt-2">
+                  <span className="font-bold text-lg">Total</span>
+                  <span className="font-bold text-xl text-amber-600">₹{total}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1070,11 +1037,14 @@ export default function Order() {
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-amber-100 p-4 shadow-2xl">
           <Button 
             onClick={handleProceedToPayment}
-            disabled={isSubmitting || !selectedPayment}
+            disabled={isSubmitting}
             className="w-full h-14 text-lg rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg disabled:opacity-50"
           >
-            {isSubmitting ? 'Placing Order...' : selectedPayment === 'upi' ? `Pay with UPI • ₹${total}` : `Place Order • ₹${total}`}
+            {isSubmitting ? 'Placing Order...' : `Place Order • ₹${total}`}
           </Button>
+          <p className="text-xs text-center text-muted-foreground mt-2">
+            Payment will be collected via UPI at counter/table
+          </p>
         </div>
       </div>
     );
@@ -1140,11 +1110,13 @@ export default function Order() {
                   <div className="flex items-center gap-2 mb-1">
                     <div className={cn(
                       'w-5 h-5 rounded-sm border-2 flex items-center justify-center flex-shrink-0',
-                      item.is_veg ? 'border-green-600' : 'border-red-600'
+                      item.food_type === 'veg' ? 'border-green-600' : 
+                      item.food_type === 'egg' ? 'border-yellow-500' : 'border-red-600'
                     )}>
                       <div className={cn(
                         'w-2.5 h-2.5 rounded-full',
-                        item.is_veg ? 'bg-green-600' : 'bg-red-600'
+                        item.food_type === 'veg' ? 'bg-green-600' : 
+                        item.food_type === 'egg' ? 'bg-yellow-500' : 'bg-red-600'
                       )} />
                     </div>
                     <span className="font-semibold text-foreground truncate">{item.name}</span>
