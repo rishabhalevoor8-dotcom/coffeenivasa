@@ -64,6 +64,7 @@ export type Database = {
           category_id: string
           created_at: string
           display_order: number
+          food_type: string
           id: string
           image_key: string
           is_active: boolean
@@ -78,6 +79,7 @@ export type Database = {
           category_id: string
           created_at?: string
           display_order?: number
+          food_type?: string
           id?: string
           image_key?: string
           is_active?: boolean
@@ -92,6 +94,7 @@ export type Database = {
           category_id?: string
           created_at?: string
           display_order?: number
+          food_type?: string
           id?: string
           image_key?: string
           is_active?: boolean

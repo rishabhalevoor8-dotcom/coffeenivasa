@@ -18,11 +18,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+type FoodType = 'veg' | 'non_veg' | 'egg';
+
 interface MenuItem {
   id: string;
   name: string;
   price: number;
   is_veg: boolean;
+  food_type: FoodType;
   is_active: boolean;
   subcategory: string | null;
   category_id: string;
@@ -44,6 +47,7 @@ export default function Admin() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editPrice, setEditPrice] = useState('');
   const [editSpiceType, setEditSpiceType] = useState<SpiceType>('not_spicy');
+  const [editFoodType, setEditFoodType] = useState<FoodType>('veg');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -104,6 +108,7 @@ export default function Admin() {
       setItems(itemsRes.data.map((item) => ({
         ...item,
         spice_type: (item.spice_type as SpiceType) || 'not_spicy',
+        food_type: (item.food_type as FoodType) || 'veg',
         is_active: item.is_active ?? true
       })));
     }
@@ -118,6 +123,7 @@ export default function Admin() {
     setEditingId(item.id);
     setEditPrice(item.price.toString());
     setEditSpiceType(item.spice_type || 'not_spicy');
+    setEditFoodType(item.food_type || 'veg');
   };
 
   const saveItem = async (itemId: string) => {
@@ -127,9 +133,17 @@ export default function Admin() {
       return;
     }
 
+    // Also update is_veg based on food_type for backwards compatibility
+    const isVeg = editFoodType === 'veg';
+
     const { error } = await supabase
       .from('menu_items')
-      .update({ price: newPrice, spice_type: editSpiceType })
+      .update({ 
+        price: newPrice, 
+        spice_type: editSpiceType,
+        food_type: editFoodType,
+        is_veg: isVeg
+      })
       .eq('id', itemId);
 
     if (error) {
@@ -138,7 +152,7 @@ export default function Admin() {
     }
 
     setItems(items.map(item => 
-      item.id === itemId ? { ...item, price: newPrice, spice_type: editSpiceType } : item
+      item.id === itemId ? { ...item, price: newPrice, spice_type: editSpiceType, food_type: editFoodType, is_veg: isVeg } : item
     ));
     setEditingId(null);
     toast.success('Item updated successfully!');
@@ -325,13 +339,15 @@ export default function Admin() {
                       <div
                         className={cn(
                           'w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0',
-                          item.is_veg ? 'border-accent' : 'border-destructive'
+                          item.food_type === 'veg' ? 'border-accent' : 
+                          item.food_type === 'egg' ? 'border-yellow-500' : 'border-destructive'
                         )}
                       >
                         <div
                           className={cn(
                             'w-2 h-2 rounded-full',
-                            item.is_veg ? 'bg-accent' : 'bg-destructive'
+                            item.food_type === 'veg' ? 'bg-accent' : 
+                            item.food_type === 'egg' ? 'bg-yellow-500' : 'bg-destructive'
                           )}
                         />
                       </div>
@@ -346,14 +362,31 @@ export default function Admin() {
                     )}
                   </div>
                   <div className="col-span-2 hidden md:block">
-                    <span className={cn(
-                      'text-xs font-medium px-2 py-1 rounded-full',
-                      item.is_veg 
-                        ? 'bg-accent/10 text-accent' 
-                        : 'bg-destructive/10 text-destructive'
-                    )}>
-                      {item.is_veg ? 'Veg' : 'Non-Veg'}
-                    </span>
+                    {editingId === item.id ? (
+                      <Select
+                        value={editFoodType}
+                        onValueChange={(value: FoodType) => setEditFoodType(value)}
+                      >
+                        <SelectTrigger className="h-8 w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="veg">🟢 Veg</SelectItem>
+                          <SelectItem value="non_veg">🔴 Non-Veg</SelectItem>
+                          <SelectItem value="egg">🟡 Egg</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <span className={cn(
+                        'text-xs font-medium px-2 py-1 rounded-full',
+                        item.food_type === 'veg' ? 'bg-accent/10 text-accent' :
+                        item.food_type === 'egg' ? 'bg-yellow-100 text-yellow-700' : 
+                        'bg-destructive/10 text-destructive'
+                      )}>
+                        {item.food_type === 'veg' ? '🟢 Veg' : 
+                         item.food_type === 'egg' ? '🟡 Egg' : '🔴 Non-Veg'}
+                      </span>
+                    )}
                   </div>
                   <div className="col-span-2 md:col-span-2">
                     {editingId === item.id ? (

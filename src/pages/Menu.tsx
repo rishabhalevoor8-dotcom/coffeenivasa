@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
-import { Download, Plus, Search, Filter } from 'lucide-react';
+import { Plus, Search, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/hooks/useCart';
 import { CartSheet } from '@/components/menu/CartSheet';
@@ -421,19 +421,6 @@ const Menu = () => {
               ))}
             </motion.div>
 
-            <motion.div
-              className="flex flex-wrap justify-center gap-3"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button variant="gold" size="lg">
-                  <Download className="w-5 h-5" />
-                  Download Menu PDF
-                </Button>
-              </motion.div>
-            </motion.div>
           </ScrollReveal>
         </div>
       </section>
