@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/animations';
+import { TestimonialSkeleton } from '@/components/ui/menu-skeleton';
 import {
   Dialog,
   DialogContent,
@@ -103,13 +104,17 @@ export function Testimonials() {
 
         {/* Testimonials Grid */}
         {isLoading ? (
-          <div className="flex justify-center py-12">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-            >
-              <Loader2 className="w-8 h-8 text-gold" />
-            </motion.div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+              >
+                <TestimonialSkeleton />
+              </motion.div>
+            ))}
           </div>
         ) : (
           <StaggerContainer className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">

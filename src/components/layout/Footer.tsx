@@ -63,7 +63,7 @@ export function Footer() {
                 <Clock className="w-5 h-5 mt-0.5 flex-shrink-0 text-gold" />
                 <span className="text-sm text-primary-foreground/80">
                   Open All Days<br />
-                  10:00 AM - 11:00 PM
+                  6:00 AM - 12:00 AM (Midnight)
                 </span>
               </li>
             </ul>

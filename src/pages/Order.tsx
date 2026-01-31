@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,6 +36,7 @@ import logo from '@/assets/logo.png';
 import { useShopStatus } from '@/hooks/useShopStatus';
 import { ShopClosedBanner } from '@/components/order/ShopClosedBanner';
 import { useConfetti } from '@/hooks/useConfetti';
+import { MenuSkeleton, CategoryTabsSkeleton } from '@/components/ui/menu-skeleton';
 
 type FoodType = 'veg' | 'non_veg' | 'egg';
 
@@ -74,6 +76,7 @@ export default function Order() {
   const [customerDetailsCollected, setCustomerDetailsCollected] = useState(false);
   const [customerDetails, setCustomerDetails] = useState<CustomerDetails>({ name: '', phone: '', email: '' });
   const [loading, setLoading] = useState(false);
+  const [menuLoading, setMenuLoading] = useState(false);
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -171,26 +174,31 @@ export default function Order() {
   };
 
   const fetchMenuData = async () => {
-    const [categoriesRes, itemsRes] = await Promise.all([
-      supabase.from('menu_categories').select('*').order('display_order'),
-      supabase.from('menu_items').select('*').eq('is_active', true).order('display_order'),
-    ]);
+    setMenuLoading(true);
+    try {
+      const [categoriesRes, itemsRes] = await Promise.all([
+        supabase.from('menu_categories').select('*').order('display_order'),
+        supabase.from('menu_items').select('*').eq('is_active', true).order('display_order'),
+      ]);
 
-    const fetchedItems = (itemsRes.data || []).map(item => ({
-      ...item,
-      food_type: (item.food_type as FoodType) || 'veg'
-    }));
-    setItems(fetchedItems);
+      const fetchedItems = (itemsRes.data || []).map(item => ({
+        ...item,
+        food_type: (item.food_type as FoodType) || 'veg'
+      }));
+      setItems(fetchedItems);
 
-    if (categoriesRes.data) {
-      // Filter out categories that have no items
-      const categoriesWithItems = categoriesRes.data.filter(cat => 
-        fetchedItems.some(item => item.category_id === cat.id)
-      );
-      setCategories(categoriesWithItems);
-      if (categoriesWithItems.length > 0) {
-        setSelectedCategory(categoriesWithItems[0].id);
+      if (categoriesRes.data) {
+        // Filter out categories that have no items
+        const categoriesWithItems = categoriesRes.data.filter(cat => 
+          fetchedItems.some(item => item.category_id === cat.id)
+        );
+        setCategories(categoriesWithItems);
+        if (categoriesWithItems.length > 0) {
+          setSelectedCategory(categoriesWithItems[0].id);
+        }
       }
+    } finally {
+      setMenuLoading(false);
     }
   };
 
@@ -1077,84 +1085,112 @@ export default function Order() {
 
         {/* Category Tabs */}
         <div className="overflow-x-auto scrollbar-hide pb-3">
-          <div className="flex gap-2 px-4 min-w-max">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={cn(
-                  'px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap active:scale-95',
-                  selectedCategory === cat.id 
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg' 
-                    : 'bg-white text-muted-foreground border border-amber-200'
-                )}
-              >
-                {cat.icon} {cat.name}
-              </button>
-            ))}
-          </div>
+          {menuLoading ? (
+            <div className="px-4">
+              <CategoryTabsSkeleton />
+            </div>
+          ) : (
+            <div className="flex gap-2 px-4 min-w-max">
+              {categories.map((cat, index) => (
+                <motion.button
+                  key={cat.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={cn(
+                    'px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap',
+                    selectedCategory === cat.id 
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg' 
+                      : 'bg-white text-muted-foreground border border-amber-200 hover:border-amber-400'
+                  )}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {cat.icon} {cat.name}
+                </motion.button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Menu Items */}
       <div className="px-4 py-4">
-        <div className="grid grid-cols-1 gap-3">
-          {filteredItems.map((item) => {
-            const quantity = getItemQuantity(item.id);
-            return (
-              <div 
-                key={item.id} 
-                className="bg-white rounded-2xl p-4 shadow-md shadow-amber-100 border border-amber-50 flex items-center gap-4"
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className={cn(
-                      'w-5 h-5 rounded-sm border-2 flex items-center justify-center flex-shrink-0',
-                      item.food_type === 'veg' ? 'border-green-600' : 
-                      item.food_type === 'egg' ? 'border-amber-700' : 'border-red-600'
-                    )}>
+        {menuLoading ? (
+          <MenuSkeleton count={6} />
+        ) : (
+          <div className="grid grid-cols-1 gap-3">
+            {filteredItems.map((item, index) => {
+              const quantity = getItemQuantity(item.id);
+              return (
+                <motion.div 
+                  key={item.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.03 }}
+                  className="bg-white rounded-2xl p-4 shadow-md shadow-amber-100 border border-amber-50 flex items-center gap-4 hover:shadow-lg hover:border-amber-200 transition-all duration-200"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
                       <div className={cn(
-                        'w-2.5 h-2.5 rounded-full',
-                        item.food_type === 'veg' ? 'bg-green-600' : 
-                        item.food_type === 'egg' ? 'bg-amber-700' : 'bg-red-600'
-                      )} />
+                        'w-5 h-5 rounded-sm border-2 flex items-center justify-center flex-shrink-0',
+                        item.food_type === 'veg' ? 'border-green-600' : 
+                        item.food_type === 'egg' ? 'border-amber-700' : 'border-red-600'
+                      )}>
+                        <div className={cn(
+                          'w-2.5 h-2.5 rounded-full',
+                          item.food_type === 'veg' ? 'bg-green-600' : 
+                          item.food_type === 'egg' ? 'bg-amber-700' : 'bg-red-600'
+                        )} />
+                      </div>
+                      <span className="font-semibold text-foreground truncate">{item.name}</span>
                     </div>
-                    <span className="font-semibold text-foreground truncate">{item.name}</span>
+                    <p className="font-bold text-amber-600 text-lg">₹{item.price}</p>
                   </div>
-                  <p className="font-bold text-amber-600 text-lg">₹{item.price}</p>
-                </div>
-                
-                {quantity > 0 ? (
-                  <div className="flex items-center gap-3">
-                    <button 
-                      onClick={() => updateQuantity(item.id, -1)}
-                      className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center active:scale-95"
-                    >
-                      <Minus className="w-5 h-5 text-amber-700" />
-                    </button>
-                    <span className="w-6 text-center font-bold text-lg">{quantity}</span>
-                    <button 
+                  
+                  {quantity > 0 ? (
+                    <div className="flex items-center gap-3">
+                      <motion.button 
+                        onClick={() => updateQuantity(item.id, -1)}
+                        className="w-11 h-11 rounded-xl bg-amber-100 flex items-center justify-center shadow-sm"
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        <Minus className="w-5 h-5 text-amber-700" />
+                      </motion.button>
+                      <motion.span 
+                        key={quantity}
+                        initial={{ scale: 1.3 }}
+                        animate={{ scale: 1 }}
+                        className="w-6 text-center font-bold text-lg"
+                      >
+                        {quantity}
+                      </motion.span>
+                      <motion.button 
+                        onClick={() => addToCart(item)}
+                        className="w-11 h-11 rounded-xl bg-amber-500 flex items-center justify-center shadow-md"
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        <Plus className="w-5 h-5 text-white" />
+                      </motion.button>
+                    </div>
+                  ) : (
+                    <motion.button 
                       onClick={() => addToCart(item)}
-                      className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center active:scale-95"
+                      className="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold flex items-center gap-1 shadow-md"
+                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
                     >
-                      <Plus className="w-5 h-5 text-white" />
-                    </button>
-                  </div>
-                ) : (
-                  <button 
-                    onClick={() => addToCart(item)}
-                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold flex items-center gap-1 active:scale-95 shadow-md"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add
-                  </button>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                      <Plus className="w-4 h-4" />
+                      Add
+                    </motion.button>
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
 
-        {filteredItems.length === 0 && (
+        {!menuLoading && filteredItems.length === 0 && (
           <div className="text-center py-16">
             <div className="w-20 h-20 rounded-2xl bg-amber-100 flex items-center justify-center mx-auto mb-4">
               <Coffee className="w-10 h-10 text-amber-400" />
@@ -1165,25 +1201,46 @@ export default function Order() {
       </div>
 
       {/* Fixed Cart Bar */}
-      {cart.length > 0 && (
-        <div className="fixed bottom-20 left-0 right-0 p-4 bg-gradient-to-t from-amber-50 via-amber-50 to-transparent pt-8 z-40">
-          <button
-            onClick={() => setShowCart(true)}
-            className="w-full h-16 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white flex items-center justify-between px-6 shadow-xl shadow-amber-300 active:scale-[0.98] transition-transform"
+      <AnimatePresence>
+        {cart.length > 0 && (
+          <motion.div 
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="fixed bottom-20 left-0 right-0 p-4 bg-gradient-to-t from-amber-50 via-amber-50 to-transparent pt-8 z-40"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                <ShoppingCart className="w-5 h-5" />
+            <motion.button
+              onClick={() => setShowCart(true)}
+              className="w-full h-16 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white flex items-center justify-between px-6 shadow-xl shadow-amber-300/50"
+              whileTap={{ scale: 0.98 }}
+              whileHover={{ boxShadow: '0 20px 40px -10px rgba(245, 158, 11, 0.5)' }}
+            >
+              <div className="flex items-center gap-3">
+                <motion.div 
+                  className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center"
+                  animate={{ rotate: [0, -10, 10, 0] }}
+                  transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 3 }}
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                </motion.div>
+                <span className="font-bold text-lg">{totalItems} items</span>
               </div>
-              <span className="font-bold text-lg">{totalItems} items</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-xl">₹{total}</span>
-              <span className="text-white/80">→</span>
-            </div>
-          </button>
-        </div>
-      )}
+              <div className="flex items-center gap-2">
+                <motion.span 
+                  key={total}
+                  initial={{ scale: 1.2 }}
+                  animate={{ scale: 1 }}
+                  className="font-bold text-xl"
+                >
+                  ₹{total}
+                </motion.span>
+                <span className="text-white/80">→</span>
+              </div>
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
