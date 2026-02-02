@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { LogOut, Save, Pencil, Search, Coffee, AlertCircle, Receipt, ChefHat, Settings, ToggleLeft, ToggleRight } from 'lucide-react';
+import { LogOut, Save, Pencil, Search, Coffee, AlertCircle, Receipt, ChefHat, Settings, ToggleLeft, ToggleRight, Plus, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import type { User } from '@supabase/supabase-js';
@@ -17,12 +17,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { MenuItemForm } from '@/components/admin/MenuItemForm';
+import { DeleteItemDialog } from '@/components/admin/DeleteItemDialog';
 
 type FoodType = 'veg' | 'non_veg' | 'egg';
 
 interface MenuItem {
   id: string;
   name: string;
+  description?: string;
   price: number;
   is_veg: boolean;
   food_type: FoodType;
@@ -30,6 +33,7 @@ interface MenuItem {
   subcategory: string | null;
   category_id: string;
   spice_type: SpiceType;
+  image_key: string;
 }
 
 interface MenuCategory {
@@ -50,6 +54,12 @@ export default function Admin() {
   const [editFoodType, setEditFoodType] = useState<FoodType>('veg');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  
+  // Dialog states
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -177,6 +187,21 @@ export default function Admin() {
     toast.success(newStatus ? 'Item is now available' : 'Item is now unavailable');
   };
 
+  const handleAddItem = () => {
+    setSelectedItem(null);
+    setFormDialogOpen(true);
+  };
+
+  const handleEditItem = (item: MenuItem) => {
+    setSelectedItem(item);
+    setFormDialogOpen(true);
+  };
+
+  const handleDeleteItem = (item: MenuItem) => {
+    setSelectedItem(item);
+    setDeleteDialogOpen(true);
+  };
+
   const filteredItems = items.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = !selectedCategory || item.category_id === selectedCategory;
@@ -283,6 +308,14 @@ export default function Admin() {
             </Link>
           </div>
 
+          {/* Add New Item Button */}
+          <div className="flex justify-end mb-4">
+            <Button onClick={handleAddItem} className="gap-2">
+              <Plus className="w-4 h-4" />
+              Add Menu Item
+            </Button>
+          </div>
+
           {/* Search and Filters */}
           <div className="bg-card rounded-2xl p-4 mb-6 border border-border">
             <div className="flex flex-col md:flex-row gap-4">
@@ -324,8 +357,8 @@ export default function Admin() {
               <div className="col-span-2 hidden md:block">Type</div>
               <div className="col-span-2 md:col-span-2">Spice</div>
               <div className="col-span-2 md:col-span-2">Price</div>
-              <div className="col-span-3 md:col-span-2">Status</div>
-              <div className="col-span-2 md:col-span-1">Edit</div>
+              <div className="col-span-2 md:col-span-2">Status</div>
+              <div className="col-span-3 md:col-span-1">Actions</div>
             </div>
             
             <div className="divide-y divide-border">
@@ -373,18 +406,18 @@ export default function Admin() {
                         <SelectContent>
                           <SelectItem value="veg">🟢 Veg</SelectItem>
                           <SelectItem value="non_veg">🔴 Non-Veg</SelectItem>
-                          <SelectItem value="egg">🟡 Egg</SelectItem>
+                          <SelectItem value="egg">🟤 Egg</SelectItem>
                         </SelectContent>
                       </Select>
                     ) : (
                       <span className={cn(
                         'text-xs font-medium px-2 py-1 rounded-full',
                         item.food_type === 'veg' ? 'bg-accent/10 text-accent' :
-                        item.food_type === 'egg' ? 'bg-yellow-100 text-yellow-700' : 
+                        item.food_type === 'egg' ? 'bg-amber-100 text-amber-700' : 
                         'bg-destructive/10 text-destructive'
                       )}>
                         {item.food_type === 'veg' ? '🟢 Veg' : 
-                         item.food_type === 'egg' ? '🟡 Egg' : '🔴 Non-Veg'}
+                         item.food_type === 'egg' ? '🟤 Egg' : '🔴 Non-Veg'}
                       </span>
                     )}
                   </div>
@@ -426,7 +459,7 @@ export default function Admin() {
                       <span className="font-bold text-gold">₹{item.price}</span>
                     )}
                   </div>
-                  <div className="col-span-3 md:col-span-2">
+                  <div className="col-span-2 md:col-span-2">
                     <button
                       onClick={() => toggleItemAvailability(item)}
                       className="flex items-center gap-1.5"
@@ -444,25 +477,39 @@ export default function Admin() {
                       )}
                     </button>
                   </div>
-                  <div className="col-span-2 md:col-span-1">
-                    {editingId === item.id ? (
-                      <Button
-                        size="sm"
-                        onClick={() => saveItem(item.id)}
-                        className="h-8"
-                      >
-                        <Save className="w-4 h-4" />
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => startEdit(item)}
-                        className="h-8"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                    )}
+                  <div className="col-span-3 md:col-span-1">
+                    <div className="flex items-center gap-1">
+                      {editingId === item.id ? (
+                        <Button
+                          size="sm"
+                          onClick={() => saveItem(item.id)}
+                          className="h-8"
+                        >
+                          <Save className="w-4 h-4" />
+                        </Button>
+                      ) : (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleEditItem(item)}
+                            className="h-8 px-2"
+                            title="Edit Item"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDeleteItem(item)}
+                            className="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            title="Delete Item"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -477,6 +524,23 @@ export default function Admin() {
           </div>
         </div>
       </section>
+
+      {/* Add/Edit Form Dialog */}
+      <MenuItemForm
+        open={formDialogOpen}
+        onOpenChange={setFormDialogOpen}
+        categories={categories}
+        editItem={selectedItem}
+        onSuccess={fetchMenuData}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteItemDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        item={selectedItem}
+        onSuccess={fetchMenuData}
+      />
     </Layout>
   );
 }
