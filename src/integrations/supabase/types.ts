@@ -63,6 +63,7 @@ export type Database = {
         Row: {
           category_id: string
           created_at: string
+          description: string | null
           display_order: number
           food_type: string
           id: string
@@ -78,6 +79,7 @@ export type Database = {
         Insert: {
           category_id: string
           created_at?: string
+          description?: string | null
           display_order?: number
           food_type?: string
           id?: string
@@ -93,6 +95,7 @@ export type Database = {
         Update: {
           category_id?: string
           created_at?: string
+          description?: string | null
           display_order?: number
           food_type?: string
           id?: string
