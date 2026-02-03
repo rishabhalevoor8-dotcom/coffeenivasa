@@ -28,6 +28,18 @@ import brownieIcecreamImg from '@/assets/menu/brownie-icecream.jpg';
 import paneerTikkaSandwichImg from '@/assets/menu/paneer-tikka-sandwich.jpg';
 import vegClubSandwichImg from '@/assets/menu/veg-club-sandwich.jpg';
 import omelette from '@/assets/menu/omelette.jpg';
+import manchowSoupImg from '@/assets/menu/manchow-soup.jpg';
+import tomatoSoupImg from '@/assets/menu/tomato-soup.jpg';
+import bunItemImg from '@/assets/menu/bun-item.jpg';
+import vegFriedRiceImg from '@/assets/menu/veg-fried-rice.jpg';
+import schezwanRiceImg from '@/assets/menu/schezwan-rice.jpg';
+import paneerRollImg from '@/assets/menu/paneer-roll.jpg';
+import gobiManchurianImg from '@/assets/menu/gobi-manchurian.jpg';
+import paneer65Img from '@/assets/menu/paneer-65.jpg';
+import orangeJuiceImg from '@/assets/menu/orange-juice.jpg';
+import watermelonJuiceImg from '@/assets/menu/watermelon-juice.jpg';
+import vanillaIceCreamImg from '@/assets/menu/vanilla-ice-cream.jpg';
+import cheeseMaggiImg from '@/assets/menu/cheese-maggi.jpg';
 
 const imageMap: Record<string, string> = {
   sandwich: sandwichImg,
@@ -55,6 +67,18 @@ const imageMap: Record<string, string> = {
   'paneer-tikka-sandwich': paneerTikkaSandwichImg,
   'veg-club-sandwich': vegClubSandwichImg,
   omelette: omelette,
+  'manchow-soup': manchowSoupImg,
+  'tomato-soup': tomatoSoupImg,
+  'bun-item': bunItemImg,
+  'veg-fried-rice': vegFriedRiceImg,
+  'schezwan-rice': schezwanRiceImg,
+  'paneer-roll': paneerRollImg,
+  'gobi-manchurian': gobiManchurianImg,
+  'paneer-65': paneer65Img,
+  'orange-juice': orangeJuiceImg,
+  'watermelon-juice': watermelonJuiceImg,
+  'vanilla-ice-cream': vanillaIceCreamImg,
+  'cheese-maggi': cheeseMaggiImg,
 };
 
 interface MenuItem {
@@ -62,6 +86,12 @@ interface MenuItem {
   name: string;
   image_key: string;
   food_type: string;
+  category_id: string;
+}
+
+interface Category {
+  id: string;
+  name: string;
 }
 
 export function MenuShowcase() {
@@ -73,15 +103,36 @@ export function MenuShowcase() {
   }, []);
 
   const fetchItems = async () => {
-    const { data, error } = await supabase
-      .from('menu_items')
-      .select('id, name, image_key, food_type')
-      .eq('is_active', true)
-      .limit(25);
+    // First get all categories
+    const { data: categories } = await supabase
+      .from('menu_categories')
+      .select('id, name')
+      .order('display_order');
 
-    if (data && !error) {
-      setItems(data);
+    if (!categories) {
+      setLoading(false);
+      return;
     }
+
+    // Fetch 2 items from each category to ensure variety
+    const allItems: MenuItem[] = [];
+    
+    for (const category of categories) {
+      const { data: categoryItems } = await supabase
+        .from('menu_items')
+        .select('id, name, image_key, food_type, category_id')
+        .eq('category_id', category.id)
+        .eq('is_active', true)
+        .limit(2);
+      
+      if (categoryItems) {
+        allItems.push(...categoryItems);
+      }
+    }
+
+    // Shuffle the items for visual variety
+    const shuffled = allItems.sort(() => Math.random() - 0.5);
+    setItems(shuffled.slice(0, 25));
     setLoading(false);
   };
 
