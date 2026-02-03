@@ -30,7 +30,9 @@ import vegClubSandwichImg from '@/assets/menu/veg-club-sandwich.jpg';
 import omelette from '@/assets/menu/omelette.jpg';
 import manchowSoupImg from '@/assets/menu/manchow-soup.jpg';
 import tomatoSoupImg from '@/assets/menu/tomato-soup.jpg';
-import bunItemImg from '@/assets/menu/bun-item.jpg';
+import hotSourSoupImg from '@/assets/menu/hot-sour-soup.jpg';
+import bunMaskaImg from '@/assets/menu/bun-maska.jpg';
+import jamBunImg from '@/assets/menu/jam-bun.jpg';
 import vegFriedRiceImg from '@/assets/menu/veg-fried-rice.jpg';
 import schezwanRiceImg from '@/assets/menu/schezwan-rice.jpg';
 import paneerRollImg from '@/assets/menu/paneer-roll.jpg';
@@ -69,7 +71,9 @@ const imageMap: Record<string, string> = {
   omelette: omelette,
   'manchow-soup': manchowSoupImg,
   'tomato-soup': tomatoSoupImg,
-  'bun-item': bunItemImg,
+  'hot-sour-soup': hotSourSoupImg,
+  'bun-maska': bunMaskaImg,
+  'jam-bun': jamBunImg,
   'veg-fried-rice': vegFriedRiceImg,
   'schezwan-rice': schezwanRiceImg,
   'paneer-roll': paneerRollImg,
