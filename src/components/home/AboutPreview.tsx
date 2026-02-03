@@ -2,7 +2,11 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Heart, Leaf, Users } from 'lucide-react';
-import { ScrollReveal, StaggerContainer, StaggerItem, FloatingElement } from '@/components/animations';
+import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/animations';
+import cafeStorefront from '@/assets/cafe-storefront.jpg';
+import cappuccinoImg from '@/assets/menu/cappuccino.jpg';
+import sandwichImg from '@/assets/menu/sandwich.jpg';
+import pastaImg from '@/assets/menu/pasta.jpg';
 
 const features = [
   {
@@ -87,50 +91,50 @@ export function AboutPreview() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-4">
                   <motion.div
-                    className="h-48 rounded-2xl bg-accent/20 overflow-hidden shadow-card"
+                    className="h-48 rounded-2xl overflow-hidden shadow-card"
                     whileHover={{ scale: 1.02 }}
                     transition={{ type: 'spring', stiffness: 300 }}
                   >
-                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/30 flex items-center justify-center">
-                      <FloatingElement duration={3}>
-                        <span className="text-6xl">☕</span>
-                      </FloatingElement>
-                    </div>
+                    <img 
+                      src={cafeStorefront} 
+                      alt="Coffee Nivasa Café" 
+                      className="w-full h-full object-cover"
+                    />
                   </motion.div>
                   <motion.div
-                    className="h-32 rounded-2xl bg-gold/20 overflow-hidden shadow-card"
+                    className="h-32 rounded-2xl overflow-hidden shadow-card"
                     whileHover={{ scale: 1.02 }}
                     transition={{ type: 'spring', stiffness: 300 }}
                   >
-                    <div className="w-full h-full bg-gradient-to-br from-gold/30 to-gold/10 flex items-center justify-center">
-                      <FloatingElement duration={3.5} delay={0.5}>
-                        <span className="text-4xl">🍳</span>
-                      </FloatingElement>
-                    </div>
+                    <img 
+                      src={cappuccinoImg} 
+                      alt="Fresh Coffee" 
+                      className="w-full h-full object-cover"
+                    />
                   </motion.div>
                 </div>
                 <div className="space-y-4 pt-8">
                   <motion.div
-                    className="h-32 rounded-2xl bg-primary/10 overflow-hidden shadow-card"
+                    className="h-32 rounded-2xl overflow-hidden shadow-card"
                     whileHover={{ scale: 1.02 }}
                     transition={{ type: 'spring', stiffness: 300 }}
                   >
-                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                      <FloatingElement duration={4} delay={1}>
-                        <span className="text-4xl">🥐</span>
-                      </FloatingElement>
-                    </div>
+                    <img 
+                      src={sandwichImg} 
+                      alt="Delicious Sandwich" 
+                      className="w-full h-full object-cover"
+                    />
                   </motion.div>
                   <motion.div
-                    className="h-48 rounded-2xl bg-secondary overflow-hidden shadow-card"
+                    className="h-48 rounded-2xl overflow-hidden shadow-card"
                     whileHover={{ scale: 1.02 }}
                     transition={{ type: 'spring', stiffness: 300 }}
                   >
-                    <div className="w-full h-full bg-gradient-to-br from-secondary to-muted flex items-center justify-center">
-                      <FloatingElement duration={3.2} delay={0.3}>
-                        <span className="text-6xl">🍕</span>
-                      </FloatingElement>
-                    </div>
+                    <img 
+                      src={pastaImg} 
+                      alt="Fresh Pasta" 
+                      className="w-full h-full object-cover"
+                    />
                   </motion.div>
                 </div>
               </div>
