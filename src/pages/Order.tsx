@@ -28,7 +28,9 @@ import {
   Bell,
   QrCode,
   Smartphone,
-  ShieldCheck
+  ShieldCheck,
+  Banknote,
+  CreditCard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -68,7 +70,7 @@ interface CustomerDetails {
 }
 
 type OrderType = 'dine_in' | 'takeaway';
-type PaymentMethod = 'upi_later';
+type PaymentMethod = 'upi_later' | 'cash_later' | 'card_later';
 
 export default function Order() {
   const [pin, setPin] = useState('');
@@ -90,7 +92,7 @@ export default function Order() {
   const [orderStatus, setOrderStatus] = useState<'pending' | 'preparing' | 'ready' | 'served' | 'cancelled'>('pending');
   const [orderDateTime, setOrderDateTime] = useState<Date | null>(null);
   const [showCart, setShowCart] = useState(false);
-  const [selectedPayment] = useState<PaymentMethod>('upi_later'); // Single payment option: Pay Later (UPI)
+  const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>('upi_later');
   const [showUpiConfirmation, setShowUpiConfirmation] = useState(false);
   const [queueCount, setQueueCount] = useState<number>(0);
   const [estimatedWaitTime, setEstimatedWaitTime] = useState<number>(0);
@@ -239,7 +241,27 @@ export default function Order() {
   const getItemQuantity = (itemId: string) => cart.find(i => i.id === itemId)?.quantity || 0;
 
   const getPaymentStatus = (): 'pending' | 'paid' | 'cash_pending' | 'refunded' | 'cheque_pending' | 'card_pending' => {
-    return 'pending'; // Pay Later (UPI) - payment to be collected later
+    switch (selectedPayment) {
+      case 'cash_later':
+        return 'cash_pending';
+      case 'card_later':
+        return 'card_pending';
+      case 'upi_later':
+      default:
+        return 'pending';
+    }
+  };
+
+  const getPaymentLabel = () => {
+    switch (selectedPayment) {
+      case 'cash_later':
+        return 'Pay Later (Cash)';
+      case 'card_later':
+        return 'Pay Later (Card)';
+      case 'upi_later':
+      default:
+        return 'Pay Later (UPI)';
+    }
   };
 
   const validateCustomerDetails = () => {
@@ -983,20 +1005,99 @@ export default function Order() {
             ))}
           </div>
 
-          {/* Payment Method - Pay Later (UPI) Only */}
+          {/* Payment Method Selection */}
           <div className="mt-6">
             <h2 className="font-display text-lg font-bold text-foreground mb-4">Payment Method</h2>
-            <div className="bg-white rounded-2xl p-4 border-2 border-amber-500 shadow-lg">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-xl bg-amber-500 flex items-center justify-center">
-                  <Wallet className="w-7 h-7 text-white" />
+            <div className="space-y-3">
+              {/* UPI Option */}
+              <button
+                onClick={() => setSelectedPayment('upi_later')}
+                className={cn(
+                  'w-full bg-white rounded-2xl p-4 border-2 transition-all',
+                  selectedPayment === 'upi_later' 
+                    ? 'border-amber-500 shadow-lg' 
+                    : 'border-amber-100 hover:border-amber-300'
+                )}
+              >
+                <div className="flex items-center gap-4">
+                  <div className={cn(
+                    'w-12 h-12 rounded-xl flex items-center justify-center transition-colors',
+                    selectedPayment === 'upi_later' ? 'bg-amber-500' : 'bg-amber-100'
+                  )}>
+                    <Wallet className={cn(
+                      'w-6 h-6',
+                      selectedPayment === 'upi_later' ? 'text-white' : 'text-amber-600'
+                    )} />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="font-bold text-foreground">Pay Later (UPI)</p>
+                    <p className="text-xs text-muted-foreground">Pay via UPI at counter/table</p>
+                  </div>
+                  {selectedPayment === 'upi_later' && (
+                    <CheckCircle className="w-6 h-6 text-amber-500" />
+                  )}
                 </div>
-                <div className="flex-1">
-                  <p className="font-bold text-lg text-foreground">Pay Later (UPI)</p>
-                  <p className="text-sm text-muted-foreground">Payment will be collected at counter/table via UPI</p>
+              </button>
+
+              {/* Cash Option */}
+              <button
+                onClick={() => setSelectedPayment('cash_later')}
+                className={cn(
+                  'w-full bg-white rounded-2xl p-4 border-2 transition-all',
+                  selectedPayment === 'cash_later' 
+                    ? 'border-amber-500 shadow-lg' 
+                    : 'border-amber-100 hover:border-amber-300'
+                )}
+              >
+                <div className="flex items-center gap-4">
+                  <div className={cn(
+                    'w-12 h-12 rounded-xl flex items-center justify-center transition-colors',
+                    selectedPayment === 'cash_later' ? 'bg-amber-500' : 'bg-amber-100'
+                  )}>
+                    <Banknote className={cn(
+                      'w-6 h-6',
+                      selectedPayment === 'cash_later' ? 'text-white' : 'text-amber-600'
+                    )} />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="font-bold text-foreground">Pay Later (Cash)</p>
+                    <p className="text-xs text-muted-foreground">Pay with cash at counter/table</p>
+                  </div>
+                  {selectedPayment === 'cash_later' && (
+                    <CheckCircle className="w-6 h-6 text-amber-500" />
+                  )}
                 </div>
-                <CheckCircle className="w-6 h-6 text-amber-500" />
-              </div>
+              </button>
+
+              {/* Card Option */}
+              <button
+                onClick={() => setSelectedPayment('card_later')}
+                className={cn(
+                  'w-full bg-white rounded-2xl p-4 border-2 transition-all',
+                  selectedPayment === 'card_later' 
+                    ? 'border-amber-500 shadow-lg' 
+                    : 'border-amber-100 hover:border-amber-300'
+                )}
+              >
+                <div className="flex items-center gap-4">
+                  <div className={cn(
+                    'w-12 h-12 rounded-xl flex items-center justify-center transition-colors',
+                    selectedPayment === 'card_later' ? 'bg-amber-500' : 'bg-amber-100'
+                  )}>
+                    <CreditCard className={cn(
+                      'w-6 h-6',
+                      selectedPayment === 'card_later' ? 'text-white' : 'text-amber-600'
+                    )} />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="font-bold text-foreground">Pay Later (Card)</p>
+                    <p className="text-xs text-muted-foreground">Pay with Credit/Debit Card at counter/table</p>
+                  </div>
+                  {selectedPayment === 'card_later' && (
+                    <CheckCircle className="w-6 h-6 text-amber-500" />
+                  )}
+                </div>
+              </button>
             </div>
           </div>
 
@@ -1028,7 +1129,7 @@ export default function Order() {
                 </div>
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>Payment</span>
-                  <span className="font-medium text-foreground">Pay Later (UPI)</span>
+                  <span className="font-medium text-foreground">{getPaymentLabel()}</span>
                 </div>
                 <div className="flex justify-between pt-2">
                   <span className="font-bold text-lg">Total</span>
@@ -1051,7 +1152,7 @@ export default function Order() {
             {isSubmitting ? 'Placing Order...' : `Place Order • ₹${total}`}
           </Button>
           <p className="text-xs text-center text-muted-foreground mt-2">
-            Payment will be collected via UPI at counter/table
+            Payment will be collected at counter/table
           </p>
         </div>
       </div>
