@@ -28,6 +28,13 @@ import paneerRoll from '@/assets/menu/paneer-roll.jpg';
 import hotChocolate from '@/assets/menu/hot-chocolate.jpg';
 import masalaChai from '@/assets/menu/masala-chai.jpg';
 import brownieIcecream from '@/assets/menu/brownie-icecream.jpg';
+// Soup images
+import manchowSoup from '@/assets/menu/manchow-soup.jpg';
+import hotSourSoup from '@/assets/menu/hot-sour-soup.jpg';
+import tomatoSoup from '@/assets/menu/tomato-soup.jpg';
+// Bun images
+import bunMaska from '@/assets/menu/bun-maska.jpg';
+import jamBun from '@/assets/menu/jam-bun.jpg';
 // New images for variety
 import orangeJuice from '@/assets/menu/orange-juice.jpg';
 import omelette from '@/assets/menu/omelette.jpg';
@@ -195,21 +202,21 @@ const menuCategories: MenuCategory[] = [
     name: 'Soup',
     icon: '🍲',
     items: [
-      { name: 'Veg Manchow Soup', price: '₹60', isVeg: true, image: hotChocolate },
-      { name: 'Hot & Sour Soup', price: '₹70', isVeg: true, image: hotChocolate },
-      { name: 'Tomato Soup', price: '₹70', isVeg: true, image: hotChocolate },
-      { name: 'Chicken Manchow Soup', price: '₹90', isVeg: false, image: hotChocolate },
-      { name: 'Chicken Hot & Sour Soup', price: '₹90', isVeg: false, image: hotChocolate },
+      { name: 'Veg Manchow Soup', price: '₹60', isVeg: true, image: manchowSoup },
+      { name: 'Hot & Sour Soup', price: '₹70', isVeg: true, image: hotSourSoup },
+      { name: 'Tomato Soup', price: '₹70', isVeg: true, image: tomatoSoup },
+      { name: 'Chicken Manchow Soup', price: '₹90', isVeg: false, image: manchowSoup },
+      { name: 'Chicken Hot & Sour Soup', price: '₹90', isVeg: false, image: hotSourSoup },
     ],
   },
   {
     name: 'Bun Items',
     icon: '🍞',
     items: [
-      { name: 'Bun Maska', price: '₹30', isVeg: true, image: sandwich },
-      { name: 'Jam Bun', price: '₹40', isVeg: true, image: sandwich },
-      { name: 'Nutella Bun', price: '₹45', isVeg: true, image: brownieIcecream },
-      { name: 'Peanut Bun', price: '₹45', isVeg: true, image: sandwich },
+      { name: 'Bun Maska', price: '₹30', isVeg: true, image: bunMaska },
+      { name: 'Jam Bun', price: '₹40', isVeg: true, image: jamBun },
+      { name: 'Nutella Bun', price: '₹45', isVeg: true, image: jamBun },
+      { name: 'Peanut Bun', price: '₹45', isVeg: true, image: bunMaska },
     ],
   },
   {
