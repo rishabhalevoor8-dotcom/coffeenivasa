@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
@@ -101,6 +102,8 @@ interface Category {
 export function MenuShowcase() {
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchItems();
@@ -156,60 +159,121 @@ export function MenuShowcase() {
   const duplicatedItems = [...items, ...items];
 
   return (
-    <section className="py-8 md:py-12 overflow-hidden bg-secondary/30">
+    <section className="py-8 md:py-12 overflow-hidden bg-secondary/30 relative">
+      {/* Decorative elements */}
+      <motion.div
+        className="absolute top-4 left-8 text-4xl opacity-10 pointer-events-none"
+        animate={{ y: [0, -10, 0], rotate: [0, 5, 0] }}
+        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        🍔
+      </motion.div>
+      <motion.div
+        className="absolute bottom-4 right-8 text-4xl opacity-10 pointer-events-none"
+        animate={{ y: [0, 10, 0], rotate: [0, -5, 0] }}
+        transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        ☕
+      </motion.div>
+
       <div className="container mx-auto px-4 mb-6">
-        <h2 className="font-display text-xl md:text-2xl font-bold text-foreground text-center">
+        <motion.h2
+          className="font-display text-xl md:text-2xl font-bold text-foreground text-center"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
           Our Delicious Menu
-        </h2>
+        </motion.h2>
+        <motion.p
+          className="text-muted-foreground text-center text-sm mt-2"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.2 }}
+        >
+          Hover to pause • Tap to explore
+        </motion.p>
       </div>
 
-      <div className="relative">
+      <div
+        className="relative"
+        ref={containerRef}
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        onTouchStart={() => setIsPaused(true)}
+        onTouchEnd={() => setIsPaused(false)}
+      >
         {/* Gradient overlays for fade effect */}
         <div className="absolute left-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-r from-secondary/30 to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-l from-secondary/30 to-transparent z-10 pointer-events-none" />
 
         {/* Scrolling container */}
-        <div className="flex animate-scroll-left">
+        <div
+          className={cn(
+            'flex animate-scroll-left',
+            isPaused && 'animation-paused'
+          )}
+          style={{ animationPlayState: isPaused ? 'paused' : 'running' }}
+        >
           {duplicatedItems.map((item, index) => (
-            <div
+            <motion.div
               key={`${item.id}-${index}`}
               className="flex-shrink-0 w-36 md:w-48 mx-2 md:mx-3"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.02, duration: 0.3 }}
+              whileHover={{ scale: 1.05, zIndex: 20 }}
             >
-              <div className="bg-card rounded-2xl overflow-hidden border border-border shadow-sm hover:shadow-lg transition-all duration-300 group">
+              <motion.div
+                className="bg-card rounded-2xl overflow-hidden border border-border shadow-sm group relative"
+                whileHover={{
+                  boxShadow: '0 20px 40px -15px rgba(0,0,0,0.15)',
+                  borderColor: 'hsl(var(--gold) / 0.3)',
+                }}
+                transition={{ duration: 0.3 }}
+              >
                 {/* Image */}
                 <div className="relative aspect-square overflow-hidden">
-                  <img
+                  <motion.img
                     src={getItemImage(item.image_key)}
                     alt={item.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-cover"
+                    whileHover={{ scale: 1.15 }}
+                    transition={{ duration: 0.5 }}
                     loading="lazy"
+                  />
+                  {/* Shine effect on hover */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 -translate-x-full group-hover:translate-x-full transition-all duration-700"
                   />
                   {/* Food type indicator */}
                   <div
                     className={cn(
-                      'absolute top-2 right-2 w-5 h-5 rounded border-2 flex items-center justify-center',
+                      'absolute top-2 right-2 w-5 h-5 rounded border-2 flex items-center justify-center backdrop-blur-sm',
                       item.food_type === 'veg' ? 'border-accent bg-card' : 
-                      item.food_type === 'egg' ? 'border-amber-700 bg-card' : 'border-destructive bg-card'
+                      item.food_type === 'egg' ? 'border-gold bg-card' : 'border-destructive bg-card'
                     )}
                   >
                     <div
                       className={cn(
                         'w-2.5 h-2.5 rounded-full',
                         item.food_type === 'veg' ? 'bg-accent' : 
-                        item.food_type === 'egg' ? 'bg-amber-700' : 'bg-destructive'
+                        item.food_type === 'egg' ? 'bg-gold' : 'bg-destructive'
                       )}
                     />
                   </div>
                 </div>
 
                 {/* Name */}
-                <div className="p-3">
-                  <h3 className="font-display font-semibold text-sm md:text-base text-foreground text-center truncate">
+                <div className="p-3 relative">
+                  <h3 className="font-display font-semibold text-sm md:text-base text-foreground text-center truncate group-hover:text-gold transition-colors duration-300">
                     {item.name}
                   </h3>
                 </div>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           ))}
         </div>
       </div>

@@ -4,3 +4,4 @@ export { StaggerContainer, StaggerItem, staggerItemVariants } from './StaggerCon
 export { AnimatedCard } from './AnimatedCard';
 export { TextReveal, CharacterReveal } from './TextReveal';
 export { FloatingElement, PulsingElement } from './FloatingElement';
+export { GlowEffect, ShineEffect, MagneticButton, ParallaxCard, BlurReveal, Typewriter, CountUp } from './GlowEffect';
