@@ -1,4 +1,5 @@
 import * as React from "react";
+import { motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
@@ -6,6 +7,31 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
   <div ref={ref} className={cn("rounded-lg border bg-card text-card-foreground shadow-sm", className)} {...props} />
 ));
 Card.displayName = "Card";
+
+interface AnimatedCardWrapperProps extends React.HTMLAttributes<HTMLDivElement> {
+  hoverScale?: number;
+  hoverY?: number;
+}
+
+const AnimatedCardWrapper = React.forwardRef<HTMLDivElement, AnimatedCardWrapperProps>(
+  ({ className, hoverScale = 1.02, hoverY = -5, children, ...props }, ref) => (
+    <motion.div
+      ref={ref}
+      className={cn("rounded-lg border bg-card text-card-foreground shadow-sm transition-colors", className)}
+      whileHover={{
+        scale: hoverScale,
+        y: hoverY,
+        boxShadow: 'var(--shadow-hover)',
+      }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+      {...props}
+    >
+      {children}
+    </motion.div>
+  )
+);
+AnimatedCardWrapper.displayName = "AnimatedCardWrapper";
 
 const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
@@ -41,3 +67,4 @@ const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
 CardFooter.displayName = "CardFooter";
 
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent };
+export { AnimatedCardWrapper };
