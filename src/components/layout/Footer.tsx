@@ -186,7 +186,7 @@ export function Footer() {
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ duration: 1, repeat: Infinity }}
             >
-              <Heart className="w-4 h-4 fill-red-400 text-red-400" />
+              <Heart className="w-4 h-4 fill-destructive text-destructive" />
             </motion.span>
             in Bangalore
           </p>
