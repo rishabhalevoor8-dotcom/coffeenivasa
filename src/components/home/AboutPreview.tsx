@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Heart, Leaf, Users } from 'lucide-react';
 import { ScrollReveal, StaggerContainer, StaggerItem, BlurReveal } from '@/components/animations';
@@ -26,15 +26,15 @@ const features = [
   },
 ];
 
-const imageHoverVariants = {
+const imageHoverVariants: Variants = {
   rest: { scale: 1 },
   hover: { 
     scale: 1.08,
-    transition: { duration: 0.4, ease: 'easeOut' }
+    transition: { duration: 0.4, ease: 'easeOut' as const }
   }
 };
 
-const overlayVariants = {
+const overlayVariants: Variants = {
   rest: { opacity: 0 },
   hover: { opacity: 1, transition: { duration: 0.3 } }
 };
@@ -213,7 +213,6 @@ export function AboutPreview() {
                 initial={{ opacity: 0, y: 20, scale: 0.8 }}
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.5, type: 'spring' }}
                 whileHover={{ scale: 1.1, y: -3 }}
                 animate={{
                   boxShadow: [
@@ -222,7 +221,7 @@ export function AboutPreview() {
                     '0 4px 20px -4px rgba(var(--gold) / 0.4)',
                   ],
                 }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' as const }}
               >
                 <motion.span
                   animate={{ scale: [1, 1.1, 1] }}
