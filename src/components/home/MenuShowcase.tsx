@@ -253,14 +253,14 @@ export function MenuShowcase() {
                     className={cn(
                       'absolute top-2 right-2 w-5 h-5 rounded border-2 flex items-center justify-center backdrop-blur-sm',
                       item.food_type === 'veg' ? 'border-accent bg-card' : 
-                      item.food_type === 'egg' ? 'border-amber-700 bg-card' : 'border-destructive bg-card'
+                      item.food_type === 'egg' ? 'border-gold bg-card' : 'border-destructive bg-card'
                     )}
                   >
                     <div
                       className={cn(
                         'w-2.5 h-2.5 rounded-full',
                         item.food_type === 'veg' ? 'bg-accent' : 
-                        item.food_type === 'egg' ? 'bg-amber-700' : 'bg-destructive'
+                        item.food_type === 'egg' ? 'bg-gold' : 'bg-destructive'
                       )}
                     />
                   </div>
