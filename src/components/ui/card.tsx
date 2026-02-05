@@ -1,5 +1,5 @@
 import * as React from "react";
-import { motion } from "framer-motion";
+import { motion, type HTMLMotionProps } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
@@ -8,13 +8,15 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
 ));
 Card.displayName = "Card";
 
-interface AnimatedCardWrapperProps extends React.HTMLAttributes<HTMLDivElement> {
+interface AnimatedCardWrapperProps {
   hoverScale?: number;
   hoverY?: number;
+  className?: string;
+  children?: React.ReactNode;
 }
 
 const AnimatedCardWrapper = React.forwardRef<HTMLDivElement, AnimatedCardWrapperProps>(
-  ({ className, hoverScale = 1.02, hoverY = -5, children, ...props }, ref) => (
+  ({ className, hoverScale = 1.02, hoverY = -5, children }, ref) => (
     <motion.div
       ref={ref}
       className={cn("rounded-lg border bg-card text-card-foreground shadow-sm transition-colors", className)}
@@ -25,7 +27,6 @@ const AnimatedCardWrapper = React.forwardRef<HTMLDivElement, AnimatedCardWrapper
       }}
       whileTap={{ scale: 0.98 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      {...props}
     >
       {children}
     </motion.div>
