@@ -49,8 +49,10 @@ export function useShopStatus(): ShopStatus {
   }, [fetchSettings]);
 
   const isWithinOpenHours = useCallback(() => {
+    // Get current time in India timezone (IST)
     const now = new Date();
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const istTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    const currentMinutes = istTime.getHours() * 60 + istTime.getMinutes();
 
     const [openHour, openMin] = settings.openTime.split(':').map(Number);
     const [closeHour, closeMin] = settings.closeTime.split(':').map(Number);
