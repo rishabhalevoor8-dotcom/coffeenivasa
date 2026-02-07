@@ -3,8 +3,6 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { 
   Coffee, 
@@ -18,9 +16,6 @@ import {
   Wallet,
   ArrowLeft,
   Sparkles,
-  User,
-  Phone,
-  Mail,
   Clock,
   Calendar,
   Home,
@@ -63,22 +58,11 @@ interface CartItem extends MenuItem {
   quantity: number;
 }
 
-interface CustomerDetails {
-  name: string;
-  phone: string;
-  email: string;
-}
-
 type OrderType = 'dine_in' | 'takeaway';
 type PaymentMethod = 'upi_later' | 'cash_later' | 'card_later';
 
 export default function Order() {
-  const [pin, setPin] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [customerDetailsCollected, setCustomerDetailsCollected] = useState(false);
-  const [customerDetails, setCustomerDetails] = useState<CustomerDetails>({ name: '', phone: '', email: '' });
-  const [loading, setLoading] = useState(false);
-  const [menuLoading, setMenuLoading] = useState(false);
+  const [menuLoading, setMenuLoading] = useState(true);
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -102,6 +86,11 @@ export default function Order() {
   
   // Confetti celebration
   const { fireConfetti } = useConfetti();
+
+  // Load menu data on mount
+  useEffect(() => {
+    fetchMenuData();
+  }, []);
 
   // Trigger confetti when order is complete
   useEffect(() => {
@@ -151,29 +140,6 @@ export default function Order() {
       supabase.removeChannel(channel);
     };
   }, [orderId, orderComplete]);
-
-  const verifyPin = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('system_settings')
-      .select('value')
-      .eq('key', 'customer_pin')
-      .maybeSingle();
-
-    if (error || !data) {
-      toast.error('Could not verify PIN');
-      setLoading(false);
-      return;
-    }
-
-    if (data.value === pin) {
-      setIsAuthenticated(true);
-      fetchMenuData();
-    } else {
-      toast.error('Invalid PIN');
-    }
-    setLoading(false);
-  };
 
   const fetchMenuData = async () => {
     setMenuLoading(true);
@@ -264,24 +230,6 @@ export default function Order() {
     }
   };
 
-  const validateCustomerDetails = () => {
-    if (!customerDetails.name.trim()) {
-      toast.error('Please enter your name');
-      return false;
-    }
-    if (!customerDetails.phone.trim() || customerDetails.phone.length < 10) {
-      toast.error('Please enter a valid phone number');
-      return false;
-    }
-    return true;
-  };
-
-  const handleCustomerDetailsSubmit = () => {
-    if (validateCustomerDetails()) {
-      setCustomerDetailsCollected(true);
-    }
-  };
-
   const handleProceedToPayment = () => {
     if (orderType === 'dine_in' && !tableNumber) {
       toast.error('Please select a table number');
@@ -332,8 +280,6 @@ export default function Order() {
           total,
           payment_status: getPaymentStatus(),
           status: 'pending',
-          customer_name: customerDetails.name,
-          customer_phone: customerDetails.phone,
         }])
         .select()
         .single();
@@ -378,8 +324,6 @@ export default function Order() {
     setOrderDateTime(null);
     setOrderType(null);
     setTableNumber(null);
-    setCustomerDetailsCollected(false);
-    setCustomerDetails({ name: '', phone: '', email: '' });
     setShowUpiConfirmation(false);
     setQueueCount(0);
     setEstimatedWaitTime(0);
@@ -526,7 +470,7 @@ export default function Order() {
             Order Confirmed!
           </h1>
           <p className="text-muted-foreground mb-6 text-lg">
-            Thank you, <span className="font-semibold text-foreground">{customerDetails.name}</span>!
+            Thank you for your order!
           </p>
           
           <div className="bg-white rounded-3xl p-8 shadow-xl shadow-amber-100 border border-amber-100 mb-6">
@@ -683,142 +627,6 @@ export default function Order() {
           >
             Place Another Order
           </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // PIN Entry Screen
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 flex items-center justify-center p-6">
-        <div className="w-full max-w-sm">
-          <div className="text-center mb-10">
-            <img 
-              src={logo} 
-              alt="Coffee Nivasa" 
-              className="w-24 h-24 rounded-full object-cover mx-auto mb-6 shadow-xl shadow-amber-200"
-            />
-            <h1 className="font-display text-3xl font-bold text-foreground mb-2">
-              Coffee Nivasa
-            </h1>
-            <p className="text-muted-foreground text-lg">Enter café code to order</p>
-          </div>
-          
-          <div className="bg-white rounded-3xl p-8 shadow-xl shadow-amber-100 border border-amber-100">
-            <Input
-              type="password"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              placeholder="Enter Code"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              className="text-center text-3xl tracking-[0.5em] h-16 rounded-2xl border-2 border-amber-200 focus:border-amber-400 bg-amber-50/50 mb-6"
-              maxLength={6}
-              onKeyDown={(e) => e.key === 'Enter' && verifyPin()}
-            />
-            <Button 
-              onClick={verifyPin} 
-              className="w-full h-14 text-lg rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg" 
-              disabled={loading || pin.length < 4}
-            >
-              {loading ? 'Verifying...' : 'Start Ordering'}
-            </Button>
-            
-            {/* Home Button */}
-            <Button 
-              variant="ghost" 
-              className="w-full mt-4 text-muted-foreground hover:text-foreground"
-              asChild
-            >
-              <Link to="/">
-                <Home className="w-5 h-5 mr-2" />
-                Back to Home
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Customer Details Collection Screen
-  if (!customerDetailsCollected) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 flex items-center justify-center p-6">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-4 shadow-xl shadow-amber-200">
-              <User className="w-10 h-10 text-white" />
-            </div>
-            <h1 className="font-display text-2xl font-bold text-foreground mb-2">
-              Your Details
-            </h1>
-            <p className="text-muted-foreground">Please tell us a bit about you</p>
-          </div>
-          
-          <div className="bg-white rounded-3xl p-8 shadow-xl shadow-amber-100 border border-amber-100">
-            <div className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium">
-                  Name <span className="text-red-500">*</span>
-                </Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="name"
-                    type="text"
-                    placeholder="Your name"
-                    value={customerDetails.name}
-                    onChange={(e) => setCustomerDetails(prev => ({ ...prev, name: e.target.value }))}
-                    className="pl-10 h-12 rounded-xl border-2 border-amber-200 focus:border-amber-400"
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="text-sm font-medium">
-                  Phone Number <span className="text-red-500">*</span>
-                </Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="phone"
-                    type="tel"
-                    inputMode="numeric"
-                    placeholder="9876543210"
-                    value={customerDetails.phone}
-                    onChange={(e) => setCustomerDetails(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
-                    className="pl-10 h-12 rounded-xl border-2 border-amber-200 focus:border-amber-400"
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">
-                  Email <span className="text-muted-foreground text-xs">(optional)</span>
-                </Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={customerDetails.email}
-                    onChange={(e) => setCustomerDetails(prev => ({ ...prev, email: e.target.value }))}
-                    className="pl-10 h-12 rounded-xl border-2 border-amber-200 focus:border-amber-400"
-                  />
-                </div>
-              </div>
-            </div>
-            
-            <Button 
-              onClick={handleCustomerDetailsSubmit}
-              className="w-full h-14 text-lg rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg mt-6"
-            >
-              Continue
-            </Button>
-          </div>
         </div>
       </div>
     );
