@@ -148,7 +148,7 @@ export function HeroSection() {
           {/* CTA Buttons */}
           <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-3 pt-4">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="gold" size="lg" onClick={() => toast.info('Please login as staff to place orders')}>
+              <Button variant="gold" size="lg" onClick={handleOrderClick} className={!isStaff ? 'cursor-default' : ''}>
                 <ShoppingBag className="w-5 h-5" />
                 Order Here
               </Button>
