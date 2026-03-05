@@ -52,6 +52,31 @@ const badgeVariants = {
 };
 
 export function HeroSection() {
+  const navigate = useNavigate();
+  const [isStaff, setIsStaff] = useState(false);
+
+  useEffect(() => {
+    const checkStaff = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id);
+      if (roles && roles.length > 0) { setIsStaff(true); return; }
+      const { data: adminCheck } = await supabase
+        .from('admin_users')
+        .select('id')
+        .eq('email', session.user.email || '');
+      if (adminCheck && adminCheck.length > 0) setIsStaff(true);
+    };
+    checkStaff();
+  }, []);
+
+  const handleOrderClick = () => {
+    if (isStaff) navigate('/order');
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image with Parallax Effect */}
