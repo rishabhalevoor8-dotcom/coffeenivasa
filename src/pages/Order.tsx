@@ -62,6 +62,8 @@ type OrderType = 'dine_in' | 'takeaway';
 type PaymentMethod = 'upi_later' | 'cash_later' | 'card_later';
 
 export default function Order() {
+  const navigate = useNavigate();
+  const [authChecked, setAuthChecked] = useState(false);
   const [menuLoading, setMenuLoading] = useState(true);
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
