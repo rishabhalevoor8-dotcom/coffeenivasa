@@ -140,6 +140,17 @@ export function HeroSection() {
             </motion.div>
           </motion.div>
 
+          {/* Contact Number */}
+          <motion.div variants={itemVariants} className="pt-2">
+            <a
+              href="tel:+919663025408"
+              className="inline-flex items-center gap-2 text-primary-foreground/70 hover:text-gold transition-colors text-sm"
+            >
+              <Phone className="w-4 h-4" />
+              <span>Call to Order: <span className="font-semibold text-primary-foreground/90">+91 96630 25408</span></span>
+            </a>
+          </motion.div>
+
           {/* Trust Indicators */}
           <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-3 pt-8">
             {trustIndicators.map((item, index) => (

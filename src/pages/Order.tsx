@@ -85,6 +85,37 @@ export default function Order() {
 
   // Shop status check
   const shopStatus = useShopStatus();
+
+  // Auth guard: only allow logged-in staff/admin
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Please login as staff to place orders');
+        navigate('/auth');
+        return;
+      }
+      // Check if user has a staff role
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id);
+      if (!roles || roles.length === 0) {
+        // Also check legacy admin_users
+        const { data: adminCheck } = await supabase
+          .from('admin_users')
+          .select('id')
+          .eq('email', session.user.email || '');
+        if (!adminCheck || adminCheck.length === 0) {
+          toast.error('Please login as staff to place orders');
+          navigate('/auth');
+          return;
+        }
+      }
+      setAuthChecked(true);
+    };
+    checkAuth();
+  }, [navigate]);
   
   // Confetti celebration
   const { fireConfetti } = useConfetti();
