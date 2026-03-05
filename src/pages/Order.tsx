@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -62,6 +62,8 @@ type OrderType = 'dine_in' | 'takeaway';
 type PaymentMethod = 'upi_later' | 'cash_later' | 'card_later';
 
 export default function Order() {
+  const navigate = useNavigate();
+  const [authChecked, setAuthChecked] = useState(false);
   const [menuLoading, setMenuLoading] = useState(true);
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
@@ -83,6 +85,37 @@ export default function Order() {
 
   // Shop status check
   const shopStatus = useShopStatus();
+
+  // Auth guard: only allow logged-in staff/admin
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Please login as staff to place orders');
+        navigate('/auth');
+        return;
+      }
+      // Check if user has a staff role
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id);
+      if (!roles || roles.length === 0) {
+        // Also check legacy admin_users
+        const { data: adminCheck } = await supabase
+          .from('admin_users')
+          .select('id')
+          .eq('email', session.user.email || '');
+        if (!adminCheck || adminCheck.length === 0) {
+          toast.error('Please login as staff to place orders');
+          navigate('/auth');
+          return;
+        }
+      }
+      setAuthChecked(true);
+    };
+    checkAuth();
+  }, [navigate]);
   
   // Confetti celebration
   const { fireConfetti } = useConfetti();
@@ -328,6 +361,18 @@ export default function Order() {
     setQueueCount(0);
     setEstimatedWaitTime(0);
   };
+
+  // Auth loading state
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <Coffee className="w-10 h-10 text-gold mx-auto animate-pulse" />
+          <p className="text-muted-foreground">Verifying access...</p>
+        </div>
+      </div>
+    );
+  }
 
   // UPI QR Code Payment Confirmation Screen
   if (showUpiConfirmation) {

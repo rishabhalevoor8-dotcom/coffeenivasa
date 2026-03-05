@@ -1,8 +1,8 @@
-import { ShoppingBag, MapPin } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ShoppingBag, MapPin, Phone } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { FloatingElement } from '@/components/animations';
+import { toast } from 'sonner';
 import heroBg from '@/assets/hero-bg.jpg';
 
 const trustIndicators = [
@@ -121,11 +121,9 @@ export function HeroSection() {
           {/* CTA Buttons */}
           <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-3 pt-4">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="gold" size="lg" asChild>
-                <Link to="/order">
-                  <ShoppingBag className="w-5 h-5" />
-                  Order Now
-                </Link>
+              <Button variant="gold" size="lg" onClick={() => toast.info('Please login as staff to place orders')}>
+                <ShoppingBag className="w-5 h-5" />
+                Order Here
               </Button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -140,6 +138,17 @@ export function HeroSection() {
                 </a>
               </Button>
             </motion.div>
+          </motion.div>
+
+          {/* Contact Number */}
+          <motion.div variants={itemVariants} className="pt-2">
+            <a
+              href="tel:+919663025408"
+              className="inline-flex items-center gap-2 text-primary-foreground/70 hover:text-gold transition-colors text-sm"
+            >
+              <Phone className="w-4 h-4" />
+              <span>Call to Order: <span className="font-semibold text-primary-foreground/90">+91 96630 25408</span></span>
+            </a>
           </motion.div>
 
           {/* Trust Indicators */}

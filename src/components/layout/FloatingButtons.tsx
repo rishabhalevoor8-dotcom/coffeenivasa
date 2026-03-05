@@ -57,7 +57,7 @@ export function MobileActionBar() {
             >
               <ShoppingBag className="w-5 h-5 mb-1" />
             </motion.div>
-            <span className="text-xs font-medium">Order Now</span>
+            <span className="text-xs font-medium">Order Here</span>
           </Link>
         </motion.div>
         <motion.a

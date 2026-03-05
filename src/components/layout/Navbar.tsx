@@ -136,7 +136,7 @@ export function Navbar() {
               <Button variant="gold" size="sm" asChild>
                 <Link to="/order">
                   <ShoppingBag className="w-4 h-4" />
-                  Order Now
+                  Order Here
                 </Link>
               </Button>
             </motion.div>
@@ -225,7 +225,7 @@ export function Navbar() {
                   <Button variant="gold" size="sm" className="w-full" asChild>
                     <Link to="/order">
                       <ShoppingBag className="w-4 h-4" />
-                      Order Now
+                      Order Here
                     </Link>
                   </Button>
                 </motion.div>
