@@ -1,8 +1,8 @@
-import { ShoppingBag, MapPin } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ShoppingBag, MapPin, Phone } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { FloatingElement } from '@/components/animations';
+import { toast } from 'sonner';
 import heroBg from '@/assets/hero-bg.jpg';
 
 const trustIndicators = [
