@@ -362,6 +362,18 @@ export default function Order() {
     setEstimatedWaitTime(0);
   };
 
+  // Auth loading state
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <Coffee className="w-10 h-10 text-gold mx-auto animate-pulse" />
+          <p className="text-muted-foreground">Verifying access...</p>
+        </div>
+      </div>
+    );
+  }
+
   // UPI QR Code Payment Confirmation Screen
   if (showUpiConfirmation) {
     return (
