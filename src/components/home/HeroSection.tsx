@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react';
 import { ShoppingBag, MapPin, Phone } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { FloatingElement } from '@/components/animations';
-import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import heroBg from '@/assets/hero-bg.jpg';
 
 const trustIndicators = [
