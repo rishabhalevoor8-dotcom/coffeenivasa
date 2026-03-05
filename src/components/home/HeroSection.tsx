@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react';
 import { ShoppingBag, MapPin, Phone } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { FloatingElement } from '@/components/animations';
-import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import heroBg from '@/assets/hero-bg.jpg';
 
 const trustIndicators = [
@@ -50,6 +52,31 @@ const badgeVariants = {
 };
 
 export function HeroSection() {
+  const navigate = useNavigate();
+  const [isStaff, setIsStaff] = useState(false);
+
+  useEffect(() => {
+    const checkStaff = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id);
+      if (roles && roles.length > 0) { setIsStaff(true); return; }
+      const { data: adminCheck } = await supabase
+        .from('admin_users')
+        .select('id')
+        .eq('email', session.user.email || '');
+      if (adminCheck && adminCheck.length > 0) setIsStaff(true);
+    };
+    checkStaff();
+  }, []);
+
+  const handleOrderClick = () => {
+    if (isStaff) navigate('/order');
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image with Parallax Effect */}
@@ -121,7 +148,7 @@ export function HeroSection() {
           {/* CTA Buttons */}
           <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-3 pt-4">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="gold" size="lg" onClick={() => toast.info('Please login as staff to place orders')}>
+              <Button variant="gold" size="lg" onClick={handleOrderClick} className={!isStaff ? 'cursor-default' : ''}>
                 <ShoppingBag className="w-5 h-5" />
                 Order Here
               </Button>
