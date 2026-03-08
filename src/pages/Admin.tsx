@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/select';
 import { MenuItemForm } from '@/components/admin/MenuItemForm';
 import { DeleteItemDialog } from '@/components/admin/DeleteItemDialog';
+import { AdminSpecialOffers } from '@/components/admin/AdminSpecialOffers';
 
 type FoodType = 'veg' | 'non_veg' | 'egg';
 
