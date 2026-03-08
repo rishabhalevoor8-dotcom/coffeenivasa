@@ -309,6 +309,11 @@ export default function Admin() {
             </Link>
           </div>
 
+          {/* Special Offers Management */}
+          <div className="mb-8">
+            <AdminSpecialOffers />
+          </div>
+
           {/* Add New Item Button */}
           <div className="flex justify-end mb-4">
             <Button onClick={handleAddItem} className="gap-2">
