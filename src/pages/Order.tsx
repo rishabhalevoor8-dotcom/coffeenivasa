@@ -995,7 +995,7 @@ export default function Order() {
                 Coffee Nivasa
               </h1>
               <p className="text-sm text-muted-foreground">
-                {orderType === 'dine_in' ? `Table ${tableNumber}` : '📦 Takeaway'}
+                {orderType === 'dine_in' ? (tableNumber === 0 ? '🌿 Free Zone' : `Table ${tableNumber}`) : '📦 Takeaway'}
               </p>
             </div>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">

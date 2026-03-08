@@ -399,6 +399,7 @@ export default function AdminOrders() {
                   {[1, 2, 3, 4, 5, 6, 7, 8].map(t => (
                     <SelectItem key={t} value={t.toString()}>Table {t}</SelectItem>
                   ))}
+                  <SelectItem value="0">Free Zone</SelectItem>
                   <SelectItem value="takeaway">Takeaway</SelectItem>
                 </SelectContent>
               </Select>
