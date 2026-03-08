@@ -105,19 +105,6 @@ export function HeroSection() {
             Café & Restaurant in Doddanekundi, Bangalore
           </motion.p>
 
-          {/* CTA Buttons */}
-          <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-4 pt-2">
-            <Button variant="heroOutline" size="lg" asChild>
-              <a
-                href="https://maps.google.com/?q=Coffee+Nivasa,+Doddanekundi,+Bangalore"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <MapPin className="w-5 h-5" />
-                Get Directions
-              </a>
-            </Button>
-          </motion.div>
 
           {/* Contact */}
           <motion.div variants={itemVariants}>
