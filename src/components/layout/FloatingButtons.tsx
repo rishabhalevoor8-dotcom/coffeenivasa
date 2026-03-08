@@ -5,35 +5,19 @@ import { cn } from '@/lib/utils';
 
 export function FloatingOrderButton() {
   return (
-    <motion.div
-      className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40"
-      initial={{ scale: 0, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ delay: 1, type: 'spring', stiffness: 200 }}
-    >
-      <motion.div
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        animate={{
-          y: [0, -8, 0],
-        }}
-        transition={{
-          y: { duration: 2, repeat: Infinity, ease: 'easeInOut' },
-        }}
+    <div className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40">
+      <Link
+        to="/order"
+        className={cn(
+          'w-14 h-14 rounded-full bg-gold text-gold-foreground',
+          'flex items-center justify-center',
+          'shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200'
+        )}
+        aria-label="Order Now"
       >
-        <Link
-          to="/order"
-          className={cn(
-            'w-14 h-14 rounded-full bg-gold text-gold-foreground',
-            'flex items-center justify-center',
-            'shadow-lg hover:shadow-xl transition-shadow duration-300'
-          )}
-          aria-label="Order Now"
-        >
-          <ShoppingBag className="w-6 h-6" />
-        </Link>
-      </motion.div>
-    </motion.div>
+        <ShoppingBag className="w-6 h-6" />
+      </Link>
+    </div>
   );
 }
 

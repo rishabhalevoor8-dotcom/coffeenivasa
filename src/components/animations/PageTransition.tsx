@@ -7,30 +7,15 @@ interface PageTransitionProps {
 }
 
 const pageVariants = {
-  initial: {
-    opacity: 0,
-    y: 30,
-    scale: 0.98,
-    filter: 'blur(4px)',
-  },
-  in: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    filter: 'blur(0px)',
-  },
-  out: {
-    opacity: 0,
-    y: -20,
-    scale: 0.98,
-    filter: 'blur(4px)',
-  },
+  initial: { opacity: 0 },
+  in: { opacity: 1 },
+  out: { opacity: 0 },
 };
 
 const pageTransition = {
   type: 'tween' as const,
-  ease: [0.22, 1, 0.36, 1] as const,
-  duration: 0.5,
+  ease: 'easeOut' as const,
+  duration: 0.2,
 };
 
 export function PageTransition({ children }: PageTransitionProps) {
