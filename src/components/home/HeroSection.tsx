@@ -179,17 +179,16 @@ export function HeroSection() {
           </motion.div>
 
           {/* Trust Indicators */}
-          <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-3 pt-8">
+          <motion.div variants={itemVariants} className="flex justify-around w-full max-w-lg mx-auto pt-8">
             {trustIndicators.map((item, index) => (
               <motion.div
                 key={item.text}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-foreground/10 backdrop-blur-sm text-sm text-primary-foreground/90"
+                className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary-foreground/10 backdrop-blur-sm text-xs sm:text-sm text-primary-foreground/90 whitespace-nowrap"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 1 + index * 0.1 }}
-                whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.15)' }}
               >
-                <span>{item.icon}</span>
+                <span className="text-sm sm:text-base">{item.icon}</span>
                 <span>{item.text}</span>
               </motion.div>
             ))}
