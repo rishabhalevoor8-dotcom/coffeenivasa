@@ -1,50 +1,61 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Clock, Percent, ArrowRight } from 'lucide-react';
+import { Flame, Clock, Percent, ArrowRight, Tag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ScrollReveal } from '@/components/animations/ScrollReveal';
 import { StaggerContainer, StaggerItem } from '@/components/animations/StaggerContainer';
+import { supabase } from '@/integrations/supabase/client';
 import coldCoffee from '@/assets/menu/cold-coffee.jpg';
 import pasta from '@/assets/menu/pasta.jpg';
 import brownieIcecream from '@/assets/menu/brownie-icecream.jpg';
 
-const offers = [
-  {
-    title: 'Combo Meal Deal',
-    description: 'Any Sandwich + Cold Coffee at a special price',
-    discount: '20% OFF',
-    image: coldCoffee,
-    badge: 'Most Popular',
-    badgeIcon: Flame,
-    gradient: 'from-gold/20 via-gold/5 to-transparent',
-    borderColor: 'border-gold/30',
-  },
-  {
-    title: 'Pasta Fest',
-    description: 'Try our signature pasta with a complimentary drink',
-    discount: '₹149 Only',
-    image: pasta,
-    badge: 'Limited Time',
-    badgeIcon: Clock,
-    gradient: 'from-accent/20 via-accent/5 to-transparent',
-    borderColor: 'border-accent/30',
-  },
-  {
-    title: 'Dessert Special',
-    description: 'Brownie Ice Cream Sundae — indulge your sweet tooth',
-    discount: 'Buy 1 Get 1',
-    image: brownieIcecream,
-    badge: 'Weekend Only',
-    badgeIcon: Percent,
-    gradient: 'from-primary/20 via-primary/5 to-transparent',
-    borderColor: 'border-primary/30',
-  },
+const badgeIcons: Record<string, typeof Flame> = {
+  'Most Popular': Flame,
+  'Limited Time': Clock,
+  'Weekend Only': Percent,
+};
+
+const fallbackImages = [coldCoffee, pasta, brownieIcecream];
+
+const gradients = [
+  'from-gold/20 via-gold/5 to-transparent',
+  'from-accent/20 via-accent/5 to-transparent',
+  'from-primary/20 via-primary/5 to-transparent',
 ];
 
+const borderColors = ['border-gold/30', 'border-accent/30', 'border-primary/30'];
+
+interface Offer {
+  id: string;
+  title: string;
+  description: string;
+  discount_text: string;
+  badge: string;
+  image_url: string;
+}
+
 export function SpecialOffers() {
+  const [offers, setOffers] = useState<Offer[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchOffers = async () => {
+      const { data } = await supabase
+        .from('special_offers')
+        .select('id, title, description, discount_text, badge, image_url')
+        .eq('is_active', true)
+        .order('display_order');
+      setOffers(data || []);
+      setLoading(false);
+    };
+    fetchOffers();
+  }, []);
+
+  if (loading || offers.length === 0) return null;
+
   return (
     <section className="py-16 md:py-24 bg-background relative overflow-hidden">
-      {/* Subtle decorative dots */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
 
       <div className="container mx-auto px-4">
@@ -66,52 +77,57 @@ export function SpecialOffers() {
         </ScrollReveal>
 
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {offers.map((offer) => (
-            <StaggerItem key={offer.title}>
-              <motion.div
-                className={`group relative bg-card rounded-2xl overflow-hidden border ${offer.borderColor} shadow-card h-full`}
-                whileHover={{ y: -6, scale: 1.02 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              >
-                {/* Image with gradient overlay */}
-                <div className="relative h-44 overflow-hidden">
-                  <motion.img
-                    src={offer.image}
-                    alt={offer.title}
-                    className="w-full h-full object-cover"
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ duration: 0.5 }}
-                  />
-                  <div className={`absolute inset-0 bg-gradient-to-t ${offer.gradient}`} />
+          {offers.map((offer, index) => {
+            const BadgeIcon = badgeIcons[offer.badge] || Tag;
+            const gradient = gradients[index % gradients.length];
+            const border = borderColors[index % borderColors.length];
+            const image = offer.image_url || fallbackImages[index % fallbackImages.length];
 
-                  {/* Discount badge */}
-                  <motion.div
-                    className="absolute top-3 right-3 bg-destructive text-destructive-foreground px-3 py-1.5 rounded-full text-sm font-bold shadow-lg"
-                    initial={{ rotate: -3 }}
-                    whileHover={{ rotate: 0, scale: 1.1 }}
-                  >
-                    {offer.discount}
-                  </motion.div>
+            return (
+              <StaggerItem key={offer.id}>
+                <motion.div
+                  className={`group relative bg-card rounded-2xl overflow-hidden border ${border} shadow-card h-full`}
+                  whileHover={{ y: -6, scale: 1.02 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                >
+                  <div className="relative h-44 overflow-hidden">
+                    <motion.img
+                      src={image}
+                      alt={offer.title}
+                      className="w-full h-full object-cover"
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ duration: 0.5 }}
+                    />
+                    <div className={`absolute inset-0 bg-gradient-to-t ${gradient}`} />
 
-                  {/* Category badge */}
-                  <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-background/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-semibold text-foreground">
-                    <offer.badgeIcon className="w-3.5 h-3.5" />
-                    {offer.badge}
+                    <motion.div
+                      className="absolute top-3 right-3 bg-destructive text-destructive-foreground px-3 py-1.5 rounded-full text-sm font-bold shadow-lg"
+                      initial={{ rotate: -3 }}
+                      whileHover={{ rotate: 0, scale: 1.1 }}
+                    >
+                      {offer.discount_text}
+                    </motion.div>
+
+                    {offer.badge && (
+                      <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-background/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-semibold text-foreground">
+                        <BadgeIcon className="w-3.5 h-3.5" />
+                        {offer.badge}
+                      </div>
+                    )}
                   </div>
-                </div>
 
-                {/* Content */}
-                <div className="p-5">
-                  <h3 className="font-display text-lg font-bold text-foreground mb-1.5 group-hover:text-gold transition-colors">
-                    {offer.title}
-                  </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    {offer.description}
-                  </p>
-                </div>
-              </motion.div>
-            </StaggerItem>
-          ))}
+                  <div className="p-5">
+                    <h3 className="font-display text-lg font-bold text-foreground mb-1.5 group-hover:text-gold transition-colors">
+                      {offer.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {offer.description}
+                    </p>
+                  </div>
+                </motion.div>
+              </StaggerItem>
+            );
+          })}
         </StaggerContainer>
 
         <ScrollReveal className="text-center mt-10" delay={0.3}>
