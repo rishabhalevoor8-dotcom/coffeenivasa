@@ -1,6 +1,5 @@
 import { ShoppingBag, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 export function FloatingOrderButton() {
