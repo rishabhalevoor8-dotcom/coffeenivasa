@@ -435,7 +435,7 @@ export default function AdminOrders() {
                           </td>
                           <td className="p-4">
                             <Badge variant="outline">
-                              {order.order_type === 'dine_in' ? `Table ${order.table_number}` : 'Takeaway'}
+                              {order.order_type === 'dine_in' ? (order.table_number === 0 ? '🌿 Free Zone' : `Table ${order.table_number}`) : 'Takeaway'}
                             </Badge>
                           </td>
                           <td className="p-4">
