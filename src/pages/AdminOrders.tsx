@@ -399,6 +399,7 @@ export default function AdminOrders() {
                   {[1, 2, 3, 4, 5, 6, 7, 8].map(t => (
                     <SelectItem key={t} value={t.toString()}>Table {t}</SelectItem>
                   ))}
+                  <SelectItem value="0">Free Zone</SelectItem>
                   <SelectItem value="takeaway">Takeaway</SelectItem>
                 </SelectContent>
               </Select>
@@ -434,7 +435,7 @@ export default function AdminOrders() {
                           </td>
                           <td className="p-4">
                             <Badge variant="outline">
-                              {order.order_type === 'dine_in' ? `Table ${order.table_number}` : 'Takeaway'}
+                              {order.order_type === 'dine_in' ? (order.table_number === 0 ? '🌿 Free Zone' : `Table ${order.table_number}`) : 'Takeaway'}
                             </Badge>
                           </td>
                           <td className="p-4">
@@ -552,7 +553,7 @@ export default function AdminOrders() {
                     <div className="p-4 space-y-3">
                       <div className="flex items-center justify-between">
                         <Badge variant="outline">
-                          {order.order_type === 'dine_in' ? `Table ${order.table_number}` : 'Takeaway'}
+                          {order.order_type === 'dine_in' ? (order.table_number === 0 ? '🌿 Free Zone' : `Table ${order.table_number}`) : 'Takeaway'}
                         </Badge>
                         <span className="text-sm text-muted-foreground">{formatDateTime(order.created_at)}</span>
                       </div>
@@ -652,7 +653,7 @@ function OrderDetailsContent({
         <div>
           <span className="text-muted-foreground">Type:</span>
           <p className="font-medium">
-            {order.order_type === 'dine_in' ? `Dine In - Table ${order.table_number}` : 'Takeaway'}
+            {order.order_type === 'dine_in' ? (order.table_number === 0 ? 'Dine In - Free Zone' : `Dine In - Table ${order.table_number}`) : 'Takeaway'}
           </p>
         </div>
         <div>

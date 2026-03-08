@@ -745,6 +745,14 @@ export default function Order() {
               </button>
             ))}
           </div>
+          
+          {/* Free Zone option */}
+          <button
+            onClick={() => setTableNumber(0)}
+            className="mt-4 w-full py-4 bg-white rounded-2xl border-2 border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 transition-all flex items-center justify-center gap-3 shadow-lg shadow-emerald-100 active:scale-95"
+          >
+            <span className="font-display text-xl font-bold text-emerald-700">🌿 Free Zone</span>
+          </button>
         </div>
       </div>
     );
@@ -987,7 +995,7 @@ export default function Order() {
                 Coffee Nivasa
               </h1>
               <p className="text-sm text-muted-foreground">
-                {orderType === 'dine_in' ? `Table ${tableNumber}` : '📦 Takeaway'}
+                {orderType === 'dine_in' ? (tableNumber === 0 ? '🌿 Free Zone' : `Table ${tableNumber}`) : '📦 Takeaway'}
               </p>
             </div>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">
