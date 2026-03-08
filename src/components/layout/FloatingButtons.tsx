@@ -22,38 +22,25 @@ export function FloatingOrderButton() {
 
 export function MobileActionBar() {
   return (
-    <motion.div
-      className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-background/95 backdrop-blur-md border-t border-border"
-      initial={{ y: 100 }}
-      animate={{ y: 0 }}
-      transition={{ delay: 0.5, type: 'spring', stiffness: 100, damping: 15 }}
-    >
+    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-background/95 backdrop-blur-md border-t border-border">
       <div className="grid grid-cols-2">
-        <motion.div whileHover={{ backgroundColor: 'hsl(var(--gold) / 0.9)' }} whileTap={{ scale: 0.98 }}>
-          <Link
-            to="/order"
-            className="flex flex-col items-center justify-center py-3 bg-gold text-gold-foreground"
-          >
-            <motion.div
-              animate={{ y: [0, -2, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            >
-              <ShoppingBag className="w-5 h-5 mb-1" />
-            </motion.div>
-            <span className="text-xs font-medium">Order Here</span>
-          </Link>
-        </motion.div>
-        <motion.a
+        <Link
+          to="/order"
+          className="flex flex-col items-center justify-center py-3 bg-gold text-gold-foreground active:opacity-90 transition-opacity"
+        >
+          <ShoppingBag className="w-5 h-5 mb-1" />
+          <span className="text-xs font-medium">Order Here</span>
+        </Link>
+        <a
           href="https://maps.google.com/?q=Coffee+Nivasa,+Doddanekundi,+Bangalore"
           target="_blank"
           rel="noopener noreferrer"
           className="flex flex-col items-center justify-center py-3 text-foreground hover:bg-secondary transition-colors"
-          whileTap={{ scale: 0.98 }}
         >
           <MapPin className="w-5 h-5 mb-1" />
           <span className="text-xs font-medium">Directions</span>
-        </motion.a>
+        </a>
       </div>
-    </motion.div>
+    </div>
   );
 }
