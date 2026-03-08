@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { LogOut, Save, Pencil, Search, Coffee, AlertCircle, Receipt, ChefHat, Settings, ToggleLeft, ToggleRight, Plus, Trash2 } from 'lucide-react';
+import { LogOut, Save, Pencil, Search, Coffee, AlertCircle, Receipt, ChefHat, Settings, ToggleLeft, ToggleRight, Plus, Trash2, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import type { User } from '@supabase/supabase-js';
