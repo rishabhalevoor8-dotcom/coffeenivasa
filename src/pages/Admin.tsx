@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { LogOut, Save, Pencil, Search, Coffee, AlertCircle, Receipt, ChefHat, Settings, ToggleLeft, ToggleRight, Plus, Trash2 } from 'lucide-react';
+import { LogOut, Save, Pencil, Search, Coffee, AlertCircle, Receipt, ChefHat, Settings, ToggleLeft, ToggleRight, Plus, Trash2, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import type { User } from '@supabase/supabase-js';
@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/select';
 import { MenuItemForm } from '@/components/admin/MenuItemForm';
 import { DeleteItemDialog } from '@/components/admin/DeleteItemDialog';
+import { AdminSpecialOffers } from '@/components/admin/AdminSpecialOffers';
 
 type FoodType = 'veg' | 'non_veg' | 'egg';
 
@@ -306,6 +307,11 @@ export default function Admin() {
                 <p className="text-sm text-muted-foreground">Café info, PINs & admin users</p>
               </div>
             </Link>
+          </div>
+
+          {/* Special Offers Management */}
+          <div className="mb-8">
+            <AdminSpecialOffers />
           </div>
 
           {/* Add New Item Button */}

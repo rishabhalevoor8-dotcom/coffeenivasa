@@ -256,6 +256,45 @@ export type Database = {
         }
         Relationships: []
       }
+      special_offers: {
+        Row: {
+          badge: string
+          created_at: string
+          description: string
+          discount_text: string
+          display_order: number
+          id: string
+          image_url: string
+          is_active: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          badge?: string
+          created_at?: string
+          description?: string
+          discount_text?: string
+          display_order?: number
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          badge?: string
+          created_at?: string
+          description?: string
+          discount_text?: string
+          display_order?: number
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       system_settings: {
         Row: {
           created_at: string
