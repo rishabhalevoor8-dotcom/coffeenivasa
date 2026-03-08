@@ -653,7 +653,7 @@ function OrderDetailsContent({
         <div>
           <span className="text-muted-foreground">Type:</span>
           <p className="font-medium">
-            {order.order_type === 'dine_in' ? `Dine In - Table ${order.table_number}` : 'Takeaway'}
+            {order.order_type === 'dine_in' ? (order.table_number === 0 ? 'Dine In - Free Zone' : `Dine In - Table ${order.table_number}`) : 'Takeaway'}
           </p>
         </div>
         <div>
