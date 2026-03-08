@@ -553,7 +553,7 @@ export default function AdminOrders() {
                     <div className="p-4 space-y-3">
                       <div className="flex items-center justify-between">
                         <Badge variant="outline">
-                          {order.order_type === 'dine_in' ? `Table ${order.table_number}` : 'Takeaway'}
+                          {order.order_type === 'dine_in' ? (order.table_number === 0 ? '🌿 Free Zone' : `Table ${order.table_number}`) : 'Takeaway'}
                         </Badge>
                         <span className="text-sm text-muted-foreground">{formatDateTime(order.created_at)}</span>
                       </div>
