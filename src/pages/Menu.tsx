@@ -2,10 +2,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, Filter } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useCart } from '@/hooks/useCart';
-import { CartSheet } from '@/components/menu/CartSheet';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/animations';
 
 // Import all images
