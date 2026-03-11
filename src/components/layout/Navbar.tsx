@@ -145,7 +145,7 @@ export function Navbar() {
           {/* Mobile Menu Button */}
           <motion.button
             onClick={() => setIsOpen(!isOpen)}
-            className="lg:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
+            className="lg:hidden p-2 rounded-lg hover:bg-secondary bg-secondary/50 dark:bg-secondary/70 transition-colors text-foreground"
             aria-label="Toggle menu"
             whileTap={{ scale: 0.9 }}
           >
