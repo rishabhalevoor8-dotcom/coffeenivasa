@@ -642,15 +642,6 @@ const Menu = () => {
         </div>
       </section>
 
-      {/* Cart Sheet */}
-      <CartSheet
-        items={cart.items}
-        totalItems={cart.totalItems}
-        totalPrice={cart.totalPrice}
-        onAddItem={cart.addItem}
-        onRemoveItem={cart.removeItem}
-        onClearCart={cart.clearCart}
-      />
     </Layout>
   );
 };
