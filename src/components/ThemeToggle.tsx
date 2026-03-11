@@ -27,7 +27,7 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="relative w-9 h-9 overflow-hidden"
+      className="relative w-9 h-9 overflow-hidden border border-border/50 bg-secondary/50 hover:bg-secondary text-foreground"
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
       <AnimatePresence mode="wait" initial={false}>
