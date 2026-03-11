@@ -2,10 +2,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, Filter } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useCart } from '@/hooks/useCart';
-import { CartSheet } from '@/components/menu/CartSheet';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/animations';
 
 // Import all images
@@ -324,7 +322,7 @@ const Menu = () => {
   const [activeCategory, setActiveCategory] = useState(menuCategories[0].name);
   const [searchQuery, setSearchQuery] = useState('');
   const [dietFilter, setDietFilter] = useState<'all' | 'veg' | 'nonveg'>('all');
-  const cart = useCart();
+  
 
   const currentCategory = menuCategories.find((cat) => cat.name === activeCategory);
 
@@ -558,15 +556,12 @@ const Menu = () => {
                     </motion.h3>
                   )}
                   <StaggerContainer className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4" staggerDelay={0.05}>
-                    {items.map((item) => {
-                      const quantity = cart.getItemQuantity(item.name);
-                      return (
+                    {items.map((item) => (
                         <StaggerItem key={item.name}>
                           <motion.div
                             className={cn(
                               'group relative flex gap-4 p-4 bg-card rounded-2xl border border-transparent transition-all duration-300',
-                              'hover:shadow-card hover:border-border',
-                              quantity > 0 && 'ring-2 ring-gold/30 border-gold/20'
+                              'hover:shadow-card hover:border-border'
                             )}
                             whileHover={{ y: -3 }}
                             transition={{ type: 'spring', stiffness: 300 }}
@@ -596,82 +591,25 @@ const Menu = () => {
                             </div>
 
                             {/* Content */}
-                            <div className="flex-1 min-w-0 flex flex-col justify-between">
-                              <div>
-                                <div className="flex items-center gap-1.5 mb-1">
-                                  <h4 className="font-semibold text-foreground text-sm leading-tight">
-                                    {item.name}
-                                  </h4>
-                                  {item.spiceType && item.spiceType !== 'not_spicy' && (
-                                    <SpiceIndicator spiceType={item.spiceType} showLabel={false} />
-                                  )}
-                                </div>
-                                <motion.span
-                                  className="font-bold text-gold text-lg"
-                                  whileHover={{ scale: 1.05 }}
-                                >
-                                  {item.price}
-                                </motion.span>
+                            <div className="flex-1 min-w-0 flex flex-col justify-center">
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <h4 className="font-semibold text-foreground text-sm leading-tight">
+                                  {item.name}
+                                </h4>
+                                {item.spiceType && item.spiceType !== 'not_spicy' && (
+                                  <SpiceIndicator spiceType={item.spiceType} showLabel={false} />
+                                )}
                               </div>
-
-                              {/* Add Button */}
-                              <div className="flex items-center justify-end mt-2">
-                                <AnimatePresence mode="wait">
-                                  {quantity > 0 ? (
-                                    <motion.div
-                                      key="quantity"
-                                      className="flex items-center gap-2 bg-secondary rounded-full px-2 py-1"
-                                      initial={{ scale: 0.8, opacity: 0 }}
-                                      animate={{ scale: 1, opacity: 1 }}
-                                      exit={{ scale: 0.8, opacity: 0 }}
-                                    >
-                                      <motion.button
-                                        onClick={() => cart.removeItem(item.name)}
-                                        className="w-6 h-6 rounded-full bg-background hover:bg-destructive/10 flex items-center justify-center transition-colors text-sm font-bold"
-                                        whileHover={{ scale: 1.1 }}
-                                        whileTap={{ scale: 0.9 }}
-                                      >
-                                        −
-                                      </motion.button>
-                                      <motion.span
-                                        key={quantity}
-                                        className="w-5 text-center font-semibold text-sm"
-                                        initial={{ scale: 1.3 }}
-                                        animate={{ scale: 1 }}
-                                      >
-                                        {quantity}
-                                      </motion.span>
-                                      <motion.button
-                                        onClick={() => cart.addItem(item)}
-                                        className="w-6 h-6 rounded-full bg-background hover:bg-accent/10 flex items-center justify-center transition-colors text-sm font-bold"
-                                        whileHover={{ scale: 1.1 }}
-                                        whileTap={{ scale: 0.9 }}
-                                      >
-                                        +
-                                      </motion.button>
-                                    </motion.div>
-                                  ) : (
-                                    <motion.button
-                                      key="add"
-                                      onClick={() => cart.addItem(item)}
-                                      className="flex items-center gap-1 px-3 py-1.5 bg-primary text-primary-foreground rounded-full text-xs font-semibold hover:bg-primary/90 transition-colors shadow-soft"
-                                      initial={{ scale: 0.8, opacity: 0 }}
-                                      animate={{ scale: 1, opacity: 1 }}
-                                      exit={{ scale: 0.8, opacity: 0 }}
-                                      whileHover={{ scale: 1.05 }}
-                                      whileTap={{ scale: 0.95 }}
-                                    >
-                                      <Plus className="w-3.5 h-3.5" />
-                                      Add
-                                    </motion.button>
-                                  )}
-                                </AnimatePresence>
-                              </div>
+                              <motion.span
+                                className="font-bold text-gold text-lg"
+                                whileHover={{ scale: 1.05 }}
+                              >
+                                {item.price}
+                              </motion.span>
                             </div>
                           </motion.div>
                         </StaggerItem>
-                      );
-                    })}
+                    ))}
                   </StaggerContainer>
                 </motion.div>
               ))}
@@ -704,15 +642,6 @@ const Menu = () => {
         </div>
       </section>
 
-      {/* Cart Sheet */}
-      <CartSheet
-        items={cart.items}
-        totalItems={cart.totalItems}
-        totalPrice={cart.totalPrice}
-        onAddItem={cart.addItem}
-        onRemoveItem={cart.removeItem}
-        onClearCart={cart.clearCart}
-      />
     </Layout>
   );
 };
