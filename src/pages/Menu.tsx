@@ -322,7 +322,7 @@ const Menu = () => {
   const [activeCategory, setActiveCategory] = useState(menuCategories[0].name);
   const [searchQuery, setSearchQuery] = useState('');
   const [dietFilter, setDietFilter] = useState<'all' | 'veg' | 'nonveg'>('all');
-  const cart = useCart();
+  
 
   const currentCategory = menuCategories.find((cat) => cat.name === activeCategory);
 
