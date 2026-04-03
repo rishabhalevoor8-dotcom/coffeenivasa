@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import heroBg from '@/assets/hero-bg.jpg';
+import { PromoBanner } from '@/components/layout/PromoBanner';
 
 const trustIndicators = [
   { text: 'Veg & Non-Veg', icon: UtensilsCrossed },
