@@ -12,7 +12,7 @@ export function PromoBanner() {
       href="https://rrcreatorlab.in"
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-24 md:bottom-4 left-3 w-auto max-w-[85vw] md:max-w-[500px] bg-white/90 dark:bg-card/90 backdrop-blur-xl px-3 py-2 md:px-4 md:py-2.5 rounded-full flex items-center gap-2 md:gap-3 shadow-lg z-[9999] no-underline transition-all duration-300 hover:scale-[1.01]"
+      className="fixed bottom-24 md:bottom-6 left-3 w-auto max-w-[85vw] md:max-w-[500px] bg-white/95 dark:bg-card/95 backdrop-blur-xl px-3 py-2 md:px-4 md:py-2.5 rounded-full flex items-center gap-2 md:gap-3 shadow-[0_4px_20px_rgba(0,0,0,0.15)] z-[9999] no-underline transition-all duration-300 hover:scale-[1.02]"
     >
       <img
         src={logo}
