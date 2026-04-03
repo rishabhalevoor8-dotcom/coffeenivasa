@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 import { FloatingOrderButton, MobileActionBar } from './FloatingButtons';
+import { PromoBanner } from './PromoBanner';
 
 interface LayoutProps {
   children: ReactNode;
