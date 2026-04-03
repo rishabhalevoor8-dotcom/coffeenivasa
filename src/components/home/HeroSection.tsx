@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import heroBg from '@/assets/hero-bg.jpg';
+import { PromoBanner } from '@/components/layout/PromoBanner';
 
 const trustIndicators = [
   { text: 'Veg & Non-Veg', icon: UtensilsCrossed },
@@ -81,6 +82,11 @@ export function HeroSection() {
           initial="hidden"
           animate="visible"
         >
+          {/* Promo Banner */}
+          <motion.div variants={itemVariants}>
+            <PromoBanner inline />
+          </motion.div>
+
           {/* Badge */}
           <motion.div variants={itemVariants}>
             <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-gold/30 bg-black/20 backdrop-blur-md text-gold text-sm tracking-widest uppercase font-body">
