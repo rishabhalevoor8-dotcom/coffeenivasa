@@ -2,7 +2,6 @@ import { ReactNode } from 'react';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 import { FloatingOrderButton, MobileActionBar } from './FloatingButtons';
-import { PromoBanner } from './PromoBanner';
 
 interface LayoutProps {
   children: ReactNode;
@@ -11,7 +10,6 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
-      <PromoBanner />
       <Navbar />
       <main className="flex-1 pb-16 md:pb-0">{children}</main>
       <Footer />
